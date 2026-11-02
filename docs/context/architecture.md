@@ -1,6 +1,6 @@
 # Architecture and data model
 
-One reusable deployment/codebase, separately configured PostgreSQL database per pickleball venue. The original SQL-first nine-table schema remains the source of truth. No schema changes are made in Phase 4.
+One reusable deployment/codebase, separately configured PostgreSQL database per pickleball venue. The original SQL-first nine-table schema remains the source of truth. No schema changes in Phases 4–5.
 
 ## API layering
 - `Controllers/Public/`: public venue/court APIs plus `AvailabilityController` and `PricingController` (read-only).
@@ -19,6 +19,17 @@ Venue `operating_hours`/slot_minutes determine same-day wall-clock slots; timezo
 Rule filters: nullable court/date weekday (0=Sun), time ranges, active flag; precedence court-specific then priority DESC then ID DESC. Split slots at matching rule boundaries, prorate per minute, round at end. Falls back to court base rate. Quote is **estimated under current rules**, not a booking guarantee, and can change before a Phase 5 transactional booking.
 
 ## Security and boundaries
-Admin rule changes require OWNER/MANAGER session and CSRF from Phase 3. Public endpoints expose only availability and prices, not customer/booking data. Authentication and client-frontend pages remain outside Phase 4. Phase 5 must revalidate availability and pricing under transaction and rely on PostgreSQL exclusion constraints to eliminate booking races.
+Admin rule changes require OWNER/MANAGER session and CSRF from Phase 3. Public endpoints expose only availability and prices, not customer/booking data. Authentication and client-frontend pages remain outside Phase 4. Phase 5 revalidates availability/pricing inside a transaction and relies on PostgreSQL exclusion constraints for final conflict prevention.
 
 See [Phase 4 specifications](../phase-4-availability-pricing.md), [migration safeguards](../database-migrations.md) and progress.md.
+
+## Phase 5 transaction and guest security
+
+- `Services/Bookings/BookingService.cs`: create/lookup/cancel/confirm and staff calendar read. Validates a contiguous range of 1–8 slots, recalculates quote inside a transaction, expires overdue rows with the canonical SQL function, saves HELD schedule + booking atomically, and catches SQLSTATE 23P01/23505.
+- `Background/PendingBookingExpiryWorker.cs`: runs SQL `expire_pending_schedule_entries()` every 30s; stale HELD/AWAITING_REVIEW entries remain occupied until their persisted status changes.
+- `Security/GuestBookingTokens.cs`: **Booking:SigningKey** (per-venue persistent 32+-byte secret from user-secrets/env), purpose-separated HMAC for deterministic idempotency booking code and bearer guest token. Never expose the key. Changing key invalidates existing tokens.
+- `Controllers/Public/BookingsController.cs`: rate-limited booking creation, guest lookup/cancellation with `X-Booking-Token`, no-store responses. No customer data in public availability.
+- `Controllers/Admin/BookingsController.cs`: staff list, manager/owner confirm or cancel with existing staff cookie and CSRF.
+- `Repositories/`: existing booking and schedule repositories and EF Core unit-of-work, with complex atomic status transitions via EF `ExecuteUpdateAsync`. All writes use the SQL-first schema.
+
+See [Phase 5 operator guide](../phase-5-booking-engine.md). There is no payment flow, admin interface, or guest booking frontend in this phase.

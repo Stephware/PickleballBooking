@@ -21,4 +21,11 @@ Last reviewed: 2026-11-03
 | D-015 | Skip invalid/ambiguous DST local slots rather than guess offsets | Phase 4 conservative behavior |
 | D-016 | Pricing rule deactivation rather than deletion; OWNER/MANAGER edits, STAFF reads | Phase 4 source |
 
+| D-017 | Book 1–8 complete consecutive venue slots as one atomic schedule entry/booking | Phase 5 implementation |
+| D-018 | Generate idempotent PB- booking codes from UUID v4 + persistent per-venue HMAC secret; same intent retries | Phase 5 implementation |
+| D-019 | Guest lookup/cancel requires signed X-Booking-Token, never code-only | Phase 5 security rule |
+| D-020 | HELD hold duration uses venue settings, capped at booking start; expiry worker runs every ~30s plus transactional expiry | Phase 5 implementation |
+| D-021 | Customer may cancel HELD/AWAITING_REVIEW before start; confirmed reservations require staff for cancellation | Phase 5 provisional policy |
+| D-022 | Payments/deposits deferred to Phase 6; Phase 5 snapshots required_deposit=0 | Explicitly limited MVP |
+
 Documentation records decisions, not proof of a passing local build.

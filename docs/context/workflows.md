@@ -13,16 +13,19 @@
 
 OWNER or MANAGER creates/updates/deactivates `pricing_rules`; STAFF can read. Admin CSRF required for mutations. No physical delete. Changing rules affects future quotes but does not retroactively adjust stored `bookings.total_amount`.
 
-## Booking holds and confirmed reservations (planned Phase 5)
+## Booking holds and confirmed reservations (Phase 5 API source)
 
-1. Player chooses an AVAILABLE date/court/slot, with contact information.
-2. Backend validates hours, timezone, notice, booking horizon and current pricing again within a transaction; front-end totals are not authoritative.
-3. Insert HELD schedule row with `expires_at` and related booking snapshot. Rely on PostgreSQL `ex_court_active_time_overlap` exclusion constraint so concurrent users cannot double-book; catch SQLSTATE 23P01 and return HTTP 409.
-4. Payment proof may transition to AWAITING_REVIEW, approval to CONFIRMED; cancellation to CANCELLED; expired holds to EXPIRED.
-5. A worker and booking transaction explicitly transition overdue HELD/AWAITING_REVIEW rows to EXPIRED. Merely comparing expiry timestamp must **not** make a schedule row bookable while its active status still enforces exclusion.
+1. Guest submits court, date, a **1–8 consecutive aligned slot** interval, name/contact, and random UUID v4 idempotency key.
+2. Server derives a deterministic booking code using a per-venue secret, then starts an EF Core transaction and calls the canonical SQL expiration function. Exact duplicate requests return existing booking/access token; changed intent using same key returns conflict.
+3. Server checks Phase 4 slot statuses and recalculates all selected slot prices **inside the transaction**. It rejects inactive, elapsed, partial, blocked, occupied, pending or outside-policy slots. Pricing from the frontend is never authoritative.
+4. Insert a HELD `court_schedule_entries` row with expiry followed by its `bookings` snapshot, both committed atomically. PostgreSQL `ex_court_active_time_overlap` rejects concurrent overlapping requests with SQLSTATE 23P01, surfaced as 409.
+5. Create returns booking code and an HMAC guest bearer token once; guest status lookup and cancellation require `X-Booking-Token` header. Guest may cancel HELD/AWAITING_REVIEW before start; staff OWNER/MANAGER may confirm live HELD or cancel eligible unstarted bookings.
+6. Worker runs `expire_pending_schedule_entries()` roughly every 30 seconds; mutations call it too. **Never make stale-but-active holds free solely by comparing expires_at**.
+
+Guest tokens and deterministic codes require a durable per-venue signing secret; they don't need new DB columns. Payment review and source tagging are **Phase 6**, not implemented here.
 
 ## Staff operations (planned Phase 6)
 
 Staff enters Messenger, phone, and walk-in reservations in the same schedule. Staff may block/unblock courts and review payments. Maintain booking/payment history using status transitions rather than deleting records.
 
-**Availability is implemented as a read-only display calculation. The booking/payment operations above are not implemented yet.**
+**Phase 5 has booking API source but no payment processing or public/admin booking UI; actual .NET build, real DB transactions and concurrency behavior still need verification.**

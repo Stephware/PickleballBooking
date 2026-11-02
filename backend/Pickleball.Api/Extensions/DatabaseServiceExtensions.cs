@@ -19,11 +19,14 @@ public static class DatabaseServiceExtensions
         var connectionString = configuration.GetConnectionString("Pickleball");
         // Tests/process status work without credentials. /health/db explicitly
         // returns unhealthy until the connection string is configured.
-        if (!string.IsNullOrWhiteSpace(connectionString))
+        // Always register DbContext for DI graph validation and offline tests.
+        // Without credentials there is no EF provider; /health/db returns 503,
+        // /health remains usable, and database-dependent requests fail closed.
+        services.AddDbContext<PickleballDbContext>(options =>
         {
-            services.AddDbContext<PickleballDbContext>(options =>
-                options.UseNpgsql(connectionString));
-        }
+            if (!string.IsNullOrWhiteSpace(connectionString))
+                options.UseNpgsql(connectionString);
+        });
 
         services.AddScoped<IUnitOfWork, EfUnitOfWork>();
         services.AddScoped<IVenueRepository, VenueRepository>();

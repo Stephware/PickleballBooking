@@ -1,4 +1,4 @@
-# Development setup — Phases 1–4
+# Development setup — Phases 1–5
 
 Prerequisites: .NET 10 SDK, Node.js 22 LTS recommended, and your **already-running** PostgreSQL 17 Docker instance on localhost:5435. Do not change the Docker volume.
 
@@ -48,3 +48,21 @@ Open http://localhost:3000. Player availability calendar and owner dashboard are
 - Never commit .env, staff credentials, customer records, payment proofs or private database exports.
 
 Update docs/context/progress.md and log.md when local verification is completed.
+
+## Phase 5 reservation engine
+
+Configure the per-venue persistent random signing key **before** issuing guest bookings:
+
+```zsh
+BOOKING_SIGNING_KEY=$(openssl rand -hex 32)
+dotnet user-secrets set "Booking:SigningKey" "$BOOKING_SIGNING_KEY" --project backend/Pickleball.Api
+unset BOOKING_SIGNING_KEY
+```
+
+Protect and back up the secret securely; all replicas of the **same** venue require it. Never commit it to Git. See [Phase 5 guide](phase-5-booking-engine.md) for API examples, UUID v4 idempotency, bearer guest tokens and payment limitations.
+
+With `/health/db` healthy, test a future AVAILABLE court slot using POST `/api/v1/bookings`. Verify same UUID + same input returns the same booking; overlap with another UUID returns 409; GET/cancel without a token returns 404; guests cannot cancel confirmed reservations. Staff confirmations and cancellations still require Phase 3 session cookie + CSRF. After `hold_minutes`, the background worker should change HELD to EXPIRED using canonical SQL.
+
+**Live integration constraint tests** require `PICKLEBALL_TEST_CONNECTION_STRING` pointing to a disposable test database and explicit `PICKLEBALL_TEST_MUTATIONS_ENABLED=1`. Never run mutation tests on production/current venue data. `dotnet test PickleballBooking.slnx` runs offline tests by default.
+
+GitHub branch warning: PR #3 and PR #4 were merged into parent feature branches, **not main**. Phase 5 is stacked on the Phase 4 feature branch; integrate all subsequent features into main in order after build/runtime verification.

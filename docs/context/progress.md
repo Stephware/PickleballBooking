@@ -2,35 +2,38 @@
 
 Last updated: 2026-11-03
 
-## Previous phases
-- [x] Phase 1 ASP.NET Core/.NET 10 + Next.js scaffold merged.
-- [x] Phase 2 EF Core model/repositories and DB health source implemented in PR #2 (open at Phase 4 start).
-- [x] Phase 3 staff cookie authentication, venue/courts/hours APIs in PR #3 (open, stacked on Phase 2).
-- [ ] Prior phases have not been runtime-built/tested or exercised against the developer's PostgreSQL in this conversation.
-- [x] Existing PostgreSQL 17 and DBeaver connection reported working by the user; schema and Docker volumes unaffected.
+## GitHub branch state
+- [x] Phase 1 and Phase 2 code present on main.
+- [x] PR #3 merged to the **Phase 2 feature branch**, NOT to main.
+- [x] PR #4 merged to the **Phase 3 feature branch**, NOT to main.
+- [x] Phase 5 branches from `feature/phase-4-availability-pricing` (contains all Phases 1–4). It is NOT independently present on main.
+- [ ] Integration PR/merge needed to carry Phase 3, 4, and 5 commits all the way to main in order, after checks.
 
-## Phase 4 — source implementation
-- [x] Public `GET /api/v1/availability?date=&courtId=` returns all active courts with generated status/price slots.
-- [x] Public `GET /api/v1/pricing/quote?date=&courtId=&startsAt=` uses the same server-side slot quote.
-- [x] Dynamic venue-local operating hours/slot duration and UTC instants; closed days/invalid DST boundaries handled conservatively.
-- [x] Server-side rule engine: court-specific over venue; priority/ID; weekday/weekend; partial-interval proration, final rounding.
-- [x] Batched schedule query with statuses AVAILABLE, OCCUPIED, PENDING, ELAPSED, BLOCKED and UNAVAILABLE. Expired but still active holds remain pending until explicit status transition.
-- [x] Owner/Manager pricing rule create/update/deactivate; staff read-only; existing Phase 3 cookie/CSRF applies.
-- [x] DTOs, service/repository interfaces and implementations, DI wiring and automated test source.
-- [x] Dedicated [Phase 4 rules](../phase-4-availability-pricing.md), API inventory, agent/wiki updates.
-- [x] No changes to PostgreSQL SQL bootstrap, Docker or existing data.
+## Phase 5 — implemented in source
+- [x] Guest booking request and response DTOs with idempotency UUID, contact, court and local start/end.
+- [x] Server-side 1–8 consecutive aligned slot validation, dynamic venue hours/notice/horizon/pricing check.
+- [x] Transactional insert of HELD schedule entry and booking snapshot, SQL-side overlap exclusion (23P01) and duplicate key (23505) conflict handling.
+- [x] Persistent per-venue HMAC signing key, deterministic booking codes for idempotent retries, bearer guest access tokens.
+- [x] Authenticated guest lookup and cancellation via `X-Booking-Token`; 404 for bad credentials.
+- [x] Staff daily booking list, atomic confirm and cancel endpoints; OWNER/MANAGER authorization and CSRF for mutations.
+- [x] 30-second periodic SQL expiry worker plus immediate expiry transition during booking state changes.
+- [x] Guest IP-rate limiting, private/no-store responses, and existing Phase 3 CORS protections.
+- [x] Unit/integration test source for tokens, auth boundaries and PostgreSQL GiST overlap constraint.
+- [x] No modifications to existing SQL schema, Compose configuration, migration baseline or Docker volume.
+- [x] Updated AGENTS.md and tracked Karpathy context wiki.
 
-## Verification remaining
-- [ ] `dotnet restore/build/test` in .NET-enabled runtime.
-- [ ] Confirm SQL-first EF mapping and real /health/db against local database.
-- [ ] Test availability responses, pricing CRUD/authorization and all seven operating-day setups with seeded **disposable** test data.
-- [ ] Confirm real booking status transitions and expiry behavior once Phase 5 exists.
-- [ ] Commit frontend/package-lock.json after first local npm install.
-- [ ] Rebase/retarget sequential PRs after dependencies merge.
+## Verification not yet completed
+- [ ] `dotnet restore/build/test` on a .NET 10-enabled machine.
+- [ ] Real PostgreSQL /health/db with developer-side user-secrets.
+- [ ] Booking HMAC secret configured through secure persistent environment/user-secrets.
+- [ ] Test create / identical retry / overlapping reservation / expiration / guest cancellation / staff confirmation and cancellation on a disposable development DB.
+- [ ] Test concurrent independent requests against the exclusion constraint under actual PostgreSQL.
+- [ ] Code review of security, production HTTPS, reverse-proxy IP rate limiting and deployment key persistence.
+- [ ] Frontend `package-lock.json` generated and committed after local install.
 
-## Next phases
-- [ ] Phase 5 atomic booking engine, temporary holds, expiration worker, customer reservation lookup/cancellation and PostgreSQL conflict handling.
-- [ ] Phase 6 manual bookings/payments and verification.
-- [ ] Phase 7 player Next.js UI; Phase 8 owner dashboard; Phase 9 production and comprehensive verification.
+## Deferred
+- [ ] Phase 6: payment proof, approval and walk-in/phone/Messenger reservations.
+- [ ] Phase 7: player booking UI; Phase 8: staff dashboard.
+- [ ] Phase 9: comprehensive E2E/security and independent venue deployment.
 
-**Do not mark Phase 4 runtime-verified until real build/tests and PostgreSQL integration pass.**
+**Source implementation is not runtime verification.** Preserve your existing SQL-first database; do not call `dotnet ef database update` or reset Docker volumes.
