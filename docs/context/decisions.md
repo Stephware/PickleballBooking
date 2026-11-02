@@ -4,20 +4,21 @@ Last reviewed: 2026-11-03
 
 | ID | Decision | Status |
 | --- | --- | --- |
-| D-001 | One branded deployment and database per venue, reusable code/schema | Confirmed |
-| D-002 | Court list/time-grid, not a physical floor-layout interface | Confirmed |
-| D-003 | Green available, red occupied, gray elapsed; pending/blocked states also shown clearly | Confirmed |
-| D-004 | PostgreSQL 17 + DBeaver + Docker | User-reported working |
-| D-005 | ASP.NET Core .NET 10, Next.js/TypeScript/Tailwind, one repository | Implemented scaffold |
-| D-006 | AGENTS.md and selective docs/context wiki tracked by Git | Implemented |
-| D-007 | UI UX Pro Max (design) and Impeccable (audit) | Approved workflow |
-| D-008 | One API project organized by layers until separate Core/Infrastructure warranted | Current design |
-| D-009 | SQL-first EF Core mappings to existing nine tables | Phase 2 source |
-| D-010 | No automatic migrations against initialized database | Mandatory |
-| D-011 | Phase 3 uses existing staff_users with PasswordHasher and secure cookie+CSRF, no added auth tables | Phase 3 source |
-| D-012 | OWNER bootstrap only via one-time CLI secrets, not anonymous HTTP | Phase 3 source |
-| D-013 | OWNER changes venue identity/settings and staff; OWNER/MANAGER edit courts and hours; STAFF read-only | Phase 3 source |
-| D-014 | Court deactivation is reversible and blocked if future active reservations exist; never delete booking history | Phase 3 source |
-| D-015 | Admin frontend not built until Phase 8; backend auth/CRUD routes implemented first | Phased plan |
+| D-001 | Dedicated branded app + independent database per venue, shared implementation | Confirmed |
+| D-002 | Court list/time grid, not a floor plan | Confirmed |
+| D-003 | Green available, red occupied, gray elapsed, yellow pending; distinct blocked/unavailable | Confirmed |
+| D-004 | .NET 10 API + Next.js 16/TypeScript/Tailwind monorepo | Phase 1 |
+| D-005 | PostgreSQL 17 Docker/DBeaver SQL-first nine-table schema | Confirmed |
+| D-006 | Track `AGENTS.md` and docs/context wiki in Git | Confirmed |
+| D-007 | UI UX Pro Max first, Impeccable audit/polish | Confirmed |
+| D-008 | Keep one API project with layered folders until separation justified | Confirmed |
+| D-009 | Existing SQL + safe EF Core mappings; no unreviewed initial migrations | Phase 2 |
+| D-010 | Staff cookie/CSRF; CLI owner bootstrap; OWNER/MANAGER/STAFF role-based CRUD | Phase 3 |
+| D-011 | Availability slots generated from operating hours, not persisted as empty DB rows | Phase 4 source |
+| D-012 | Active holds remain PENDING despite past expiry timestamp until DB status transitions to EXPIRED | Safety rule |
+| D-013 | Price rules: court-specific > venue-wide, higher priority > newer ID, prorate partial windows | Phase 4 source |
+| D-014 | All displayed quotes server-computed; final booking prices revalidated in Phase 5 | Mandatory |
+| D-015 | Skip invalid/ambiguous DST local slots rather than guess offsets | Phase 4 conservative behavior |
+| D-016 | Pricing rule deactivation rather than deletion; OWNER/MANAGER edits, STAFF reads | Phase 4 source |
 
-Do not confuse planned features with implemented behavior or runtime-verified functionality.
+Documentation records decisions, not proof of a passing local build.

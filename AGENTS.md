@@ -22,10 +22,12 @@
 - Admin endpoints use HttpOnly signed cookie authentication, CSRF header for all unsafe /api/v1/admin methods, OWNER/MANAGER/STAFF policies, login throttling and repeated DB active/role checks. Do not replace with unauthenticated writes or localStorage session tokens.
 - The first OWNER is created only through the one-time --bootstrap-owner CLI command and local user-secrets; never expose public owner sign-up or commit bootstrap passwords. Password reset must invalidate previous cookies.
 - Do not implement court physical deletion: only soft-deactivate, and reject deactivation while future reservations exist.
+- Before modifying slot/price behavior, read docs/phase-4-availability-pricing.md. Status order: started/elapsed, block, occupied, pending, unavailable by notice, available. NEVER treat stale HELD/AWAITING_REVIEW rows as available until the persisted status has transitioned to EXPIRED.
+- Price rules: court-specific > venue-wide, priority DESC, ID DESC, prorate at rule boundaries, round final total to 2 decimals. Never accept client-computed totals for booking/payment; Phase 5 must revalidate pricing and GiST conflict under transaction.
 
 ## Current implementation
 
-Phase 1 merged. Phase 2 EF Core SQL-first mapping is still PR #2 at the start of Phase 3. Phase 3 adds API-source implementations for staff cookie authentication/CSRF, roles, CLI-only owner bootstrap, staff management, venue settings and court management. Booking/availability/pricing/payment logic and Next.js admin/player screens are NOT implemented. Phase 3 is a stacked branch based on Phase 2 and is NOT runtime-verified against local PostgreSQL. See [docs/context/progress.md](docs/context/progress.md) and verify before claiming otherwise.
+Phase 1 merged. Phase 2 EF Core SQL-first mapping is still PR #2 at the start of Phase 3. Phase 3 adds API-source implementations for staff cookie authentication/CSRF, roles, CLI-only owner bootstrap, staff management, venue settings and court management. Phase 4 adds server-side availability, timezone-aware slots, pricing/quote calculators, and pricing rule APIs. Booking creation/holds, payment processing and Next.js admin/player screens are NOT implemented. Availability/quotes are read-only and never reserve a slot. Phase 3 is a stacked branch based on Phase 2 and is NOT runtime-verified against local PostgreSQL. See [docs/context/progress.md](docs/context/progress.md) and verify before claiming otherwise.
 
 ## Documentation hygiene
 

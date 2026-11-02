@@ -1,26 +1,27 @@
 # Project wiki — selective context index
 
-Read this index first, then open only relevant topic pages. Current code and canonical SQL define reality; this wiki records decisions and verification status.
+Read this index first, then only task-relevant pages. Current C# code and PostgreSQL SQL establish implemented behavior; documents record decisions and verification status.
 
-| Document | Load for |
+| Document | Read for |
 | --- | --- |
-| [requirements.md](requirements.md) | Project scope |
-| [ui-ux.md](ui-ux.md) | UI UX Pro Max + Impeccable practices |
-| [architecture.md](architecture.md) | API/DB architecture, roles, per-venue isolation |
-| [workflows.md](workflows.md) | Availability and booking flows |
-| [decisions.md](decisions.md) | Approved architectural choices |
-| [progress.md](progress.md) | Implementation vs verified progress |
-| [log.md](log.md) | Changes |
-| [../phase-3-authentication.md](../phase-3-authentication.md) | Cookie login, CSRF, bootstrap, roles and Phase 3 API |
-| [../development.md](../development.md) | Local setup |
-| [../database-migrations.md](../database-migrations.md) | SQL-first migration safeguards |
-| [../api/README.md](../api/README.md) | Actual endpoint list |
+| [requirements.md](requirements.md) | Product scope |
+| [ui-ux.md](ui-ux.md) | UI UX Pro Max + Impeccable and schedule UI |
+| [architecture.md](architecture.md) | API/DB layers and Phase 4 engine |
+| [workflows.md](workflows.md) | Booking, holds, pricing status flows |
+| [decisions.md](decisions.md) | Architectural choices and rule precedence |
+| [progress.md](progress.md) | Phase source completion vs runtime verification |
+| [log.md](log.md) | Short implementation change history |
+| [../phase-3-authentication.md](../phase-3-authentication.md) | Staff auth, cookie, CSRF and venue management |
+| [../phase-4-availability-pricing.md](../phase-4-availability-pricing.md) | Slots/statuses, rate rules and new APIs |
+| [../database-migrations.md](../database-migrations.md) | Migration safeguards |
+| [../development.md](../development.md) | How to run and test |
+| [../api/README.md](../api/README.md) | Current endpoints |
 
-## Status — 2026-11-03
+## Status — November 3, 2026
 
-- Branded single-venue applications using the same code and a distinct database per client.
-- Phase 1 merged; Phase 2 EF mapping remains under PR #2 at Phase 3 start.
-- Phase 3 provides source for staff auth, Owner/Manager/Staff roles, venue settings, hours and court management. No migration or Docker operations. Source build and live integration tests still pending.
-- Booking availability, time-slot engine, reservation/payment flows and real frontend/admin remain unimplemented.
+- One venue per deployment and database; shared codebase; nine SQL-first PostgreSQL tables remain unchanged.
+- Phase 1 merged; Phase 2 and 3 open stacked PRs at Phase 4 start.
+- Phase 4 adds server-side dynamic availability and pricing rule management; includes tests but needs local .NET build/database verification.
+- **No booking creation, payment or customer/admin frontend flows implemented yet.**
 
-Read architecture and phase-3-authentication for API tasks; UI/UX and requirements for frontend work; progress to avoid false completion claims.
+Open only the relevant pages for the task to conserve agent context.
