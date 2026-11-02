@@ -4,20 +4,20 @@ Last reviewed: 2026-11-03
 
 | ID | Decision | Status |
 | --- | --- | --- |
-| D-001 | One dedicated branded system per venue, shared code/schema, separate DB | Confirmed |
-| D-002 | Court list/time-grid rather than venue floor-layout image | Confirmed |
-| D-003 | Available/occupied/elapsed status colors | Confirmed |
-| D-004 | Pending hold and blocked/closed status treatment | Recommended |
-| D-005 | PostgreSQL 17 in Docker; DBeaver management | Confirmed; user reports working |
-| D-006 | ASP.NET Core .NET 10 + Next.js TypeScript monorepo | Selected direction |
-| D-007 | Track docs/context wiki and root AGENTS.md in Git | Confirmed |
-| D-008 | UI UX Pro Max for design direction; Impeccable for audits/polish | Confirmed |
-| D-009 | Temporary holds, owner payment approval, staff dashboard/manual bookings | MVP proposal |
-| D-010 | One API project with layer-based folders initially; avoid premature Core/Infrastructure splitting | Implemented |
-| D-011 | Next.js 16 App Router + TypeScript + Tailwind 4 starter | Implemented, not booking UI |
-| D-012 | xUnit v3 and WebApplicationFactory tests | Implemented; runtime unverified |
-| D-013 | EF Core 10 + Npgsql 10 mappings to existing SQL schema; status strings and PostgreSQL-specific SQL stay canonical | Phase 2 implementation |
-| D-014 | Do not auto-create/migrate/reset existing DB; future baseline migration requires generated snapshot and DB-clone review | Phase 2 safeguard |
-| D-015 | Use user-secrets/env for `ConnectionStrings:Pickleball` and expose separate `/health/db` | Phase 2 implementation |
+| D-001 | One branded deployment and database per venue, reusable code/schema | Confirmed |
+| D-002 | Court list/time-grid, not a physical floor-layout interface | Confirmed |
+| D-003 | Green available, red occupied, gray elapsed; pending/blocked states also shown clearly | Confirmed |
+| D-004 | PostgreSQL 17 + DBeaver + Docker | User-reported working |
+| D-005 | ASP.NET Core .NET 10, Next.js/TypeScript/Tailwind, one repository | Implemented scaffold |
+| D-006 | AGENTS.md and selective docs/context wiki tracked by Git | Implemented |
+| D-007 | UI UX Pro Max (design) and Impeccable (audit) | Approved workflow |
+| D-008 | One API project organized by layers until separate Core/Infrastructure warranted | Current design |
+| D-009 | SQL-first EF Core mappings to existing nine tables | Phase 2 source |
+| D-010 | No automatic migrations against initialized database | Mandatory |
+| D-011 | Phase 3 uses existing staff_users with PasswordHasher and secure cookie+CSRF, no added auth tables | Phase 3 source |
+| D-012 | OWNER bootstrap only via one-time CLI secrets, not anonymous HTTP | Phase 3 source |
+| D-013 | OWNER changes venue identity/settings and staff; OWNER/MANAGER edit courts and hours; STAFF read-only | Phase 3 source |
+| D-014 | Court deactivation is reversible and blocked if future active reservations exist; never delete booking history | Phase 3 source |
+| D-015 | Admin frontend not built until Phase 8; backend auth/CRUD routes implemented first | Phased plan |
 
-Code and SQL take priority when reporting what is really implemented.
+Do not confuse planned features with implemented behavior or runtime-verified functionality.
