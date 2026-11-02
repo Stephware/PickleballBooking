@@ -2,45 +2,45 @@
 
 Last updated: 2026-11-03
 
-## User-reported setup
-
-- [x] PostgreSQL 17 Docker and DBeaver working on Mac (user-reported).
-- [x] Nine-table schema initialized previously; **no database changes performed** during Phases 1 or 2.
+## User-reported local setup
+- [x] PostgreSQL 17 Docker instance and DBeaver connection working on developer's Mac.
+- [x] Nine-table SQL schema was previously initialized; **no database or Docker change in Phase 3**.
 
 ## Phase 1 — merged
+- [x] ASP.NET Core .NET 10 and Next.js starter, tests, context wiki.
+- [ ] Runtime .NET/npm build verification still not demonstrated in this conversation.
+- [ ] Next.js package-lock.json must be generated and committed after local install.
 
-- [x] .NET 10 API, Next.js/TypeScript/Tailwind starter, API/test structure and context wiki.
-- [ ] Local build and runtime verification not established in this conversation.
-- [ ] Commit `frontend/package-lock.json` after initial `npm install` on the developer's Mac.
+## Phase 2 — PR #2 (not yet merged as of Phase 3 start)
+- [x] SQL-first EF Core mapping, context, repositories/unit-of-work and /health/db source.
+- [x] Static SQL/EF mapping audit passed; original DB schema and Compose unchanged.
+- [ ] Build, /health/db connectivity and isolated PostgreSQL integration verification remain pending.
+- [ ] Initial EF migration baseline/snapshot intentionally deferred: see docs/database-migrations.md.
 
-## Phase 2 — EF Core integration (PR in progress)
+## Phase 3 — stacked PR, API source implemented
+- [x] Cookie authentication backed by existing staff_users and salted Identity password hasher.
+- [x] One-time console-only OWNER account bootstrap from user-secrets.
+- [x] Role-based API authorization (OWNER, MANAGER, STAFF) with database-backed active/role check on each authenticated request.
+- [x] Admin CSRF token validation, HttpOnly cookie, HTTPS-only production mode, explicit credentialed CORS, and IP-partitioned login rate limiting.
+- [x] Self-service current-password change; reset invalidates existing cookies via password fingerprint.
+- [x] Owner-only staff creation, activation/deactivation and staff password reset.
+- [x] Public venue details, opening hours and active court list.
+- [x] Protected venue branding and booking settings, 7-day operating hours, court creation/update/soft-deactivation; no deletion.
+- [x] Court deactivation blocked while future bookings are still active.
+- [x] Integration and DTO validation test source; auth/setup/runbook documentation.
+- [x] No schema changes, no new tables, no migrations, no Docker/DB actions.
 
-- [x] Npgsql EF Core 10 provider and EF Core design-time tooling references.
-- [x] All nine SQL-first entities and explicit EF Core table/column/relationship configurations.
-- [x] `PickleballDbContext`, design-time factory, safe user-secrets connection configuration.
-- [x] Venue, court, schedule and booking repositories with scoped DI; unit-of-work for coordinated save/transactions.
-- [x] `/health/db` reports DB reachability, all nine tables, and venue settings row.
-- [x] `/health` retained as a process-only check even when DB is down.
-- [x] Model-metadata unit tests, opt-in read-only live DB tests, and opt-in rollback CRUD test for isolated test DB.
-- [x] Read-only SQL verification script for the 9 tables, exclusion constraint, triggers and expiration function.
-- [x] Documented schema-first migration/baseline safeguards.
-- [x] SQL schema and Compose file unchanged; no automatic migrations, no destructive commands.
+## Phase 3 verification remaining
+- [ ] Run dotnet restore/build/test on Mac (not available to authoring environment).
+- [ ] Configure connection string and bootstrap owner using local user-secrets, then remove bootstrap password.
+- [ ] Verify login CSRF, logout, roles, all CRUD endpoints and cookie rotation against a disposable / local development database.
+- [ ] Check production reverse proxy HTTPS/cookie/Data Protection key persistence before actual deployment.
 
-## Not yet runtime-verified
+## Future work
+- [ ] Phase 4: availability and pricing rules.
+- [ ] Phase 5: booking engine and safe concurrency.
+- [ ] Phase 6: payments and walk-in operations.
+- [ ] Phases 7–8: branded player and admin frontend.
+- [ ] Phase 9: comprehensive E2E/security/deployment checks.
 
-- [ ] `dotnet restore/build/test` in a .NET-enabled environment.
-- [ ] Configure `ConnectionStrings:Pickleball` with local user-secrets and verify `GET /health/db` returns 200.
-- [ ] Run `database/sql/05_verify_existing_schema.sql` against working DB in DBeaver or psql.
-- [ ] Opt-in integration tests against an isolated PostgreSQL test database.
-- [ ] EF Core migration baseline + model snapshot: **deliberately deferred until generated and reviewed on a working .NET environment**; do not run `dotnet ef database update` yet.
-
-## Future phases
-
-- [ ] Phase 3: staff authentication/roles, venue and court management.
-- [ ] Phase 4: actual availability and pricing engine.
-- [ ] Phase 5: atomic booking workflow, holds and expiration worker.
-- [ ] Phase 6: payments and manual booking operations.
-- [ ] Phase 7–8: player and owner frontend.
-- [ ] Phase 9: E2E/security tests and multi-venue deployment.
-
-**Status:** Phase 2 source implementation ready for GitHub review; DB connectivity and test execution remain pending local verification.
+**Source implemented ≠ runtime verified.** Keep Phase 3 reviewable as a stacked PR until Phase 2 is merged.

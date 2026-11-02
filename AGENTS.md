@@ -19,10 +19,13 @@
 - EF Core mapping must preserve the SQL-first nine-table schema, UTC timestamptz, TimeOnly for hours, SQL indexes/triggers and PostgreSQL exclusion constraint. Coordinate changes using repositories + IUnitOfWork. Enforce booking transaction safety and PostgreSQL overlap exclusions. Expired HELD/AWAITING_REVIEW rows must transition to EXPIRED before time becomes free.
 - Do not commit secrets, customer information, raw passwords, real payment credentials, or sensitive database exports. Use ASP.NET Core user secrets/environment variables and secure password hashing.
 - Compute booking validity and pricing on the server and respect venue timezone (default Asia/Manila).
+- Admin endpoints use HttpOnly signed cookie authentication, CSRF header for all unsafe /api/v1/admin methods, OWNER/MANAGER/STAFF policies, login throttling and repeated DB active/role checks. Do not replace with unauthenticated writes or localStorage session tokens.
+- The first OWNER is created only through the one-time --bootstrap-owner CLI command and local user-secrets; never expose public owner sign-up or commit bootstrap passwords. Password reset must invalidate previous cookies.
+- Do not implement court physical deletion: only soft-deactivate, and reject deactivation while future reservations exist.
 
 ## Current implementation
 
-Phase 1 has merged. Phase 2 maps all nine existing SQL-first PostgreSQL tables via EF Core 10/Npgsql, defines repositories and unit-of-work, and adds a separate /health/db endpoint plus gated integration tests. .NET runtime and real database connectivity still require developer-side verification. Booking APIs, authentication, real frontend flows, and production branding remain unimplemented. Do not infer that EF mappings imply business logic exists. See [docs/context/progress.md](docs/context/progress.md) and verify before claiming otherwise.
+Phase 1 merged. Phase 2 EF Core SQL-first mapping is still PR #2 at the start of Phase 3. Phase 3 adds API-source implementations for staff cookie authentication/CSRF, roles, CLI-only owner bootstrap, staff management, venue settings and court management. Booking/availability/pricing/payment logic and Next.js admin/player screens are NOT implemented. Phase 3 is a stacked branch based on Phase 2 and is NOT runtime-verified against local PostgreSQL. See [docs/context/progress.md](docs/context/progress.md) and verify before claiming otherwise.
 
 ## Documentation hygiene
 

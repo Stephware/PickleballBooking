@@ -2,46 +2,42 @@
 
 ## Deployment model
 
-One reusable codebase, separately deployed per pickleball venue with its own PostgreSQL database. The SQL-first schema is **single-venue** (`venue_settings.id = 1`), so no `venue_id` discriminator is needed in every table. The frontend remains a Next.js 16 + TypeScript + Tailwind starter awaiting real booking/admin features.
+One source codebase; **independent deployment and PostgreSQL database per venue**. Single-venue SQL schema: venue_settings.id=1, nine existing tables. Frontend is a Next.js/TypeScript/Tailwind placeholder; booking and admin screens remain future work.
 
-## Phase 2 backend layers
+## API architecture
 
-- `Models/Entities/` — nine POCO entities corresponding to the nine existing tables. SQL status strings are kept as constants in `Models/Enums/BookingStatuses.cs`, not implicitly converted into PostgreSQL enums.
-- `Data/PickleballDbContext.cs` — EF Core context; mappings are loaded from `Data/Configurations/` for every entity and preserve SQL-first table/column names, identity semantics, types and foreign keys.
-- `Data/PickleballDbContextFactory.cs` — design-time context using user-secrets/env configuration; no automatic schema changes.
-- `Repositories/` — venue, court, schedule and booking repositories. Write methods stage changes; `IUnitOfWork` coordinates `SaveChangesAsync` and transactions.
-- `Extensions/DatabaseServiceExtensions.cs` — conditional PostgreSQL DI setup. If no local connection string exists, regular `/health` still responds and `/health/db` reports unhealthy.
-- `Health/PostgresSchemaHealthCheck.cs` — read-only check for a connection, nine required tables and the existing venue row; no external SQL or sensitive details returned.
-- `backend/tests/` — metadata unit tests and gated live integration tests.
+- **Controllers** are HTTP and authorization boundaries. Public controllers under Controllers/Public; protected staff controllers under Controllers/Admin.
+- **DTOs** validate request/response shapes; do not expose raw EF entities or password hashes.
+- **Services** own court/venue/staff rules, validation and coordination.
+- **Repositories** query and stage EF entities; **IUnitOfWork** saves transactions.
+- **Data** maps nine SQL-first tables and relationships. SQL functions, exclusion constraint, triggers, check constraints, indexes remain canonical.
+- **Security** uses staff_users table, Identity PasswordHasher (not full Identity tables), protected HttpOnly cookie, CSRF on modifying admin API calls, role/active lookup per request, and an owner bootstrap CLI command.
+- **Health** /health (process) and /health/db (database/schema).
 
-**No CRUD controllers or booking business services are exposed in Phase 2.** Roles, write authorization, booking conflict handling and payment flows belong to later phases.
+### Staff authorization
 
-## Canonical nine tables
+- OWNER: staff management, global venue settings and booking policies, courts, operating hours.
+- MANAGER: court management, operating hours, read venue settings.
+- STAFF: read admin views only; no write access in Phase 3.
+- Public: venue branding, hours and active court list; no staff password or secret fields.
+- Owner creation is one-time via `--bootstrap-owner` CLI reading `Bootstrap:Owner*` secrets, only with zero staff records.
+- Cookie role/active state and password fingerprint checked against current database on each authenticated request. Password changes invalidate previous cookies. Cookie sessions expire after 8 hours (no sliding). No stateless JWT/refresh token.
+- All unsafe `/api/v1/admin` methods require `X-CSRF-TOKEN` obtained from `/api/v1/admin/auth/csrf`. Local cross-origin use requires credentials and explicit CORS. Production deploy via a trusted single-origin HTTPS reverse proxy.
+- Secure password recovery for a lost OWNER password is not yet implemented; do not expose insecure recovery endpoints.
 
-| SQL table | C# entity |
-| --- | --- |
-| venue_settings | VenueSettings |
-| staff_users | StaffUser |
-| courts | Court |
-| operating_hours | OperatingHour |
-| pricing_rules | PricingRule |
-| customers | Customer |
-| court_schedule_entries | CourtScheduleEntry |
-| bookings | Booking |
-| payments | Payment |
+### Court and venue rules
 
-## PostgreSQL-specific behavior
+- Courts created/updated with name, description, base hourly rate, display order, active state. SQL unique case-insensitive court name index still protects races. No physical deletes via the API.
+- Deactivating a court with future active reservations is rejected; inactive courts don't appear in public listing.
+- Venue name/slug/logo/colors/timezone/currency and booking policy values editable by OWNER. Logo URL HTTPS-only.
+- Venue operating hours: all seven weekday records validated (0 Sunday → 6 Saturday), closed days no hours; open days require closesAt > opensAt. Currently same-day hours only.
+- Rich pricing rules, live availability and booking lifecycle are Phases 4–5.
 
-- `btree_gist` enables the GiST exclusion constraint `ex_court_active_time_overlap` that rejects overlapping active bookings and blocks.
-- Functional case-insensitive indexes, `updated_at` triggers, SQL check constraints, generated booking codes and `expire_pending_schedule_entries()` remain managed by `database/sql/01_schema.sql` rather than being silently rebuilt by EF conventions.
-- `timestamptz` maps to `DateTime` and **must use UTC**; `time` maps to `TimeOnly`. The venue timezone is a separate setting (initially Asia/Manila).
-- Expired pending schedule entries remain active until their status is explicitly changed to `EXPIRED`; a future service/worker will perform that transition. A read-only availability query alone cannot eliminate the concurrency race.
-- The current schema lacks specialized per-court overnight hours and secure booking-access tokens; those are future reviewed migrations.
+## PostgreSQL ownership
 
-## Migrations
+Existing tables: venue_settings, staff_users, courts, operating_hours, pricing_rules, customers, court_schedule_entries, bookings, payments.
+No schema was changed in Phase 3. See [database-migrations.md](../database-migrations.md); do not auto-apply an EF migration to initialized tables.
 
-See [docs/database-migrations.md](../database-migrations.md). The schema already exists, and EF's initial generated migration would otherwise try to create duplicate tables. **No migrations are applied or auto-run in Phase 2**. Generate the baseline and snapshot only in a local .NET-enabled environment, review it against a disposable copy first, and keep the original bootstrap SQL for new venues.
+## Implementation status
 
-## Source of truth
-
-`database/sql/01_schema.sql` for current SQL objects, mapped entity configurations for EF, and context wiki for product decisions. Keep the actual database/volume untouched during scaffolding.
+Phase 2 is the parent of the Phase 3 feature branch until merged. Tests and full live DB integration require a developer-side .NET runtime; see progress.md.
