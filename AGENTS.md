@@ -23,11 +23,21 @@
 - The first OWNER is created only through the one-time --bootstrap-owner CLI command and local user-secrets; never expose public owner sign-up or commit bootstrap passwords. Password reset must invalidate previous cookies.
 - Do not implement court physical deletion: only soft-deactivate, and reject deactivation while future reservations exist.
 - Before modifying slot/price behavior, read docs/phase-4-availability-pricing.md. Status order: started/elapsed, block, occupied, pending, unavailable by notice, available. NEVER treat stale HELD/AWAITING_REVIEW rows as available until the persisted status has transitioned to EXPIRED.
-- Price rules: court-specific > venue-wide, priority DESC, ID DESC, prorate at rule boundaries, round final total to 2 decimals. Never accept client-computed totals for booking/payment; Phase 5 must revalidate pricing and GiST conflict under transaction.
+- Price rules: court-specific > venue-wide, priority DESC, ID DESC, prorate at rule boundaries, round final total to 2 decimals. Never accept client-computed totals for booking/payment; Phase 5 revalidates pricing in an EF transaction and relies on PostgreSQL GiST exclusion for the final conflict guard.
+
+## Phase 5 booking rules
+
+- Read [docs/phase-5-booking-engine.md](docs/phase-5-booking-engine.md) before modifying booking, idempotency, guest authentication, status transitions or expiry.
+- `Booking:SigningKey` is a stable per-venue 32+-byte secret in user-secrets/env, never in Git; changing it breaks prior guest token access and idempotent retries. Keep HMAC domain-separation for booking-code derivation and access-token signing.
+- Create requires a new UUID v4 per intended guest reservation; retries **must** reuse the same UUID and identical input. Only return a guest access token to the creator/replay holder; never include it in logs, URL query strings, analytics, or public availability.
+- Guest booking access/cancellation requires `X-Booking-Token`; a booking code by itself grants no access. Guest cancels only unstarted HELD/AWAITING_REVIEW; OWNER/MANAGER can confirm an unexpired HELD or cancel an eligible booking.
+- Expire stale pending rows explicitly via the SQL `expire_pending_schedule_entries()` function **within booking mutations** and periodically through the background worker. A timestamp alone doesn't change exclusion constraint state.
+- Revalidate multiple consecutive slots, venue notice/horizon and pricing in the transaction; persist the entire range as one schedule entry plus one booking. Handle SQLSTATE 23P01/23505 with conflict responses. Future APIs must not overwrite the current database schema without reviewed migrations.
+- Phase 5 has no payment collection or booking frontend; Phase 6–8 supply those capabilities.
 
 ## Current implementation
 
-Phase 1 merged. Phase 2 EF Core SQL-first mapping is still PR #2 at the start of Phase 3. Phase 3 adds API-source implementations for staff cookie authentication/CSRF, roles, CLI-only owner bootstrap, staff management, venue settings and court management. Phase 4 adds server-side availability, timezone-aware slots, pricing/quote calculators, and pricing rule APIs. Booking creation/holds, payment processing and Next.js admin/player screens are NOT implemented. Availability/quotes are read-only and never reserve a slot. Phase 3 is a stacked branch based on Phase 2 and is NOT runtime-verified against local PostgreSQL. See [docs/context/progress.md](docs/context/progress.md) and verify before claiming otherwise.
+Phases 1–2 are on main; Phase 3 and 4 PRs were merged into their parent **feature branches**, not directly into main. Phase 5 is developed on the Phase 4 branch, and runtime build/PostgreSQL validation is still pending. See [docs/context/progress.md](docs/context/progress.md) before claiming a feature is verified. The API now has booking/hold source code, but not payments, public booking screens or admin booking UI.
 
 ## Documentation hygiene
 

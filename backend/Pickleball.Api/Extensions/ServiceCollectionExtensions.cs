@@ -1,4 +1,6 @@
 using Pickleball.Api.Services.Courts;
+using Pickleball.Api.Services.Bookings;
+using Pickleball.Api.Security;
 using Pickleball.Api.Services.Availability;
 using Pickleball.Api.Services.Pricing;
 using Pickleball.Api.Services.System;
@@ -16,6 +18,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IVenueService, VenueService>();
         services.AddScoped<IAvailabilityService, AvailabilityService>();
         services.AddScoped<IPricingService, PricingService>();
+        services.AddSingleton<GuestBookingTokens>();
+        services.AddScoped<IBookingService, BookingService>();
         return services;
     }
 }

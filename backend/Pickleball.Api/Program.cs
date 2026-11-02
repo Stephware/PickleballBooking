@@ -2,6 +2,7 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.RateLimiting;
 using Pickleball.Api.Extensions;
+using Pickleball.Api.Background;
 using Pickleball.Api.Middleware;
 using Pickleball.Api.Security;
 
@@ -14,10 +15,29 @@ builder.Services.AddHealthChecks();
 builder.Services.AddApplicationServices();
 builder.Services.AddPickleballDatabase(builder.Configuration);
 builder.Services.AddStaffAuthentication(builder.Environment);
+builder.Services.AddHostedService<PendingBookingExpiryWorker>();
 
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("guest-booking", context => RateLimitPartition.GetFixedWindowLimiter(
+        partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        factory: _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 8,
+            Window = TimeSpan.FromMinutes(5),
+            QueueLimit = 0,
+            AutoReplenishment = true
+        }));
+    options.AddPolicy("guest-booking-read", context => RateLimitPartition.GetFixedWindowLimiter(
+        partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        factory: _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 30,
+            Window = TimeSpan.FromMinutes(1),
+            QueueLimit = 0,
+            AutoReplenishment = true
+        }));
     options.AddPolicy("staff-login", context => RateLimitPartition.GetFixedWindowLimiter(
         partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
         factory: _ => new FixedWindowRateLimiterOptions
