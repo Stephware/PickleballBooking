@@ -14,15 +14,15 @@
 
 - Keep the requested repository layout: backend/Pickleball.Api, frontend, database, docs, and PickleballBooking.slnx.
 - Backend: ASP.NET Core (.NET 10); planned frontend: Next.js and TypeScript; database: PostgreSQL 17 on Docker.
-- The user's PostgreSQL instance is ALREADY working. Never run docker compose down -v, reset its volumes, rerun the schema on real data, or overwrite local .env credentials.
+- The user's PostgreSQL instance is ALREADY working. Never run docker compose down -v, reset its volumes, rerun schema initialization SQL on real data, call EnsureCreated/EnsureDeleted/Migrate at startup, or overwrite local .env credentials. Read docs/database-migrations.md before ANY EF migration changes.
 - Each venue has its own database and deployment; court count, rates, hours, policy and branding are configuration, not new tables per client.
-- Enforce booking transaction safety and PostgreSQL overlap exclusions. Expired HELD/AWAITING_REVIEW rows must transition to EXPIRED before time becomes free.
+- EF Core mapping must preserve the SQL-first nine-table schema, UTC timestamptz, TimeOnly for hours, SQL indexes/triggers and PostgreSQL exclusion constraint. Coordinate changes using repositories + IUnitOfWork. Enforce booking transaction safety and PostgreSQL overlap exclusions. Expired HELD/AWAITING_REVIEW rows must transition to EXPIRED before time becomes free.
 - Do not commit secrets, customer information, raw passwords, real payment credentials, or sensitive database exports. Use ASP.NET Core user secrets/environment variables and secure password hashing.
 - Compute booking validity and pricing on the server and respect venue timezone (default Asia/Manila).
 
 ## Current implementation
 
-Phase 1 provides a .NET 10 controller/service health foundation, exception handling, limited CORS, an xUnit test project, and a Next.js 16 + TypeScript + Tailwind starter. The frontend is a development placeholder. EF Core integration, real bookings, authentication, and production venue branding remain unimplemented. See [docs/context/progress.md](docs/context/progress.md) and verify before claiming otherwise.
+Phase 1 has merged. Phase 2 maps all nine existing SQL-first PostgreSQL tables via EF Core 10/Npgsql, defines repositories and unit-of-work, and adds a separate /health/db endpoint plus gated integration tests. .NET runtime and real database connectivity still require developer-side verification. Booking APIs, authentication, real frontend flows, and production branding remain unimplemented. Do not infer that EF mappings imply business logic exists. See [docs/context/progress.md](docs/context/progress.md) and verify before claiming otherwise.
 
 ## Documentation hygiene
 

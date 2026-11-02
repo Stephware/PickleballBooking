@@ -1,22 +1,13 @@
-# API surface (Phase 1)
+# API endpoints
 
-The backend currently provides only infrastructure endpoints; bookings are NOT live.
+Only infrastructure endpoints exist; real court, booking, staff and payment APIs are **not implemented**.
 
-| Method | Endpoint | Auth | Notes |
+| Method | Endpoint | Auth | Purpose |
 | --- | --- | --- | --- |
-| GET | `/health` | Public | Process health, no database check |
-| GET | `/api/v1/system/status` | Public | Non-sensitive service name/status/UTC time |
+| GET | `/health` | Public | Process health only; doesn't depend on database |
+| GET | `/health/db` | Public | PostgreSQL reachable, nine required tables and configured venue row |
+| GET | `/api/v1/system/status` | Public | Non-sensitive service name/status/UTC timestamp |
 
-## Error conventions
+`/health/db` returns HTTP 200 on success or HTTP 503 when connection settings are missing or the DB/schema check fails. It never returns passwords or raw SQL errors.
 
-Unexpected exceptions use HTTP 500 with RFC 9457-style Problem Details and a generic message. Do not expose stack traces to clients. Future endpoints should return appropriate 400, 401, 403, 404, 409, 422 and 429 responses as applicable.
-
-## Planned future API groups
-
-- `/api/v1/venue`
-- `/api/v1/courts`
-- `/api/v1/availability`
-- `/api/v1/bookings`
-- `/api/v1/admin/*`
-
-These routes are **not yet implemented**. Update this page when endpoints are added.
+Unhandled exceptions use Problem Details. Staff/auth, court management, pricing, booking, payment and guest endpoints are planned for Phases 3–6, not exposed today.

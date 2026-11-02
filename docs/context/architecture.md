@@ -2,42 +2,46 @@
 
 ## Deployment model
 
-One shared source code repository; **separate app deployment and PostgreSQL database per venue**. The existing schema is intentionally single-venue: it has one venue_settings row and does not add a venue_id column to every table.
+One reusable codebase, separately deployed per pickleball venue with its own PostgreSQL database. The SQL-first schema is **single-venue** (`venue_settings.id = 1`), so no `venue_id` discriminator is needed in every table. The frontend remains a Next.js 16 + TypeScript + Tailwind starter awaiting real booking/admin features.
 
-- Browser: Next.js 16 + TypeScript + Tailwind 4 App Router starter; only a development placeholder is implemented. Venue-specific UI is future work.
-- API: ASP.NET Core .NET 10; GET /health and GET /api/v1/system/status, controller/service/DTO, CORS allowlist, Problem Details exception handling and DI. No booking logic or EF Core yet.
-- Data: PostgreSQL 17 managed using Docker and inspected with DBeaver
-- Domain and branding: independent per venue; configurable logo, colors, court names, rates and policy
+## Phase 2 backend layers
 
-Separate databases should use distinct Compose project names, ports and secrets. Do not hardcode a venue's court count or copy entire codebases per customer.
+- `Models/Entities/` — nine POCO entities corresponding to the nine existing tables. SQL status strings are kept as constants in `Models/Enums/BookingStatuses.cs`, not implicitly converted into PostgreSQL enums.
+- `Data/PickleballDbContext.cs` — EF Core context; mappings are loaded from `Data/Configurations/` for every entity and preserve SQL-first table/column names, identity semantics, types and foreign keys.
+- `Data/PickleballDbContextFactory.cs` — design-time context using user-secrets/env configuration; no automatic schema changes.
+- `Repositories/` — venue, court, schedule and booking repositories. Write methods stage changes; `IUnitOfWork` coordinates `SaveChangesAsync` and transactions.
+- `Extensions/DatabaseServiceExtensions.cs` — conditional PostgreSQL DI setup. If no local connection string exists, regular `/health` still responds and `/health/db` reports unhealthy.
+- `Health/PostgresSchemaHealthCheck.cs` — read-only check for a connection, nine required tables and the existing venue row; no external SQL or sensitive details returned.
+- `backend/tests/` — metadata unit tests and gated live integration tests.
 
-## Files
+**No CRUD controllers or booking business services are exposed in Phase 2.** Roles, write authorization, booking conflict handling and payment flows belong to later phases.
 
-- backend/Pickleball.Api: API controllers, DTOs, services, middleware, DI and health plumbing; other layer directories are intentionally empty until corresponding features are built
-- backend/tests/Pickleball.Api.Tests: xUnit v3 unit and WebApplicationFactory integration tests (execution unverified here)
-- frontend: Next.js TypeScript Tailwind source with neutral placeholder landing page and backend health proxy
-- database/compose.yaml and database/sql: original DB starter configuration and scripts
-- PickleballBooking.slnx: root solution
-- AGENTS.md and docs/context: Git-tracked guidance and wiki
+## Canonical nine tables
 
-## Nine tables
-
-| Table | Purpose |
+| SQL table | C# entity |
 | --- | --- |
-| venue_settings | One venue's identity, branding, timezone and booking options |
-| staff_users | Basic owner/manager/staff records; not a full Identity implementation |
-| courts | Any number of courts, names, order, base rate and active state |
-| operating_hours | Venue-wide hours by weekday; overnight hours not supported |
-| pricing_rules | Court-specific / weekday / peak-time pricing |
-| customers | Optional customer directory |
-| court_schedule_entries | One occupancy source for holds, booked time and blocks |
-| bookings | Customer snapshot, booking code, price and deposit |
-| payments | Transaction method, amount, proof pointer and review state |
+| venue_settings | VenueSettings |
+| staff_users | StaffUser |
+| courts | Court |
+| operating_hours | OperatingHour |
+| pricing_rules | PricingRule |
+| customers | Customer |
+| court_schedule_entries | CourtScheduleEntry |
+| bookings | Booking |
+| payments | Payment |
 
-## Concurrency and time
+## PostgreSQL-specific behavior
 
-The schema's PostgreSQL btree_gist exclusion constraint prevents overlaps between active entries for the same court. Adjacent half-open time ranges are permitted. A background worker/API must move expired HELD/AWAITING_REVIEW entries to EXPIRED before their slots are free. ELAPSED is derived for the UI, not a database booking status. Convert timestamps using each venue's timezone; Asia/Manila is the starting default.
+- `btree_gist` enables the GiST exclusion constraint `ex_court_active_time_overlap` that rejects overlapping active bookings and blocks.
+- Functional case-insensitive indexes, `updated_at` triggers, SQL check constraints, generated booking codes and `expire_pending_schedule_entries()` remain managed by `database/sql/01_schema.sql` rather than being silently rebuilt by EF conventions.
+- `timestamptz` maps to `DateTime` and **must use UTC**; `time` maps to `TimeOnly`. The venue timezone is a separate setting (initially Asia/Manila).
+- Expired pending schedule entries remain active until their status is explicitly changed to `EXPIRED`; a future service/worker will perform that transition. A read-only availability query alone cannot eliminate the concurrency race.
+- The current schema lacks specialized per-court overnight hours and secure booking-access tokens; those are future reviewed migrations.
 
-## Boundaries
+## Migrations
 
-Frontend branding and layout are application concerns; base theme values are currently stored in venue_settings. Advanced per-court hours, overnight bookings, richer theme templates and ASP.NET Identity require future schema/application design. Use versioned EF Core migrations after mapping the current schema; never reinitialize a populated database.
+See [docs/database-migrations.md](../database-migrations.md). The schema already exists, and EF's initial generated migration would otherwise try to create duplicate tables. **No migrations are applied or auto-run in Phase 2**. Generate the baseline and snapshot only in a local .NET-enabled environment, review it against a disposable copy first, and keep the original bootstrap SQL for new venues.
+
+## Source of truth
+
+`database/sql/01_schema.sql` for current SQL objects, mapped entity configurations for EF, and context wiki for product decisions. Keep the actual database/volume untouched during scaffolding.

@@ -1,0 +1,85 @@
+using Microsoft.EntityFrameworkCore;
+using Pickleball.Api.Data;
+using Pickleball.Api.Models.Entities;
+using Pickleball.Api.Repositories;
+using Pickleball.Api.Repositories.Courts;
+using Pickleball.Api.Repositories.Settings;
+using Xunit;
+
+namespace Pickleball.Api.Tests.Integration;
+
+/// <summary>
+/// Opt-in live tests: set PICKLEBALL_TEST_CONNECTION_STRING to an isolated
+/// TEST database. Never point this to a production venue database.
+/// </summary>
+public sealed class DatabaseFoundationTests
+{
+    private static string? Connection => Environment.GetEnvironmentVariable(
+        "PICKLEBALL_TEST_CONNECTION_STRING");
+
+    private static PickleballDbContext CreateContext() =>
+        new(new DbContextOptionsBuilder<PickleballDbContext>()
+            .UseNpgsql(Connection!).Options);
+
+    [Fact]
+    public async Task LiveSchema_CanReadVenueAndCourtCount()
+    {
+        if (string.IsNullOrWhiteSpace(Connection))
+            return; // Integration testing is intentionally opt-in.
+
+        await using var db = CreateContext();
+        Assert.True(await db.Database.CanConnectAsync());
+
+        var venue = await new VenueRepository(db).GetAsync();
+        Assert.NotNull(venue);
+        Assert.Equal((short)1, venue.Id);
+
+        var courts = await new CourtRepository(db).ListAsync();
+        Assert.NotNull(courts);
+    }
+
+    [Fact]
+    public async Task CourtRepository_CanCreateUpdateDeleteInsideRolledBackTransaction()
+    {
+        // Explicit second guard to prevent writes to a regular venue database.
+        if (string.IsNullOrWhiteSpace(Connection) ||
+            Environment.GetEnvironmentVariable("PICKLEBALL_TEST_MUTATIONS_ENABLED") != "1")
+            return;
+
+        await using var db = CreateContext();
+        var courtRepo = new CourtRepository(db);
+        IUnitOfWork unit = new EfUnitOfWork(db);
+
+        await using var tx = await unit.BeginTransactionAsync();
+        try
+        {
+            var court = new Court
+            {
+                CourtName = "__test_court_" + Guid.NewGuid().ToString("N"),
+                BaseHourlyRate = 250m,
+                DisplayOrder = 999,
+                IsActive = true
+            };
+            courtRepo.Add(court);
+            await unit.SaveChangesAsync();
+
+            Assert.True(court.Id > 0);
+            var loaded = await courtRepo.FindAsync(court.Id);
+            Assert.NotNull(loaded);
+            loaded.BaseHourlyRate = 300m;
+            await unit.SaveChangesAsync();
+
+            var updated = await db.Courts.AsNoTracking()
+                .SingleAsync(c => c.Id == court.Id);
+            Assert.Equal(300m, updated.BaseHourlyRate);
+
+            courtRepo.Remove(loaded);
+            await unit.SaveChangesAsync();
+            Assert.Null(await courtRepo.FindAsync(court.Id));
+        }
+        finally
+        {
+            await tx.RollbackAsync(); // Always roll back, including on assertion failure.
+        }
+    }
+}
