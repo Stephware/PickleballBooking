@@ -52,8 +52,8 @@ public sealed class PricingService(
             throw new ArgumentException("Rule name is required.");
         if (input.DayOfWeek is < 0 or > 6 || input.StartsAt >= input.EndsAt)
             throw new ArgumentException("Rules need a valid weekday and same-day time window.");
-        if (input.HourlyRate < 0m || input.HourlyRate > 99999999.99m)
-            throw new ArgumentException("Hourly rate is outside the allowed range.");
+        if (!MoneyRules.IsValidRate(input.HourlyRate))
+            throw new ArgumentException("Hourly rate must be between 0 and 99999999.99 with at most two decimal places.");
         if (input.CourtId.HasValue &&
             await courts.FindAsync(input.CourtId.Value, ct) is null)
             throw new ArgumentException("Selected court does not exist.");

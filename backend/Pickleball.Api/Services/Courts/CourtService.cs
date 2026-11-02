@@ -5,6 +5,7 @@ using Pickleball.Api.Models.Entities;
 using Pickleball.Api.Models.Enums;
 using Pickleball.Api.Repositories;
 using Pickleball.Api.Repositories.Courts;
+using Pickleball.Api.Services.Pricing;
 
 namespace Pickleball.Api.Services.Courts;
 
@@ -71,8 +72,8 @@ public sealed class CourtService(ICourtRepository courts, IUnitOfWork unit, Time
     {
         if (string.IsNullOrWhiteSpace(request.CourtName))
             throw new ArgumentException("Court name is required.");
-        if (request.BaseHourlyRate < 0 || request.BaseHourlyRate > 99999999.99m)
-            throw new ArgumentException("Court rate is outside the supported range.");
+        if (!MoneyRules.IsValidRate(request.BaseHourlyRate))
+            throw new ArgumentException("Court rate must be between 0 and 99999999.99 with at most two decimal places.");
     }
 
     private static CourtResponse Map(Court c) =>
