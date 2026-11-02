@@ -14,7 +14,7 @@ Applies to player-facing booking pages and staff/owner admin screens for individ
 ## Design system
 
 1. Inspect implemented tokens, shared components, screens, and venue configurations before adding styles.
-2. On first frontend build, define a compact documented token system: color, typography, spacing, radii, states, focus outlines and responsive breakpoints. Keep token definitions in frontend source and link to them here.
+2. On first frontend build, define a compact documented token system: color, typography, spacing, radii, states, focus outlines and responsive breakpoints. Keep token definitions in frontend source and link to them here. Phase 1 currently contains **temporary, neutral tokens** in [frontend/app/globals.css](../../frontend/app/globals.css); these are not an approved brand system.
 3. Build a consistent base UI reusable across venues. Inject logo, brand colors, images, court names/counts and booking policy via config; use scoped, deliberate variations only when justified.
 4. Keep player booking, owner dashboard and marketing pages internally consistent. Brand colors must not reduce status clarity or accessibility.
 5. Prefer clear, functional and fast interfaces over decorative complexity. Avoid gratuitous animations and arbitrary style changes.

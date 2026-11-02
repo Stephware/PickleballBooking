@@ -4,8 +4,8 @@
 
 One shared source code repository; **separate app deployment and PostgreSQL database per venue**. The existing schema is intentionally single-venue: it has one venue_settings row and does not add a venue_id column to every table.
 
-- Browser: venue-branded Next.js + TypeScript UI (planned)
-- API: ASP.NET Core .NET 10 (minimal scaffold, only GET /health implemented)
+- Browser: Next.js 16 + TypeScript + Tailwind 4 App Router starter; only a development placeholder is implemented. Venue-specific UI is future work.
+- API: ASP.NET Core .NET 10; GET /health and GET /api/v1/system/status, controller/service/DTO, CORS allowlist, Problem Details exception handling and DI. No booking logic or EF Core yet.
 - Data: PostgreSQL 17 managed using Docker and inspected with DBeaver
 - Domain and branding: independent per venue; configurable logo, colors, court names, rates and policy
 
@@ -13,8 +13,9 @@ Separate databases should use distinct Compose project names, ports and secrets.
 
 ## Files
 
-- backend/Pickleball.Api: .NET 10 API project
-- frontend: placeholder; actual Next.js project not yet initialized
+- backend/Pickleball.Api: API controllers, DTOs, services, middleware, DI and health plumbing; other layer directories are intentionally empty until corresponding features are built
+- backend/tests/Pickleball.Api.Tests: xUnit v3 unit and WebApplicationFactory integration tests (execution unverified here)
+- frontend: Next.js TypeScript Tailwind source with neutral placeholder landing page and backend health proxy
 - database/compose.yaml and database/sql: original DB starter configuration and scripts
 - PickleballBooking.slnx: root solution
 - AGENTS.md and docs/context: Git-tracked guidance and wiki

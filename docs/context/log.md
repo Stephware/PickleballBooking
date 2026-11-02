@@ -5,3 +5,5 @@
 - **2026-11-02 — GitHub:** Committed starter structure and docs to the PickleballBooking repository without credentials or production data.
 
 Append concise entries after meaningful changes; update progress and relevant topic pages.
+
+- **2026-11-03 — Phase 1:** Added .NET 10 API controller/service/DTO/DI/error handling, CORS and health routes; xUnit v3 test scaffold; Next.js 16/TypeScript/Tailwind starter, health proxy and placeholder UI; development/API documentation. Database untouched. Builds and tests still pending local runtime verification.

@@ -1,36 +1,60 @@
 # PickleballBooking
 
-Reusable venue-specific pickleball court booking and management application. The **same code and SQL schema** serve separately deployed, branded venue systems, each with its own database, number of courts, rates, schedule, and policies. This is **not** a central marketplace.
+A reusable, individually branded court booking platform for **one pickleball venue per deployment/database**. The same application code serves different businesses by configuring court counts, rates, hours, branding and booking policies. This is not a marketplace.
 
-## Repository
+## Phase 1 foundation
 
-- `backend/Pickleball.Api/`: ASP.NET Core .NET 10 API scaffold (health endpoint only)
-- `frontend/`: placeholder for Next.js + TypeScript + Tailwind
-- `database/`: PostgreSQL 17 Compose, starter SQL, sample seed and smoke test
-- `docs/context/`: tracked Karpathy-style wiki and UI/UX guide
-- `AGENTS.md`: coding-agent instructions
-- `PickleballBooking.slnx`: .NET solution
+- **API:** ASP.NET Core .NET 10 with controller/DTO/service/DI pattern, health and status endpoints, CORS allowlist and Problem Details exception handling.
+- **Frontend:** Next.js 16 App Router, TypeScript and Tailwind 4. The homepage is an explicit development placeholder; no booking UI is live.
+- **Tests:** xUnit v3 unit tests and WebApplicationFactory integration tests (source created; runtime execution pending).
+- **Database:** Existing PostgreSQL 17 and SQL schema **unchanged**. EF Core will be integrated in Phase 2.
+- **Docs:** Tracked [AGENTS.md](AGENTS.md), [context wiki](docs/context/index.md), and [UI/UX guide](docs/context/ui-ux.md). UI UX Pro Max guides new design; Impeccable guides audit and polish.
 
-## Getting started
+## Quick start
 
-Read [AGENTS.md](AGENTS.md) and [docs/context/index.md](docs/context/index.md). For UI work, read [docs/context/ui-ux.md](docs/context/ui-ux.md).
+Prerequisites: .NET 10 SDK and Node.js 20.9+ (22 recommended).
 
-**Keep the database already running on your Mac.** Moving the Compose file does not move an existing Docker volume. See [database/README.md](database/README.md) before starting another database or changing paths.
-
-With .NET 10 SDK installed:
+Terminal 1 (repository root):
 
 ```bash
-dotnet sln PickleballBooking.slnx list
 dotnet restore PickleballBooking.slnx
+dotnet build PickleballBooking.slnx
+dotnet test PickleballBooking.slnx
 dotnet run --project backend/Pickleball.Api
 ```
 
-Verify the scaffold at http://localhost:5090/health (this does **not** test PostgreSQL connectivity). Frontend and real booking APIs are not implemented yet.
+Check http://localhost:5090/health and http://localhost:5090/api/v1/system/status.
 
-## Next steps
+Terminal 2:
 
-Map EF Core to the existing PostgreSQL schema without resetting it; implement courts, availability, bookings/holds and staff management; initialize the mobile-first Next.js frontend using reusable branding.
+```bash
+cd frontend
+npm install
+npm run check
+npm run dev
+```
 
-## Secrets and context
+Open http://localhost:3000, then http://localhost:3000/api/backend-health (checks API reachability). After `npm install`, commit the generated `frontend/package-lock.json` to make subsequent installs reproducible.
 
-Keep actual .env files, payment credentials, passwords, backups and build outputs out of Git. Keep AGENTS.md and docs/context/*.md **in** Git.
+**Read [docs/development.md](docs/development.md) for troubleshooting, configuration and build details.** Do not recreate, rename or delete the already-running PostgreSQL Docker volume. See [database/README.md](database/README.md).
+
+## Repository structure
+
+```text
+backend/Pickleball.Api/               # API controllers, services, DTOs and future data layers
+backend/tests/Pickleball.Api.Tests/    # Unit and API integration tests
+frontend/                             # Next.js starter and future player/admin UIs
+database/                             # Existing Compose and PostgreSQL SQL scripts
+docs/context/                         # Tracked wiki, decisions, UI/UX and progress
+docs/api/                             # Implemented endpoints
+PickleballBooking.slnx                 # Root .NET solution
+AGENTS.md                              # AI coding agent conventions
+```
+
+## Roadmap
+
+Phase 2: EF Core and database mapping → Phase 3: staff/venue/courts → Phase 4: availability/pricing → Phase 5: booking → Phase 6: payments/manual operations → Phase 7: player frontend → Phase 8: admin frontend → Phase 9: verification/deployment.
+
+## Security and honesty
+
+No real credentials, `.env` files, customer data, payment proofs or database backups should be committed. Keep AGENTS.md and the entire context wiki **tracked in Git**. Phase 1 builds/tests remain unverified in this environment until run on the developer's Mac.

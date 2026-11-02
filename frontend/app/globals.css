@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+/* Base tokens only. Real venue branding will be loaded from configuration later. */
+:root {
+  --background: #f7f8f5;
+  --foreground: #172621;
+  --surface: #ffffff;
+  --subtle: #52645c;
+  --accent: #176e4b;
+  --border: #dce5de;
+  --focus: #0e775c;
+  --radius: 0.9rem;
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-accent: var(--accent);
+}
+
+* { box-sizing: border-box; }
+html { min-width: 320px; }
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.5;
+}
+a { color: inherit; }
+a:focus-visible { outline: 3px solid var(--focus); outline-offset: 4px; }
+.page-shell { max-width: 1120px; margin: auto; padding: 0 24px; }
+.site-header {
+  min-height: 96px; display: flex; justify-content: space-between;
+  align-items: center; gap: 16px;
+}
+.wordmark { display: inline-flex; gap: 11px; align-items: center; font-size: 1.05rem; font-weight: 750; text-decoration: none; }
+.mark { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 10px; background: var(--accent); color: white; }
+.phase-pill { border: 1px solid var(--border); border-radius: 999px; padding: 6px 12px; color: var(--subtle); font-size: 0.8rem; }
+.hero { padding: clamp(70px, 12vw, 145px) 0 85px; max-width: 740px; }
+.eyebrow { text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.8rem; color: var(--accent); font-weight: 700; }
+.hero h1 { font-size: clamp(3.2rem, 8vw, 6.8rem); line-height: 0.98; letter-spacing: -0.055em; margin: 18px 0 25px; }
+.hero-description { max-width: 610px; font-size: clamp(1.05rem, 2.2vw, 1.3rem); color: var(--subtle); }
+.development-note { border-left: 3px solid var(--accent); padding-left: 15px; margin-top: 34px; color: var(--subtle); font-size: 0.94rem; }
+.features { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.feature-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
+.feature-card h2 { font-size: 1.02rem; margin: 0 0 7px; }
+.feature-card p { color: var(--subtle); font-size: 0.92rem; margin: 0; }
+.site-footer { margin-top: 70px; padding: 24px 0; font-size: 0.85rem; color: var(--subtle); border-top: 1px solid var(--border); }
+@media (max-width: 700px) {
+  .page-shell { padding: 0 18px; }
+  .site-header { min-height: 78px; }
+  .phase-pill { font-size: 0.7rem; }
+  .hero { padding: 75px 0 65px; }
+  .features { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
