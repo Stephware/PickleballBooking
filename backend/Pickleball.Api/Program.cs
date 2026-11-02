@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Pickleball.Api.Extensions;
 using Pickleball.Api.Middleware;
 
@@ -8,6 +9,7 @@ builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddHealthChecks();
 builder.Services.AddApplicationServices();
+builder.Services.AddPickleballDatabase(builder.Configuration);
 
 const string frontendCorsPolicy = "VenueFrontend";
 var allowedOrigins = builder.Configuration
@@ -23,17 +25,18 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
-{
     app.UseHsts();
-}
 
 app.UseExceptionHandler();
 app.UseCors(frontendCorsPolicy);
 
 app.MapControllers();
-app.MapHealthChecks("/health"); // Application/process only; database checks come in Phase 2.
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    Predicate = _ => false // Process-only check; keep Phase 1 contract.
+});
+app.MapDatabaseHealth(); // DB + all required tables + configured venue row.
 
 app.Run();
 
-// Required by WebApplicationFactory integration tests.
 public partial class Program { }

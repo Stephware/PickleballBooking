@@ -1,32 +1,31 @@
 # Project wiki — selective context index
 
-Read this index first, then only the pages relevant to the task. The code and SQL are the source of truth for implemented behavior; these pages record decisions, product requirements, and progress.
+Load this index first, then only the task-relevant pages. **Code and SQL** establish what is implemented; documentation captures plans, decisions and verification limits.
 
 | Page | Read for |
 | --- | --- |
-| [requirements.md](requirements.md) | Approved scope and proposed player/owner features |
-| [ui-ux.md](ui-ux.md) | UI UX Pro Max + Impeccable workflow, booking status colors, accessibility |
-| [architecture.md](architecture.md) | Components, deployment isolation, database model |
-| [workflows.md](workflows.md) | Booking, payments, time-slot generation and staff actions |
-| [decisions.md](decisions.md) | Approved choices vs assumptions |
-| [progress.md](progress.md) | Implemented, tested, pending |
-| [log.md](log.md) | Short change history |
-| [../development.md](../development.md) | Local .NET/Next.js commands and Phase 1 checks |
-| [../api/README.md](../api/README.md) | Implemented API routes vs planned endpoints |
+| [requirements.md](requirements.md) | Venue/product requirements |
+| [ui-ux.md](ui-ux.md) | UI UX Pro Max and Impeccable workflow |
+| [architecture.md](architecture.md) | API/DB architecture and nine SQL-first entities |
+| [workflows.md](workflows.md) | Booking holds, payment review and status flow |
+| [decisions.md](decisions.md) | Confirmed choices and planned enhancements |
+| [progress.md](progress.md) | Implemented vs local verified |
+| [log.md](log.md) | Change history |
+| [../development.md](../development.md) | Run API/frontend, configure PostgreSQL safely |
+| [../database-migrations.md](../database-migrations.md) | SQL-first EF Core baseline safeguards |
+| [../api/README.md](../api/README.md) | API route inventory |
 
-**Source of truth:** current user decisions > actual repository code/SQL for behavior > documented intent > assumptions. Never claim a planned feature is already working.
+## Status — November 3, 2026
 
-## Snapshot — 2026-11-02
+- Each venue uses one deployment and PostgreSQL database, sharing reusable app code and schema.
+- UI is a list/time-grid of courts, semantic slot statuses: available, occupied, pending, elapsed and blocked.
+- Phase 1 API/Next.js scaffold is merged; actual booking UI is not built.
+- Phase 2 adds nine EF Core entities and mappings, context, repositories, safe transaction boundary, and database health checking. **Runtime build and DB connection still require local verification.**
+- No EF migrations have been run, no Docker data touched. Schema-first migration baseline must be generated/reviewed later.
 
-- Individually branded booking systems for individual venues, built on one reusable codebase and one PostgreSQL schema; separate deployment and database per venue.
-- List or time-grid of courts (not a venue floor plan), variable court count.
-- Semantic court statuses: available, occupied, elapsed; pending and blocked/closed as additional states.
-- User reported Docker/PostgreSQL/DBeaver connection working on Mac. No local DB restart or migration is needed to set up this repository.
-- Phase 1 code: .NET 10 API health and versioned system status controller, dependency injection, exception handling, explicit frontend CORS, and test scaffold. Next.js 16/TypeScript/Tailwind starter and a placeholder page. No real booking screens or backend booking logic yet. Local build/run/tests still need verification.
+## Reading by task
 
-## Efficient task routing
-
-- Booking tasks → requirements, workflows, actual schema.
-- Backend/data tasks → architecture, progress, project and SQL.
-- Frontend/branding tasks → ui-ux, requirements, decisions, and actual design tokens/components.
-- Planning/reporting → decisions, progress; record meaningful changes in log.
+- Backend/EF → architecture, progress, database-migrations, actual C#/SQL
+- Booking → workflows, requirements, status SQL, actual C#/SQL
+- Frontend → ui-ux, requirements, decisions, current Next.js tokens/components
+- Planning/verification → decisions, progress, latest commit or PR diff
