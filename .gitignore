@@ -1,0 +1,34 @@
+# Secrets and local settings
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+**/appsettings.Development.json
+**/appsettings.Local.json
+*.pfx
+*.p12
+*.key
+# .NET
+**/bin/
+**/obj/
+*.user
+*.suo
+.vs/
+TestResults/
+# Next.js
+node_modules/
+.next/
+out/
+dist/
+coverage/
+*.tsbuildinfo
+# DB backups and editor artifacts
+*.dump
+*.backup
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+# AGENTS.md and docs/context/*.md MUST remain tracked

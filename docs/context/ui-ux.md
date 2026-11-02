@@ -1,0 +1,46 @@
+# UI/UX development guide
+
+Applies to player-facing booking pages and staff/owner admin screens for individually branded deployments of PickleballBooking. This is a workflow standard, NOT a preapproved palette or replacement for actual design tokens. Read [requirements.md](requirements.md) and [decisions.md](decisions.md) with this guide.
+
+## Skill responsibilities
+
+- **UI UX Pro Max:** Use for initial design-system direction, information architecture, layouts, typography, spacing, component patterns, color/token proposals, and visual direction of new screens.
+- **Impeccable:** Use for UI/UX reviews, accessibility, responsiveness, refinement, interactive edge cases, visual consistency and final polish.
+- For new screens: inspect the existing components/venue brand first → use UI UX Pro Max where available → implement reusable components → run Impeccable for audit/refinement → verify in the rendered UI.
+- For a small targeted bug fix, do not forcibly invoke both skills or redesign the entire page. Use only what is relevant.
+- The skills are installed globally by the developer, not copied into this repository. If missing in a particular agent environment, follow these guidelines manually and do not falsely claim a skill was run.
+- Existing brand specifications and project decisions override generated suggestions. Avoid unnecessary redesigns and conflicting styles.
+
+## Design system
+
+1. Inspect implemented tokens, shared components, screens, and venue configurations before adding styles.
+2. On first frontend build, define a compact documented token system: color, typography, spacing, radii, states, focus outlines and responsive breakpoints. Keep token definitions in frontend source and link to them here.
+3. Build a consistent base UI reusable across venues. Inject logo, brand colors, images, court names/counts and booking policy via config; use scoped, deliberate variations only when justified.
+4. Keep player booking, owner dashboard and marketing pages internally consistent. Brand colors must not reduce status clarity or accessibility.
+5. Prefer clear, functional and fast interfaces over decorative complexity. Avoid gratuitous animations and arbitrary style changes.
+
+## Product-specific requirements
+
+- **Court display:** List of courts or court-by-time schedule grid. Do NOT replace it with a venue floor plan.
+- **Semantic colors:** Green AVAILABLE, red OCCUPIED, gray ELAPSED, yellow PENDING/held, plus distinct blocked/closed styling. Use a readable text label or icon alongside every color; never rely solely on color.
+- **Time rules:** ELAPSED is computed from selected date, current time and venue timezone; it is not a persisted booking status. Do not let players select elapsed/closed/blocked/occupied time.
+- **Variable court counts:** Support 1, 3, 8, 12+ courts. On mobile, prefer legible court cards or intentional horizontal time-grid scrolling instead of tiny columns.
+- **Player path:** Select date → court → available slot → booking/contact details → any required payment/proof → confirmation/status. Show total price, duration and policy before finalizing.
+- **Admin path:** Courts, operating hours, rates, walk-in/Messenger/phone bookings, blocks, review and payment confirmation must be discoverable and easy to edit.
+- **Edge states:** Loading, no courts, no available times, pending, expired hold, payment validation error, network failure, duplicate submission, concurrency conflict, cancellation and success.
+
+## Quality gate before calling UI finished
+
+- [ ] Follows venue branding and existing shared design system with no conflicting tokens.
+- [ ] Clear information hierarchy, readable text, obvious action and accurate status labels.
+- [ ] Color is supplementary; all states have clear labels/icons and accessible names.
+- [ ] Contrast and focus meet WCAG 2.2 AA where applicable; keyboard and screen reader navigation work.
+- [ ] Labels, validation messages and accessible status announcements work correctly.
+- [ ] Render tested on representative mobile (~375px), tablet (~768px), and desktop (~1280px+) widths.
+- [ ] No clipped controls or accidental page overflow; touch interactions practical.
+- [ ] All booking time/price, closed/blocked, pending/expired and conflict states reviewed.
+- [ ] Motion is purposeful and respects prefers-reduced-motion; no unnecessary performance cost.
+- [ ] Relevant Impeccable findings fixed or documented, and visual UI changes actually viewed/tested.
+- [ ] Update context wiki when behavior or durable design rules change.
+
+Document approved design-system paths here once frontend exists; do not duplicate source tokens in docs.
