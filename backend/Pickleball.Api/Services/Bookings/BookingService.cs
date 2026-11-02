@@ -203,6 +203,21 @@ public sealed class BookingService(
         var booking = await bookings.FindByCodeAsync(code, ct) ?? throw Missing();
         var now = clock.GetUtcNow().UtcDateTime;
 
+        // Serialize with Phase 6 payment submissions and staff reviews.
+        var locked = await db.CourtScheduleEntries.FromSqlInterpolated(
+            $"SELECT * FROM court_schedule_entries WHERE id = {booking.ScheduleEntryId} FOR UPDATE")
+            .SingleAsync(ct);
+        if (!staff && await db.Payments.AnyAsync(p => p.BookingId == booking.Id &&
+                (p.Status == PaymentStatuses.Submitted ||
+                 p.Status == PaymentStatuses.Verified), ct))
+            throw new BookingException(BookingError.Conflict,
+                "Payment already submitted. Contact the venue about cancellation or refund.");
+        if (confirm && locked.CreatedByStaffId is null && booking.TotalAmount > 0m &&
+            !await db.Payments.AnyAsync(p => p.BookingId == booking.Id &&
+                p.Status == PaymentStatuses.Verified && p.Amount >= booking.TotalAmount, ct))
+            throw new BookingException(BookingError.Conflict,
+                "Online reservations require verified payment before confirmation.");
+
         var query = db.CourtScheduleEntries.Where(s =>
             s.Id == booking.ScheduleEntryId && s.StartsAt > now);
 

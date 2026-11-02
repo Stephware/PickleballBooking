@@ -33,3 +33,14 @@ See [Phase 4 specifications](../phase-4-availability-pricing.md), [migration saf
 - `Repositories/`: existing booking and schedule repositories and EF Core unit-of-work, with complex atomic status transitions via EF `ExecuteUpdateAsync`. All writes use the SQL-first schema.
 
 See [Phase 5 operator guide](../phase-5-booking-engine.md). There is no payment flow, admin interface, or guest booking frontend in this phase.
+
+## Phase 6 payment and staff operations
+
+- `Services/Payments/PaymentService.cs` + `Repositories/Payments/`: guest proof submission, manual staff payment entries, verification/rejection, payment balances and external refund records. Payment + booking state changes serialize through a locked `court_schedule_entries` row and persist in one transaction.
+- `Storage/IProofStorage.cs`, `LocalProofStorage.cs`: private filesystem storage, random non-user filenames, header checks and 5 MiB upload cap. Requires `ProofStorage:Directory` outside public wwwroot. No public file routes; protected admin image preview/PDF attachment only.
+- `Services/Operations/OperationsService.cs`: confirmed staff/manual bookings and future maintenance BLOCKED entries with SQL overlap protection. All channels are stored as a structured notes prefix because `bookings.booking_source` does not yet exist.
+- `Controllers/Public/PaymentsController.cs`: token-authenticated guest receipt upload/status.
+- `Controllers/Admin/PaymentsController.cs`: protected proof access, review, manual record and external refund logging.
+- `Controllers/Admin/OperationsController.cs`: walk-in/phone/Messenger bookings and court blocks; existing Phase 3 cookie+CSRF rules apply.
+
+The canonical nine-table SQL bootstrap remains unchanged. A future reviewed migration should add a true booking_source field and potentially an auditable payment-action history. Phase 6 provides manual verification only: no settlement API, no actual refund payments, no automated invoices or SMS.

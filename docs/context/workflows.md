@@ -24,7 +24,20 @@ OWNER or MANAGER creates/updates/deactivates `pricing_rules`; STAFF can read. Ad
 
 Guest tokens and deterministic codes require a durable per-venue signing secret; they don't need new DB columns. Payment review and source tagging are **Phase 6**, not implemented here.
 
-## Staff operations (planned Phase 6)
+## Payment handling and staff operations (Phase 6 source)
+
+1. Guest receives a HELD booking from Phase 5. They submit full quoted amount as a GCash/bank receipt and private proof file with the HMAC bearer token.
+2. While HELD and unexpired, backend stores receipt and changes status to AWAITING_REVIEW until min(now + venue review_timeout_hours, booking start). Payment row starts SUBMITTED, not VERIFIED.
+3. Owner/Manager compares receipt against actual funds; approval atomically marks payment VERIFIED and schedule CONFIRMED. Rejection marks payment REJECTED and pending schedule EXPIRED. Late proofs require manual reconciliation, never automatic financial claims.
+4. Guest cancellation is refused while a payment is pending or verified. Staff can cancel eligible confirmed reservations; verified payments remain in the ledger until an **external** refund is recorded.
+5. Staff may create confirmed future bookings via WALK_IN, PHONE or MESSENGER, all passing the same availability/pricing rules, with no overlap. Payment can be recorded later as a claim awaiting manager verification.
+6. Staff can view blocks; Owner/Manager can add/remove future maintenance blocks in the same GiST-protected schedule. Source channel prefix in booking notes is a documented schema limitation.
+
+See [Phase 6 guide](../phase-6-payments-operations.md) for authentication, proof previews, size limits, pending payments, and refund caveats.
+
+## Previously planned staff workflows (remaining)
+
+
 
 Staff enters Messenger, phone, and walk-in reservations in the same schedule. Staff may block/unblock courts and review payments. Maintain booking/payment history using status transitions rather than deleting records.
 

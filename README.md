@@ -8,9 +8,10 @@ Reusable, independently branded pickleball court booking systems: **one deployme
 - **Phase 2 (on main):** SQL-first EF Core/Npgsql mapping to the nine-table PostgreSQL database, repositories and DB health.
 - **Phase 3 (merged into Phase 2 feature branch):** Staff cookie/CSRF authentication, roles, venue settings/hours and court management.
 - **Phase 4 (merged into Phase 3 feature branch):** Public availability/price quote APIs and admin pricing rules.
-- **Phase 5 (stacked on Phase 4):** Actual guest booking holds, idempotent retries, HMAC guest access, staff confirmation/cancellation, expiry worker and tests.
+- **Phase 5 (merged into parent feature branch):** Guest booking holds, idempotent retries, HMAC guest access, expiry worker.
+- **Phase 6 (stacked on Phase 5):** GCash/bank proof submissions, manual payment verification, staff-recorded cash/payment and external refunds, private staff-only proof preview, walk-in/phone/Messenger bookings and maintenance blocks.
 
-**Not yet implemented:** payments/proof/approval, walk-in source tagging, working player/admin frontend and production deployment automation. Phases 3–5 must still be integrated into main. All source builds and DB flows still require local verification.
+**Not yet implemented:** automated payment settlement, native booking_source database column, customer/admin frontend and production deployment automation. Phases 3–6 must still be integrated into main. All source builds and DB flows still require local verification.
 
 ## Local API
 
@@ -24,7 +25,7 @@ dotnet test PickleballBooking.slnx
 dotnet run --project backend/Pickleball.Api
 ```
 
-The example command can expose the password in shell history; use an interactive secret input in real development. **Phase 5 also needs a persistent Booking:SigningKey secret**, configured as explained in [docs/phase-5-booking-engine.md](docs/phase-5-booking-engine.md). Open `http://localhost:5090/health/db` before API queries.
+The example command can expose the password in shell history; use an interactive secret input in real development. **Phase 5 needs a persistent Booking:SigningKey**; Phase 6 additionally needs a durable, private absolute **ProofStorage:Directory**. Configure both outside Git as described in the phase guides. Open `http://localhost:5090/health/db` before API queries.
 
 ```text
 GET /api/v1/availability?date=2026-11-03
@@ -63,6 +64,7 @@ Open http://localhost:3000. Commit the generated `frontend/package-lock.json` af
 - [docs/context/ui-ux.md](docs/context/ui-ux.md) — UI UX Pro Max for design; Impeccable for audit/polish
 - [docs/phase-4-availability-pricing.md](docs/phase-4-availability-pricing.md) — rules and endpoints
 - [docs/phase-5-booking-engine.md](docs/phase-5-booking-engine.md) — bookings, holds, signed guest access and expiry
+- [docs/phase-6-payments-operations.md](docs/phase-6-payments-operations.md) — manual payments, proof storage, staff bookings and court blocks
 - [docs/phase-3-authentication.md](docs/phase-3-authentication.md) — staff auth and one-time owner bootstrap
 - [docs/database-migrations.md](docs/database-migrations.md) — SQL-first EF migration safeguards
 - [docs/development.md](docs/development.md) — local setup
