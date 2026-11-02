@@ -36,4 +36,12 @@ Last reviewed: 2026-11-03
 | D-028 | No manual book or block may overlap an active schedule entry; PostgreSQL exclusion remains final guard | Phase 6 |
 | D-029 | Bank/GCash receipts require a reference; verification serializes identical references to prevent duplicate approvals | Phase 6 |
 
+| D-030 | Player frontend uses courts-as-columns/time-as-rows, horizontally scrollable on mobile; no floor-plan UI | Phase 7 |
+| D-031 | Venue brand colors scoped to deployment with contrast-aware text; status colors stay semantic | Phase 7 |
+| D-032 | Store HMAC guest token in Next.js HttpOnly SameSite cookie, never JS/localStorage/query URL | Phase 7 security |
+| D-033 | Next.js API gateway allowlists public backend routes; Origin validated for POST; production APP_ORIGIN required | Phase 7 security |
+| D-034 | Guest receipt input previews locally, but confirmed status only after authorized Phase 6 payment review | Phase 7 |
+| D-035 | No invented GCash/bank recipient instructions; add official venue-approved details before public launch | Launch blocker |
+| D-036 | Cross-device recovery for online holds unavailable until a secure verified channel is designed | Documented limitation |
+
 Documentation records decisions, not proof of a passing local build.

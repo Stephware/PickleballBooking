@@ -9,9 +9,10 @@ Reusable, independently branded pickleball court booking systems: **one deployme
 - **Phase 3 (merged into Phase 2 feature branch):** Staff cookie/CSRF authentication, roles, venue settings/hours and court management.
 - **Phase 4 (merged into Phase 3 feature branch):** Public availability/price quote APIs and admin pricing rules.
 - **Phase 5 (merged into parent feature branch):** Guest booking holds, idempotent retries, HMAC guest access, expiry worker.
-- **Phase 6 (stacked on Phase 5):** GCash/bank proof submissions, manual payment verification, staff-recorded cash/payment and external refunds, private staff-only proof preview, walk-in/phone/Messenger bookings and maintenance blocks.
+- **Phase 6 (PR #6, stacked on Phase 5):** GCash/bank proof submissions, manual payment review, private staff-only proof preview, walk-in/phone/Messenger bookings and maintenance blocks.
+- **Phase 7 (stacked on Phase 6):** Responsive branded Next.js player site, court/time availability grid, booking form, private booking status, receipt upload/preview and secured same-origin API gateway.
 
-**Not yet implemented:** automated payment settlement, native booking_source database column, customer/admin frontend and production deployment automation. Phases 3–6 must still be integrated into main. All source builds and DB flows still require local verification.
+**Not yet implemented:** automated payment settlement, venue-approved payment recipient configuration, native booking_source database column, owner/staff frontend, verified cross-device guest recovery and production deployment automation. Phases 3–7 still need integration into main. All source builds and DB flows still require local verification.
 
 ## Local API
 
@@ -46,16 +47,18 @@ POST /api/v1/admin/bookings/{bookingCode}/cancel   # OWNER/MANAGER + CSRF
 ```
 See [Phase 5 API, token and idempotency details](docs/phase-5-booking-engine.md). Booking creation places a time-limited **HELD** entry; it is not payment confirmation.
 
-## Frontend (development placeholder)
+## Player frontend — Phase 7
 
 ```bash
 cd frontend
+cp .env.example .env.local
 npm install
 npm run check
+npm run build
 npm run dev
 ```
 
-Open http://localhost:3000. Commit the generated `frontend/package-lock.json` after the first local install.
+Open http://localhost:3000 for venue branding, date/court grid and booking. The private /booking/{code} page supports proof upload/status. APP_ORIGIN must match the frontend public origin (required in production) and API_BASE_URL is server-only. Commit frontend/package-lock.json after the first actual local npm install. See [Phase 7 guide](docs/phase-7-player-frontend.md).
 
 ## Docs and safety
 
@@ -65,6 +68,7 @@ Open http://localhost:3000. Commit the generated `frontend/package-lock.json` af
 - [docs/phase-4-availability-pricing.md](docs/phase-4-availability-pricing.md) — rules and endpoints
 - [docs/phase-5-booking-engine.md](docs/phase-5-booking-engine.md) — bookings, holds, signed guest access and expiry
 - [docs/phase-6-payments-operations.md](docs/phase-6-payments-operations.md) — manual payments, proof storage, staff bookings and court blocks
+- [docs/phase-7-player-frontend.md](docs/phase-7-player-frontend.md) — player pages, server-only gateway, secure booking access and UI verification
 - [docs/phase-3-authentication.md](docs/phase-3-authentication.md) — staff auth and one-time owner bootstrap
 - [docs/database-migrations.md](docs/database-migrations.md) — SQL-first EF migration safeguards
 - [docs/development.md](docs/development.md) — local setup

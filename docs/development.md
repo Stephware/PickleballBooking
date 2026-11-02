@@ -1,4 +1,4 @@
-# Development setup — Phases 1–6
+# Development setup — Phases 1–7
 
 Prerequisites: .NET 10 SDK, Node.js 22 LTS recommended, and your **already-running** PostgreSQL 17 Docker instance on localhost:5435. Do not change the Docker volume.
 
@@ -82,3 +82,24 @@ Check `/health/db` is healthy. Then create a future HELD booking, use its `X-Boo
 Staff operations include confirmed future WALK_IN/PHONE/MESSENGER bookings and maintenance blocks, both guarded by the same schedule overlap exclusion. Source is currently stored as a structured notes prefix; actual `booking_source` is not a schema column.
 
 See [Phase 6 runbook](phase-6-payments-operations.md) for detailed endpoints, limits, external refund recording and security caveats. Recheck `docs/context/progress.md` before claiming live verification or merging into main.
+
+## Phase 7 player site
+
+After starting the API (with DB, Booking:SigningKey, and private ProofStorage:Directory) in another terminal, configure frontend/.env.local from frontend/.env.example:
+
+    API_BASE_URL=http://localhost:5090
+    APP_ORIGIN=http://localhost:3000
+
+Both variables are server-only. For production, APP_ORIGIN **must** equal the public HTTPS frontend origin or booking/payment POST routes fail closed. Do not commit .env.local or any real guest data.
+
+    cd frontend
+    npm install
+    npm run check
+    npm run build
+    npm run dev
+
+Visit http://localhost:3000 and test a genuinely AVAILABLE future slot. A reservation should create HELD and navigate to /booking/{code}, where the Next.js gateway stores bearer access in an HttpOnly cookie and allows same-browser lookup, payment proof upload/preview and eligible hold cancellation. Before real public launch, configure official venue-provided GCash/bank recipient instructions rather than leaving users to guess an account.
+
+The frontend tests cover pure helpers only. Manual real-browser responsive/accessibility checks and a disposable PostgreSQL full booking/payment flow are still mandatory. See [Phase 7 runbook](phase-7-player-frontend.md). Generate/commit frontend/package-lock.json after first npm install; don't fabricate lock dependencies.
+
+The repo still has stacked feature branches Phases 3–7, with main behind. Verify and integrate carefully before deployment.

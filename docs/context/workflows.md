@@ -42,3 +42,15 @@ See [Phase 6 guide](../phase-6-payments-operations.md) for authentication, proof
 Staff enters Messenger, phone, and walk-in reservations in the same schedule. Staff may block/unblock courts and review payments. Maintain booking/payment history using status transitions rather than deleting records.
 
 **Phase 5 has booking API source but no payment processing or public/admin booking UI; actual .NET build, real DB transactions and concurrency behavior still need verification.**
+
+## Phase 7 player web flow (implemented in Next.js source)
+
+1. Server retrieves public venue branding (non-operational fallback if unreachable), client fetches selected date's court grid.
+2. Player selects one AVAILABLE slot, optionally extends to adjacent AVAILABLE slots on the same court (maximum 8), and reads server-supplied estimate.
+3. Form collects full name and phone or email. It uses UUID v4 idempotency; unchanged retries preserve the same key.
+4. Next.js server-only gateway creates the hold, accepts the HMAC guest token from .NET and stores it in an HttpOnly cookie without returning it to browser JavaScript.
+5. /booking/{code} fetches private status using server-side token forwarding, displays deadlines and offers cancellation where allowed.
+6. For HELD paid bookings, player uploads bank/GCash payment proof with local image preview. Status transitions to AWAITING_REVIEW only; owner/manager approval remains Phase 6 protected backend functionality and Phase 8 UI.
+7. A venue-provided token may be entered for cross-device access, but online booking creation intentionally doesn't export tokens; verified cross-device recovery is deferred.
+
+The frontend is a UI over the backend rules. It cannot make an expired, blocked, booked or pending slot available by itself. API downtime disables booking.
