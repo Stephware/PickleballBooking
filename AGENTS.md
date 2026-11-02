@@ -22,7 +22,7 @@
 
 ## Current implementation
 
-The initial backend supports only /health. Authentication, EF Core integration, booking APIs, and the Next.js frontend remain unimplemented. See [docs/context/progress.md](docs/context/progress.md) and verify before claiming otherwise.
+Phase 1 provides a .NET 10 controller/service health foundation, exception handling, limited CORS, an xUnit test project, and a Next.js 16 + TypeScript + Tailwind starter. The frontend is a development placeholder. EF Core integration, real bookings, authentication, and production venue branding remain unimplemented. See [docs/context/progress.md](docs/context/progress.md) and verify before claiming otherwise.
 
 ## Documentation hygiene
 

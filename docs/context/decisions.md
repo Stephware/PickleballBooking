@@ -15,3 +15,7 @@ Last reviewed: 2026-11-02
 | D-009 | Temporary holds, owner payment approval, staff dashboard/manual bookings | MVP proposal, not implemented |
 
 Code and SQL take priority when reporting what is truly implemented. Update this document if product decisions change.
+
+- **D-010 (2026-11-03):** Keep one API project organized by layers initially; add separate Core/Infrastructure projects only if complexity warrants. Implemented in Phase 1.
+- **D-011 (2026-11-03):** Next.js 16 App Router + TypeScript + Tailwind 4 starter, with a development-only homepage; no false booking functionality. Implemented in Phase 1.
+- **D-012 (2026-11-03):** xUnit v3 + ASP.NET Core WebApplicationFactory tests for API foundation; execution remains unverified until local build.

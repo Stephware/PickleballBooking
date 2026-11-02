@@ -11,6 +11,8 @@ Read this index first, then only the pages relevant to the task. The code and SQ
 | [decisions.md](decisions.md) | Approved choices vs assumptions |
 | [progress.md](progress.md) | Implemented, tested, pending |
 | [log.md](log.md) | Short change history |
+| [../development.md](../development.md) | Local .NET/Next.js commands and Phase 1 checks |
+| [../api/README.md](../api/README.md) | Implemented API routes vs planned endpoints |
 
 **Source of truth:** current user decisions > actual repository code/SQL for behavior > documented intent > assumptions. Never claim a planned feature is already working.
 
@@ -20,7 +22,7 @@ Read this index first, then only the pages relevant to the task. The code and SQ
 - List or time-grid of courts (not a venue floor plan), variable court count.
 - Semantic court statuses: available, occupied, elapsed; pending and blocked/closed as additional states.
 - User reported Docker/PostgreSQL/DBeaver connection working on Mac. No local DB restart or migration is needed to set up this repository.
-- Minimal .NET 10 health API scaffold; functional booking endpoints and Next.js screens not yet built.
+- Phase 1 code: .NET 10 API health and versioned system status controller, dependency injection, exception handling, explicit frontend CORS, and test scaffold. Next.js 16/TypeScript/Tailwind starter and a placeholder page. No real booking screens or backend booking logic yet. Local build/run/tests still need verification.
 
 ## Efficient task routing
 
