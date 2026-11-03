@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { adminRequest, extractError, hasManagerRights, todayForVenue } from "@/lib/admin-client";
 import { instantLabel, money } from "@/lib/player";
+import { reviewPriority, reviewPriorityLabel } from "@/lib/payment-review";
 import type { AdminBooking, AdminSectionId, PendingPayment, StaffProfile } from "@/types/admin";
 import type { Venue } from "@/types/player";
 import { Empty, Notice, SectionHeader } from "@/components/admin/AdminShared";
@@ -25,6 +26,7 @@ export function AdminOverview({ user, venue, navigate }: {
   useEffect(() => { void reload(); }, [reload]);
   const confirmed = bookings.filter((b) => b.status === "CONFIRMED").length;
   const held = bookings.filter((b) => ["HELD", "AWAITING_REVIEW"].includes(b.status)).length;
+  const reviewsNeedingAttention = pending.filter(payment => reviewPriority(payment) !== "NORMAL");
   return <>
     <SectionHeader eyebrow={"VENUE OPERATIONS · " + venue.venueName} title="Today"
       description={"Your court activity for " + new Intl.DateTimeFormat("en-PH",
@@ -33,6 +35,10 @@ export function AdminOverview({ user, venue, navigate }: {
         onClick={() => { setLoading(true); setError(""); void reload(); }}>↻ Refresh</button>} />
     {error && <Notice>{error} <button className="inline-link" type="button"
       onClick={() => { setLoading(true); void reload(); }}>Try again</button></Notice>}
+    {!loading && !error && reviewsNeedingAttention.length > 0 &&
+      <Notice kind="info">{reviewsNeedingAttention.length} submitted payment{reviewsNeedingAttention.length === 1 ? "" : "s"}
+        {" "}need staff attention. Review the payment queue before the guests' game times.
+        Courts with submitted proof remain reserved until a manual decision.</Notice>}
     <section className="admin-quick-actions">
       <h3>Quick actions</h3>
       <div className="admin-action-row">
@@ -77,7 +83,8 @@ export function AdminOverview({ user, venue, navigate }: {
           : pending.length === 0 ? <Empty text="No proofs waiting for review." />
           : pending.slice(0, 6).map((p) => <div className="admin-list-row" key={p.paymentId}>
             <div><strong>{p.guestName}</strong>
-              <small>{p.paymentMethod.replaceAll("_", " ")} · {p.bookingCode}</small></div>
+              <small>{p.paymentMethod.replaceAll("_", " ")} · {p.bookingCode}</small>
+              <small>{reviewPriorityLabel(reviewPriority(p))}</small></div>
             <strong>{money(p.amount, venue.currency)}</strong>
           </div>)}
       </section>
