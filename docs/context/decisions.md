@@ -69,3 +69,9 @@ Documentation records decisions, not proof of a passing local build.
 | D-054 | Share live staff visual schedule for booking and court blocks, mobile tabs, max 8 consecutive slots; backend revalidates | Phase 1 source |
 | D-055 | WALK_IN alone permits current elapsed slot during min(half slot,30m) grace after active schedule check and transactional revalidation | Phase 1 source |
 | D-056 | Keep top back controls and mobile labeled reservation cards; prefer operational tasks over administrative complexity | Phase 1 source |
+
+| D-057 | Gallery uses manually deployed real venue raster photos, max six, no autoplay or owner uploads, illustration fallback if empty | Post-Phase-9 usability Phase 2 |
+| D-058 | Phone/Facebook contact strictly validated and optional, one per-venue developer config | Post-Phase-9 usability Phase 2 |
+| D-059 | Publish GCash/bank destination only on explicit developer-verified approval gate and complete account fields; no sample recipients | Security / usability Phase 2 |
+| D-060 | Guest local receipt image may enlarge with modal; locally opened PDF before upload; no public proof storage | Phase 2 |
+| D-061 | Staff receipt remains private authenticated preview with larger modal; PDF still attachment, not inline | Phase 2 |

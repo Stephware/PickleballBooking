@@ -78,3 +78,7 @@ Follow docs/context/ui-ux.md: UI UX Pro Max for initial layout/system proposals 
 ## Deferred
 
 Staff login, protected payment approvals, admin court management and staff booking/maintenance dashboards remain Phase 8. Payment provider integrations, authenticated cross-device booking recovery and production observability/security tests belong to future reviewed work/Phase 9.
+
+## Post-Phase-9 usability Phase 2 extension
+
+The player site now accepts only real, developer-managed `/venue/...` court photos through a scroll-snap gallery with optional phone/Facebook contacts. The booking status/payment page displays validated GCash or bank account information **only** when an operator explicitly approves complete per-venue values. Otherwise, it warns users not to transfer money until they independently confirm official details. Photo, recipient and QR input are public server configuration, not booking or staff-editable database records. Images can be enlarged locally before upload; PDF local preview is via user-selected file blob URL. Staff image enlargement continues to use authenticated proof delivery. See [Phase 2 improvement guide](improvements-phase-2-public-payment.md).

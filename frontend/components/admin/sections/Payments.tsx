@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { adminRequest, extractError, hasManagerRights } from "@/lib/admin-client";
 import { instantLabel, money } from "@/lib/player";
 import { PaymentLedger } from "@/components/admin/sections/PaymentLedger";
+import { ReceiptImageDialog } from "@/components/ui/ReceiptImageDialog";
 import { Empty, Loading, Notice, SectionHeader, useAdminResource } from "@/components/admin/AdminShared";
 import type { PendingPayment, PaymentSummaryAdmin, StaffProfile } from "@/types/admin";
 
@@ -11,6 +12,9 @@ export function AdminPayments({ user }: { user: StaffProfile }) {
   const { data: pending, loading, error: loadError, reload } =
     useAdminResource<PendingPayment[]>("/payments/pending", []);
   const [selected, setSelected] = useState<PendingPayment | null>(null);
+  const [proofError, setProofError] = useState(false);
+  const [proofReady, setProofReady] = useState(false);
+  const [enlarged, setEnlarged] = useState(false);
   const detailRef = useRef<HTMLElement>(null);
   const [details, setDetails] = useState<PaymentSummaryAdmin | null>(null);
   const [notes, setNotes] = useState("");
@@ -21,6 +25,7 @@ export function AdminPayments({ user }: { user: StaffProfile }) {
 
   async function select(payment: PendingPayment) {
     setSelected(payment); setDetails(null); setNotes(""); setError(""); setMessage("");
+    setProofError(false); setProofReady(false); setEnlarged(false);
     try { setDetails(await adminRequest<PaymentSummaryAdmin>(
       "/payments/bookings/" + payment.bookingCode)); }
     catch (cause) { setError(extractError(cause)); }
@@ -41,7 +46,7 @@ export function AdminPayments({ user }: { user: StaffProfile }) {
       setMessage(decision === "approve"
         ? "Payment marked verified after review."
         : "Payment rejected. Review any transferred funds separately.");
-      setSelected(null); setDetails(null); setNotes("");
+      setSelected(null); setDetails(null); setNotes(""); setEnlarged(false);
       await reload();
     } catch (cause) { setError(extractError(cause)); }
     finally { setBusy(false); }
@@ -70,7 +75,8 @@ export function AdminPayments({ user }: { user: StaffProfile }) {
       <section ref={detailRef} className="admin-panel card-surface admin-review-detail"
         aria-label="Payment review details">
         {selected && <button type="button" className="admin-detail-back"
-          onClick={() => { setSelected(null); setDetails(null); setError(""); }}>
+          onClick={() => { setSelected(null); setDetails(null); setError("");
+            setEnlarged(false); }}>
           ← Back to payment queue</button>}
         <div className="admin-panel-heading"><h3>Review details</h3></div>
         {!selected ? <Empty text="Select a submitted payment to view its reference and proof." />
@@ -91,15 +97,27 @@ export function AdminPayments({ user }: { user: StaffProfile }) {
                 </dl>
                 {selected.hasProof ? <div className="admin-proof">
                   <p className="micro-label">PRIVATE PAYMENT PROOF</p>
-                  {/* Only a staff-authenticated route can return this file. */}
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={"/api/admin/payments/" + selected.paymentId + "/proof"}
-                    alt="Submitted payment proof; compare against actual transfer records"
-                    onError={(event) => { event.currentTarget.style.display = "none"; }} />
+                  <p className="admin-hint">Inspect the receipt closely, then independently
+                    verify the transaction in the venue&apos;s bank or GCash account before approving.</p>
+                  {!proofError ? <button type="button" className="admin-proof-image-button"
+                    disabled={!proofReady} aria-label="Enlarge submitted payment receipt"
+                    onClick={() => setEnlarged(true)}>
+                    {/* eslint-disable-next-line @next/next/no-img-element -- authenticated preview */}
+                    <img src={"/api/admin/payments/" + selected.paymentId + "/proof"}
+                      alt="Submitted payment proof; compare against actual transfer records"
+                      onLoad={() => setProofReady(true)}
+                      onError={() => { setProofReady(false); setProofError(true); }}/>
+                    {proofReady && <span>Tap to view full size</span>}
+                  </button> : <Notice kind="info">This receipt is a PDF or its image cannot be displayed
+                    here. Use the protected download link to inspect it.</Notice>}
                   <a className="button-outline" href={"/api/admin/payments/" +
                     selected.paymentId + "/proof"} target="_blank" rel="noopener noreferrer">
-                    Open proof / download PDF
+                    Open receipt / download PDF securely
                   </a>
+                  <ReceiptImageDialog
+                    src={proofError ? null : "/api/admin/payments/" + selected.paymentId + "/proof"}
+                    open={enlarged} onClose={() => setEnlarged(false)}
+                    alt="Enlarged private payment proof for staff review"/>
                 </div> : <Notice kind="info">This payment has no uploaded receipt.
                   Verify the claimed payment externally.</Notice>}
                 {canManage ? <>

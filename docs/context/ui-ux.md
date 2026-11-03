@@ -77,3 +77,11 @@ This is implemented-and-tested evidence for the stated environment, not physical
 Default owner experience has five task-focused sections: Today, Schedule, Payments, Manage and My Account. Schedule's Add Booking and Block Court reuse one visual picker. Keep a desktop court-by-time grid and a readable court switcher on phones. Never introduce tiny multi-court columns on 320–375px devices. Show availability as accessible text plus semantic color; current WALK_IN_NOW is distinct from future AVAILABLE, staff-only and must remain server-confirmed.
 
 Use progressive disclosure: choose court/time first, then only guest details or block reason. Keep the back button at the **top** of nested forms, payment details and editing screens. Preserve private guest tokens, payment review safety and backend price/overlap authority. Team Accounts and Venue Settings are not in the regular menu; adding them back needs an explicit owner UX decision. UI UX Pro Max/Impeccable and real mobile keyboard/touch evaluation remain a new branch verification task.
+
+## Post-Phase-9 Phase 2 public website and payments
+
+- Homepage: use real, **venue-approved** court photography in swipeable gallery if configured; 3–6 landscape images recommended, max 6, alt text and visible arrow/count. No autoplay or invented/stock images. Keep illustrative court art if unset.
+- Venue contact: an actual published phone link and Facebook/Messenger profile should be available on homepage and payment/booking help contexts when configured; empty data must not render fake links.
+- Payment: method selection reveals approved recipient name/number and optionally verified QR; do not suggest sending a transfer until genuine instructions are configured and confirmed offline. Distinguish receipt SUBMITTED/AWAITING_REVIEW from VERIFIED/CONFIRMED in both language and color.
+- Proof previews: users can expand the *local selected file* without server exposure; staff can inspect full-size private image only through authenticated proxy. PDFs remain safe local open (guest) and protected attachment (staff), never publicly embedded.
+- Keep back controls at the top of multi-step pages; test phone sizes 320/375, tablet 768 and desktop 1024+, touch/swipe, keyboard/ESC dialog, responsive contact, missing media/error states, real screen readers and reduced motion.

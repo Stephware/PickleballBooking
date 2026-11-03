@@ -410,3 +410,26 @@
   .admin-form button,.admin-inline-form button { min-height: 44px; }
   .admin-quick-actions .admin-action-row button { flex: 1 1 145px; min-height: 44px; }
 }
+
+/* Phase 2: secure, enlarged staff receipt previews. */
+.admin-proof-image-button {
+  display: grid; width: 100%; max-width: 100%;
+  min-height: 115px; margin: 12px 0 16px;
+  padding: 10px; border: 1px solid #cadccc; border-radius: 10px;
+  background: white; color: #1e5437; justify-items: center; gap: 7px;
+}
+.admin-proof-image-button:not(:disabled):hover { border-color: #367c58; }
+.admin-proof-image-button:disabled { opacity: 1; cursor: default; }
+.admin-proof-image-button img { width: auto; max-width: 100%; max-height: 360px;
+  object-fit: contain; border-radius: 7px; }
+.admin-proof-image-button span { font-size: .8rem; font-weight: 750; }
+.admin-proof .receipt-image-dialog { text-align: left; }
+@media (max-width: 700px) {
+  .admin-proof-image-button { min-height: 44px; }
+  .admin-proof > a.button-outline { white-space: normal; }
+}
+
+.admin-proof .receipt-image-dialog > img {
+  display: block; width: 100%; max-width: 100%;
+  max-height: calc(94dvh - 102px); object-fit: contain;
+}

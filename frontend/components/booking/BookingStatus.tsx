@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PaymentProofForm } from "@/components/booking/PaymentProofForm";
+import { VenueContactLinks } from "@/components/ui/VenueContact";
+import type { VenuePublicDetails } from "@/lib/venue-public";
 import { instantLabel, jsonRequest, money } from "@/lib/player";
 import type { Booking, PaymentSummary, Venue } from "@/types/player";
 
@@ -40,7 +42,9 @@ const statusInfo: Record<string, { title: string; description: string; badge: st
   },
 };
 
-export function BookingStatus({ code, venue }: { code: string; venue: Venue }) {
+export function BookingStatus({ code, venue, publicDetails }: {
+  code: string; venue: Venue; publicDetails: VenuePublicDetails;
+}) {
   const router = useRouter();
   const [booking, setBooking] = useState<Booking | null>(null);
   const [payments, setPayments] = useState<PaymentSummary | null>(null);
@@ -119,6 +123,7 @@ export function BookingStatus({ code, venue }: { code: string; venue: Venue }) {
 
   if (!booking && missingAccess) return (
     <section className="booking-status-container">
+      <Link href="/" className="subpage-back">← Back to courts</Link>
       <div className="card-surface access-card">
         <p className="eyebrow">Private booking</p>
         <h1>Access your reservation</h1>
@@ -141,9 +146,12 @@ export function BookingStatus({ code, venue }: { code: string; venue: Venue }) {
     </section>
   );
 
-  if (!booking) return <div className="empty-card" role="alert">
-    <h2>Booking unavailable</h2><p>{error || "Could not load your booking."}</p>
-    <button type="button" className="button-outline" onClick={() => void reload()}>Try again</button>
+  if (!booking) return <div>
+    <Link href="/" className="subpage-back">← Back to courts</Link>
+    <div className="empty-card" role="alert">
+      <h2>Booking unavailable</h2><p>{error || "Could not load your booking."}</p>
+      <button type="button" className="button-outline" onClick={() => void reload()}>Try again</button>
+    </div>
   </div>;
 
   const meta = statusInfo[booking.status] || {
@@ -158,6 +166,7 @@ export function BookingStatus({ code, venue }: { code: string; venue: Venue }) {
 
   return (
     <div className="booking-status-container">
+      <Link href="/" className="subpage-back">← Back to courts</Link>
       <section className="booking-result card-surface" aria-labelledby="result-title">
         <div className="result-header">
           <span className={"status-badge badge-" + booking.status.toLowerCase()}>{meta.badge}</span>
@@ -204,7 +213,8 @@ export function BookingStatus({ code, venue }: { code: string; venue: Venue }) {
           </div>
         ))}
       </section>}
-      {canUpload && <PaymentProofForm booking={booking} venue={venue} onSuccess={() => void reload()} />}
+      {canUpload && <PaymentProofForm booking={booking} venue={venue} publicDetails={publicDetails}
+        onSuccess={() => void reload()} />}
       {booking.status === "AWAITING_REVIEW" && (
         <p role="status" className="alert info">Your receipt is awaiting manual approval.
           Do not send another payment unless the venue asks you to.</p>
@@ -218,7 +228,7 @@ export function BookingStatus({ code, venue }: { code: string; venue: Venue }) {
           reconciliation before making another payment.</p>
       )}
       <div className="status-navigation">
-        <Link className="button-outline" href="/">← Browse courts</Link>
+        <VenueContactLinks contact={publicDetails.contact} compact />
         <button type="button" className="text-button" onClick={() => router.refresh()}>
           Reload page
         </button>

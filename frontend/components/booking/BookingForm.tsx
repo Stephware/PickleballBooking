@@ -66,12 +66,14 @@ export function BookingForm({ selection, onBack }: {
 
   return (
     <section className="booking-panel card-surface" id="booking-details" aria-labelledby="booking-title">
+      <button className="subpage-back button-back" type="button" onClick={onBack}>
+        ← Back to court and time
+      </button>
       <div className="panel-heading">
         <div>
           <p className="eyebrow">Step 2 of 2 · Your reservation</p>
           <h2 id="booking-title">Save your time on court</h2>
         </div>
-        <button className="text-button" type="button" onClick={onBack}>Change times</button>
       </div>
       <div className="reservation-recap" aria-label="Selected court details">
         <div><span className="micro-label">Court</span><strong>{selection.courtName}</strong></div>

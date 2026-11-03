@@ -83,3 +83,13 @@ Today provides prioritized reservations and payment actions. Schedule offers thr
 For WALK_IN, staff read-only availability can show WALK_IN_NOW for the currently started slot, **only** within half its configured duration (maximum 30 minutes) and after checking no persisted active overlap. Booking creation checks that state again inside the transaction, then GiST exclusion prevents races. PHONE, MESSENGER, player booking and maintenance blocks cannot use that exception. Booking remains confirmed but not necessarily paid.
 
 The original Phase 9 test summary predates this change. See [updated Phase 1 guide](../improvements-phase-1-admin-usability.md) for new validation requirements.
+
+## Post-Phase-9 usability Phase 2 — player media/payment
+
+1. Next.js server reads developer-approved public photo/contact/payment config; venue name and schedule remain from the .NET API. Home shows real court photos only when provided, plus optional click-to-call and Facebook contacts.
+2. Guest selects an eligible slot and submits same server-validated hold/idempotent booking as before, with a top-positioned back control to change selection.
+3. Booking status shows selected GCash or bank payment details **only** when the verified recipient configuration is complete and explicitly approved; otherwise it warns not to transfer to an unknown account and directs the guest to contact the venue first.
+4. Guest selects a receipt, inspects a locally created image/PDF preview, submits it as an unverified payment claim, and sees AWAITING_REVIEW until manual verification.
+5. Staff reviews a private, authenticated receipt image at full size or downloads a protected PDF and verifies independently against actual external records. Existing approval/rejection, balance, CSRF and role restrictions remain unchanged.
+
+No new payment provider, confirmation shortcut, public receipt URL, photo database or admin customization is introduced.
