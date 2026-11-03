@@ -57,12 +57,13 @@ All mutations require the existing Phase 3 cookie and `X-CSRF-TOKEN` header. `GE
 
 - `POST /api/v1/admin/operations/manual-bookings` (any staff): send court/date/start/end, guest name/contact, optional notes, and Channel `WALK_IN`, `PHONE`, or `MESSENGER`. Booking is **CONFIRMED** immediately, even if unpaid, and appears in the same schedule as online bookings. Backend calculates price; overlaps return HTTP 409. Returns a signed guest-access token that staff may privately share with the customer.
 - `GET /api/v1/admin/operations/blocks?date=YYYY-MM-DD` (any staff): inspect blocks for the selected venue-local day.
+- `GET /api/v1/admin/operations/availability?date=YYYY-MM-DD` (any staff): server-calculated status overlay for limited current-slot WALK_IN_NOW availability.
 - `POST /api/v1/admin/operations/blocks` (OWNER/MANAGER): add a future maintenance block with reason, within available venue slots. SQL overlap constraint rejects conflicts.
 - `POST /api/v1/admin/operations/blocks/{id}/remove` (OWNER/MANAGER): mark a block CANCELLED; do not delete historical entries.
 
 **Schema limitation:** `bookings` has no dedicated `booking_source` column. Until a reviewed EF/SQL migration is available, manual booking channels are stored with an explicit `[CHANNEL:WALK_IN]` (etc.) prefix in `bookings.notes` and linked to the creating staff ID in `court_schedule_entries.created_by_staff_id`. The source prefix is **not** yet a first-class indexed or guaranteed structured field. Do not imply it is. Report/filtering by source should wait for an approved migration.
 
-Manual bookings currently require future complete venue slots; creating an already-started walk-in session is not supported in this iteration. Existing future online reservations cannot be overwritten.
+**Post-Phase-9 Phase 1 update:** Manual PHONE and MESSENGER bookings still require future complete venue slots. Authenticated WALK_IN bookings may select a currently started slot within min(half the configured slot duration, 30 minutes) if a batched active schedule check finds no persisted overlap. This is verified again inside the creation transaction; PostgreSQL GiST exclusion continues to prevent overlapping bookings. The public booking route and all court blocks retain strict future-only rules. See [usability implementation](improvements-phase-1-admin-usability.md).
 
 ## Running and testing
 

@@ -81,6 +81,7 @@ The `/health/db` endpoint checks the nine-table SQL schema; the expiry worker pr
 | POST | `/api/v1/admin/payments/{id}/record-refund` | OWNER/MANAGER + CSRF; record external refund only |
 | POST | `/api/v1/admin/operations/manual-bookings` | Any staff + CSRF |
 | GET | `/api/v1/admin/operations/blocks?date=YYYY-MM-DD` | Any staff |
+| GET | `/api/v1/admin/operations/availability?date=YYYY-MM-DD` | Any staff (staff-only WALK_IN_NOW overlay) |
 | POST | `/api/v1/admin/operations/blocks` | OWNER/MANAGER + CSRF |
 | POST | `/api/v1/admin/operations/blocks/{id}/remove` | OWNER/MANAGER + CSRF |
 
@@ -110,4 +111,4 @@ For production APP_ORIGIN must be configured to the browser-facing HTTPS origin.
 - GET /api/admin/payments/{id}/proof is a special authenticated binary response; image preview or PDF attachment. No public static proof URLs.
 - Session tokens reside only in HttpOnly, SameSite=Strict cookies scoped to /api/admin. Production APP_ORIGIN and HTTPS required.
 
-The user interface at /admin exposes bookings, payments, maintenance, courts, rate rules, venue hours/settings and team accounts based on .NET role definitions. Follow docs/phase-8-owner-staff-dashboard.md; API security and financial behavior remain in the existing backend.
+The updated normal /admin UI exposes Today, Schedule (bookings/add/block), Payments, Manage (courts/pricing/hours), and My Account. Venue Settings and Team Accounts are not in routine navigation; staff/owner backend roles remain. Developer branding changes via PUT /api/v1/admin/venue are denied unless a trusted server operator opts in with Developer:AllowVenueEdits=true in addition to OWNER authorization. The new authenticated /api/admin/operations/availability?date=YYYY-MM-DD gateway GET forwards a restricted staff availability response, including WALK_IN_NOW only for unoccupied current slots within limited grace. See docs/improvements-phase-1-admin-usability.md.

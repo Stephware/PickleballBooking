@@ -71,3 +71,9 @@ UI UX Pro Max form-error guidance and Impeccable context/audit/craft guidance we
 Chrome headless Playwright executed 76 layout checks at 320/375/768/1024px plus three real booking/payment workflow checks (79 total). No page overflow or browser runtime errors in that run. Axe WCAG 2/2.1/2.2 AA rules at 375px reported zero violations in sampled player/lookup/login/form/booking/admin screens. Real three-court flows used the backend/disposable DB; 1/3/8/12-court and empty/closed/outage cases used intercepted read-only availability fixtures. Screenshots were viewed locally; synthetic data/screenshots and auth cookies are not committed.
 
 This is implemented-and-tested evidence for the stated environment, not physical-device or human screen-reader certification. Keep those acceptance checks open. Reproduce with `frontend/tests/e2e/browser-smoke.mjs` per the Phase 9 report.
+
+## Post-Phase-9 Phase 1 admin simplification
+
+Default owner experience has five task-focused sections: Today, Schedule, Payments, Manage and My Account. Schedule's Add Booking and Block Court reuse one visual picker. Keep a desktop court-by-time grid and a readable court switcher on phones. Never introduce tiny multi-court columns on 320–375px devices. Show availability as accessible text plus semantic color; current WALK_IN_NOW is distinct from future AVAILABLE, staff-only and must remain server-confirmed.
+
+Use progressive disclosure: choose court/time first, then only guest details or block reason. Keep the back button at the **top** of nested forms, payment details and editing screens. Preserve private guest tokens, payment review safety and backend price/overlap authority. Team Accounts and Venue Settings are not in the regular menu; adding them back needs an explicit owner UX decision. UI UX Pro Max/Impeccable and real mobile keyboard/touch evaluation remain a new branch verification task.

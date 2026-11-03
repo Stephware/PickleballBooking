@@ -84,3 +84,11 @@ Visit http://localhost:3000/admin. For real deployment, APP_ORIGIN must use the 
 - Use disposable PostgreSQL test data; do not modify or reset the user's working Docker volume.
 
 Phase 8 has source changes only until runtime checks complete. Phase 9 remains end-to-end testing, security hardening, observability and independent venue deployment.
+
+## Post-Phase-9 admin usability changes (new Phase 1)
+
+The Phase 8 menu/role matrix above documents the **original** implementation. The new approved routine interface is five sections: Today, Schedule, Payments, Manage and My Account. Team Accounts and Venue Settings are hidden from regular navigation, but the underlying staff role APIs remain for future venues. Branding and global venue policy edits now require an explicit server-controlled opt-in, off by default, and OWNER authorization. Operators retain control of courts, hours and pricing.
+
+Schedule combines reservations, Add Booking and Block Court. A shared visual picker shows a court-by-time grid on desktop and large per-court time slots on phones. WALK_IN may select a staff-only WALK_IN_NOW current slot within a short server-enforced grace window if there is no active schedule overlap; the public API and blocks remain strict. Top back controls are used for detail steps.
+
+These changes are recorded in [Phase 1 usability guide](improvements-phase-1-admin-usability.md) and **require fresh build, disposable database, browser and accessibility verification**; earlier Phase 9 results were run before these improvements.

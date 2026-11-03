@@ -80,3 +80,11 @@ See [Phase 8 operations guide](../phase-8-owner-staff-dashboard.md). See Phase 9
 - Backend/frontend Dockerfiles run as unprivileged application users. `deployment/compose.yaml` supplies per-project database/proof/key volumes; runtime DB role has no DDL or DELETE. No automatic schema migration/initialization on deployment.
 - Payment reference uniqueness includes REFUNDED history and legacy surrounding whitespace. Review/refund notes append rather than overwrite original verification metadata; no new audit table was introduced.
 - `.github/workflows/verify.yml`, unit/integration tests and guarded HTTP/browser scripts exercise disposable databases. Local execution evidence is in [Phase 9 verification](../phase-9-final-verification.md); [deployment](../deployment.md) documents operational acceptance.
+
+## Post-Phase-9 admin usability Phase 1
+
+The normal operator UI now uses five sections. `AdminPortal` delegates Schedule to `AdminSchedule` (Reservations, Add Booking, Block Court) and Manage to `AdminManage` (Courts, Pricing, Opening Hours). `AdminSlotPicker` consumes a new **staff-authenticated** read-only availability endpoint and is reused for both actions; desktop is court-by-time grid, mobile uses court tabs and one-column time slots.
+
+`OperationsService.GetStaffAvailabilityAsync` overlays `WALK_IN_NOW` for the current ELAPSED slot only during `WalkInPolicy` grace (min(slot duration/2, 30m)) and if a batched persisted active schedule check finds **no** overlap. Walk-in creation recalculates it inside the existing EF transaction. For all other channels and blocks, only future AVAILABLE intervals are accepted; GiST exclusion still rejects any race. `/api/v1/availability` is unchanged. No new tables/columns are required.
+
+Normal owners can still edit courts, prices, hours and payments. Venue brand/global policy mutation is disabled unless a trusted deployer opts in via `Developer:AllowVenueEdits`, while existing OWNER role authorization remains mandatory. Team APIs remain intact for future venue staff expansion; they are not exposed in everyday navigation.

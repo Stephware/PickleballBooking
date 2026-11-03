@@ -4,7 +4,7 @@ Last updated: 2026-11-03 (Asia/Manila).
 
 ## Implemented
 
-- Phases 1–8 source integrated on `feature/phase-9-final-integration` from Phase 8 merge 3b0a67e. Main remains at the Phase 1–2 integration until approved merge.
+- Phases 1–9 source was integrated into `main` after the Phase 9 review. The historical verification below describes that prior implementation, not newer usability changes.
 - Player booking/proof/status UI and separate role-aware staff dashboard, original SQL-first nine tables, transactional holds/expiry, manual verification and staff operations.
 - Phase 9 fixes payment reference/history, final-total rounding, build/test configuration, streamed BFF limits, trusted proxy/rate buckets, security headers, mobile keyboard behavior and contrast.
 - Real npm lockfile; non-root images, independent-venue Compose/configuration, least-privilege runtime role, guarded API/browser harnesses and CI definition.
@@ -21,10 +21,25 @@ Last updated: 2026-11-03 (Asia/Manila).
 
 ## Pending / blocked
 
-- Main merge requires approval: review PR #9 and draft main integration PR #10 are open and unmerged. Remote CI run 41561368392 passed all implementation checks for 784cb5d, including Linux browser/Axe.
+- The original Phase 9 implementation was reviewed/landed in main. Its GitHub Actions run 41561368392 passed all implementation checks for 784cb5d, including Linux browser/Axe.
 - **Public launch blocked:** official payment recipient instructions, malware controls, actual TLS/DNS/certificate/CDN trust configuration and operator backup/retention/monitoring acceptance.
 - Physical touch devices, live screen readers, production load and actual external payment reconciliation are not verified.
 - Cross-device verified guest recovery, automated settlement/refund transfers and normalized booking-source reporting remain deferred.
 - Sixteen moderate development-tool advisories remain; no runtime dependency vulnerabilities reported. Existing xUnit cancellation analyzer warnings remain on clean compilation.
 
 See [Phase 9 final verification](../phase-9-final-verification.md) for coverage/limits, [development](../development.md) for reproduction and [deployment](../deployment.md) for operation/rollback. Existing local venue database/data/credentials were not reset or reseeded.
+
+## Post-Phase-9 usability improvements — Phase 1 (new, unverified)
+
+- [x] Five-item operator navigation: Today, Schedule, Payments, Manage, My Account.
+- [x] Shared court-by-time picker, responsive court tabs, 1–8 adjacent slots, guided Add Booking / Block Court.
+- [x] Booking source WALK_IN / PHONE / MESSENGER retained; block history/removal retained.
+- [x] Staff-only immediate walk-in grace: half configured slot length up to 30 min, no active persisted overlap, transaction revalidation and GiST exclusion.
+- [x] Team Accounts and Venue Settings hidden from regular UI; existing roles/staff APIs preserved. Venue branding write is developer-config-gated and disabled by default.
+- [x] Mobile reservation cards, payment-detail navigation, top back controls, focused Today metrics; test source and docs.
+- [x] No SQL-first schema migrations, Docker volume changes, or committed credentials.
+- [ ] **New changes not yet runtime verified**: .NET 10 build/test, Next.js lint/types/Node tests/build, browser mobile/a11y, live disposable PostgreSQL concurrency and walk-in flows.
+- [ ] No physical-device/screen-reader test in this GitHub-only authoring session.
+- [ ] Remaining agreed usability phases: public site/photos/payment instructions, payment UX refinements and final usability audit.
+
+Read [Phase 1 usability implementation](../improvements-phase-1-admin-usability.md). The earlier Phase 9 test counts above are historical and must not be reused as validation for this new branch.
