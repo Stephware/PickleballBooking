@@ -115,3 +115,11 @@ See [Phase 4 release verification](../improvements-phase-4-final-verification.md
 - [x] Added theme configuration unit tests, documented photo defaults and corrected green AVAILABLE visual statuses.
 - [ ] Fresh GitHub Actions CI, mobile/desktop browser screenshots and keyboard/a11y regression testing still required.
 - [ ] Public venue launch still NO-GO pending official payment details, operator security and physical-device acceptance.
+
+
+## 2026-11-03 — Simplified hero and mobile booking (review branch)
+
+- [x] Remove cartoon paddle/ball SVG from the player hero and redundant feature strip; keep the approved real court photography.
+- [x] Fix phone schedule CSS selector to hide duplicate desktop table under 681px, retaining the live court/time cards, selection summary and booking form.
+- [x] Extend browser smoke checks for exclusive phone/desktop layouts across 1, 3, 8 and 12 courts.
+- [ ] Verify this branch's GitHub CI and fresh phone browser/a11y results before merging.

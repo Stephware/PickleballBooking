@@ -44,6 +44,13 @@ try {
     for (const [route, label] of [["/", "player"], ["/find-booking", "lookup"], ["/admin", "staff-login"]]) {
       await page.goto(origin + route);
       await page.waitForLoadState("networkidle");
+      if (route === "/") {
+        assert.equal(await page.locator(".hero-visual img, .trust-strip, .hero-assurance").count(), 0,
+          "No oversized paddle/ball illustration or redundant feature strip on the homepage");
+        const heroBackground = await page.locator(".hero-visual")
+          .evaluate(element => getComputedStyle(element).backgroundImage);
+        assert.match(heroBackground, /court-2\.jpg/, "Hero keeps the real venue court photo");
+      }
       await checkLayout(label, width);
       await page.screenshot({ path: `${output}/${label}-${width}.png`, fullPage: true });
     }
@@ -148,8 +155,22 @@ try {
     for (const width of widths) {
       await page.setViewportSize({ width, height: 900 });
       await page.goto(origin);
-      await page.getByRole("region", { name: "Court and time schedule" }).waitFor();
+      const desktopSchedule = page.locator(".schedule-wrap");
+      const phonePicker = page.locator(".reserve-mobile-picker");
+      await desktopSchedule.waitFor({ state: "attached" });
       assert.equal(await page.locator(".court-heading").count(), count);
+      if (width <= 680) {
+        assert.equal(await desktopSchedule.isVisible(), false,
+          "Phone layout must not show a second table-style schedule");
+        assert.equal(await phonePicker.isVisible(), true,
+          "Phone layout must show the court-and-time card picker");
+        assert.equal(await phonePicker.locator(".reserve-court-choice").count(), count);
+      } else {
+        assert.equal(await desktopSchedule.isVisible(), true,
+          "Tablet/desktop must retain its schedule table");
+        assert.equal(await phonePicker.isVisible(), false,
+          "Tablet/desktop must not show the mobile picker");
+      }
       await checkLayout(`schedule-${count}-courts`, width);
     }
     await page.unroute("**/api/player/availability?*");

@@ -100,34 +100,16 @@ body {
 .app-shell .hero-action:hover { background:#f7dfd4; transform:translateY(-1px); gap:10px; }
 .hero-action-secondary { border:1px solid rgba(255,255,255,.75); color:#fff; }
 .hero-action-secondary:hover { background:rgba(255,255,255,.14); }
-.hero-assurance { color:#f1bdc4; display:block; font-size:.72rem; font-weight:600; }
 .hero-visual {
   position:absolute; right:0; top:0; bottom:0; width:51%;
-  background-image:linear-gradient(90deg,#830c28 0%,rgba(97,4,25,.63) 26%,rgba(27,7,17,.27) 100%),url("/venue/court-2.jpg");
+  background-image:linear-gradient(90deg,#820b27 0%,rgba(105,8,32,.62) 20%,rgba(27,7,17,.10) 78%),url("/venue/court-2.jpg");
   background-size:cover; background-position:center;
   pointer-events:none; z-index:1;
 }
-.hero-visual::after {
-  content:""; position:absolute; inset:0; pointer-events:none;
-  background:linear-gradient(120deg,transparent 38%,rgba(59,6,19,.21));
-}
-.hero-visual img {
-  display:block; width:100%; height:100%; object-fit:contain;
-  object-position: center right; filter:drop-shadow(0 10px 25px rgba(19,2,11,.25));
-}
-.trust-strip {
-  display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px;
-  padding:19px clamp(10px,3vw,36px); margin-bottom:29px;
-  background:#fff3e9; border-radius:0 0 18px 18px;
-  border:1px solid #f3e4da; border-top:0;
-}
-.trust-strip span { display:flex; justify-content:center; align-items:center; gap:10px;
-  color:#372329; font-size:.79rem; font-weight:740; }
-.trust-strip strong { color:#8c1332; font-size:1.15rem; font-weight:850; }
 .court-showcase {
   border-radius:21px; padding:clamp(20px,3vw,40px); background:#fff;
   border:1px solid #f0e1db; box-shadow:0 8px 28px rgba(96,25,45,.045);
-  margin:0 0 42px;
+  margin:clamp(22px,3vw,38px) 0 42px;
 }
 .showcase-header { display:flex; align-items:end; justify-content:space-between; gap:16px; margin-bottom:20px; }
 .showcase-header h2 { margin:4px 0 7px; font-size:clamp(1.8rem,3vw,2.7rem); }
@@ -229,16 +211,10 @@ body {
   .app-shell .hero-copy > p:not(.hero-kicker) { font-size:.91rem; line-height:1.6; }
   .hero-actions { margin:21px 0 15px; }
   .app-shell .hero-action,.hero-action-secondary { flex:1 1 155px; padding:11px 10px; }
-  .hero-assurance { font-size:.66rem; }
   .hero-visual {
     position:relative; margin:17px -22px 0; width:auto;
     min-height:210px; max-height:290px; background-position:center 40%;
   }
-  .hero-visual img { max-height:290px; }
-  .trust-strip { grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px 7px;
-    padding:17px 8px; margin-bottom:19px; }
-  .trust-strip span { justify-content:flex-start; font-size:.71rem; }
-  .trust-strip strong { font-size:1rem; }
   .court-showcase { padding:18px; margin-bottom:30px; }
   .showcase-header { align-items:start; flex-direction:column; gap:10px; }
   .showcase-header p { font-size:.82rem; }

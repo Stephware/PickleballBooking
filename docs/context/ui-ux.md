@@ -104,3 +104,11 @@ Inspect 320/375/768/1024px, screen reader, keyboard Tab/Escape, no horizontal ov
 - Owner: preserve five sections Today, Schedule, Payments, Manage, My Account; branded sidebar and four mobile quick-navigation entries with full menu access to account/signout. Actions and metrics are live data only, not the example numbers in the mockup.
 - Venue-specific presentation configuration is developer managed. The bundled photos are used when the Reserve theme is active and VENUE_GALLERY_JSON is omitted; use VENUE_HIDE_IMPORTED_PHOTOS=true to hide them, including for existing VENUE_GALLERY_JSON=[]. Other venue deployments with VENUE_BRAND_MODE=api must provide their own approved photos.
 - All new visual changes remain source implementation until fresh CI, browser screenshots, accessibility and physical phone review. Payment recipient approval and production security gates still apply.
+
+
+## 2026-11-03 — Clean real-photo hero and phone-only card scheduling
+
+- Keep the real venue court photograph in the homepage hero, with a subtle brand gradient; remove the decorative paddle/ball vector and its unused SVG asset entirely. The feature-benefit strip and redundant hero assurance copy are intentionally omitted.
+- Phones at 680 px and below show only Select Court / Select Time cards, not the duplicate horizontally scrolling court-by-time table. The responsive selector still uses the same server-sourced availability, pricing and 1–8 adjacent slot selection; the selection summary, Continue, booking form and payment process remain functional.
+- At wider breakpoints keep the existing desktop schedule grid. Browser regression tests assert a single visible picker at 320/375 px and a visible table at 768/1024 px, with the real-photo hero and no illustration/strip.
+- No data, API, payment, authentication, owner operations or database changes. Device/venue acceptance gates still apply.
