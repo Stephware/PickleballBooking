@@ -110,8 +110,11 @@ try {
       const receipt = { name: "synthetic-receipt.png", mimeType: "image/png",
         buffer: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aD1sAAAAASUVORK5CYII=", "base64") };
       await page.locator('input[type="file"]').setInputFiles(receipt);
-      await page.getByRole("img", { name: "Preview of the receipt you selected" }).waitFor();
-      await page.getByRole("button", { name: "Remove file", exact: true }).click();
+      await page.getByRole("img", { name: "Thumbnail of the selected payment receipt" }).waitFor();
+      await page.getByRole("button", { name: "Enlarge selected receipt image" }).click();
+      await page.getByRole("dialog", { name: "Receipt image preview" }).waitFor();
+      await page.getByRole("button", { name: "Close ×" }).click();
+      await page.getByRole("button", { name: "Remove and choose another" }).click();
       assert.equal(await page.locator('input[type="file"]').inputValue(), "");
       await page.locator('input[type="file"]').setInputFiles(receipt);
       await page.getByRole("button", { name: "Submit receipt for review" }).click();
@@ -178,6 +181,9 @@ try {
       await page.waitForFunction(() => {
         const img = document.querySelector(".admin-proof img"); return img?.complete && img.naturalWidth > 0;
       });
+      await page.getByRole("button", { name: "Enlarge submitted payment receipt" }).click();
+      await page.getByRole("dialog", { name: "Receipt image preview" }).waitFor();
+      await page.getByRole("button", { name: "Close ×" }).click();
       const proofPath = await image.getAttribute("src");
       assert.equal((await context.request.get(origin + proofPath)).status(), 200);
       const anonymous = await browser.newContext();

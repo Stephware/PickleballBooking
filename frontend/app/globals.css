@@ -374,3 +374,109 @@ strong { font-weight: 700; }
     animation-duration: 0.01ms !important;
   }
 }
+
+/* Usability improvements Phase 2: real venue media and contact, no autoplay. */
+.venue-gallery { min-width: 0; max-width: 100%; }
+.venue-gallery-track {
+  display: flex; overflow-x: auto; overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory; scroll-behavior: smooth;
+  border-radius: 15px; border: 1px solid #c9d8cc;
+  scrollbar-width: thin; scrollbar-color: #72987f transparent;
+}
+.venue-gallery-slide {
+  flex: 0 0 100%; position: relative; margin: 0;
+  scroll-snap-align: start; scroll-snap-stop: always;
+  background: #d9e9d8; min-width: 0;
+}
+.venue-gallery-slide img {
+  display: block; width: 100%; height: auto; aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+.venue-gallery-slide figcaption {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  padding: 23px 17px 13px;
+  background: linear-gradient(transparent, rgba(6,28,18,.8));
+  color: white; font-size: .88rem; font-weight: 750;
+  text-shadow: 0 1px 2px rgba(0,0,0,.5);
+}
+.venue-gallery-controls {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 12px; padding: 12px 1px;
+}
+.venue-gallery-count { color: #4c6256; font-size: .82rem; font-weight: 750; }
+.venue-gallery-arrows { display: flex; gap: 8px; }
+.venue-gallery-arrows button {
+  min-height: 44px; min-width: 44px; border-radius: 50%;
+  border: 1px solid #c6d7c9; background: #fff; color: #244d37;
+  font-size: 1.1rem; font-weight: 750;
+}
+.venue-gallery-arrows button:hover:not(:disabled) { background: #e7f4ea; }
+.venue-gallery-arrows button:disabled { opacity: .4; }
+.contact-section {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 25px; padding: 40px 0 60px;
+  border-top: 1px solid var(--border);
+}
+.contact-section h2 { font-size: clamp(1.8rem, 3vw, 2.7rem); margin: 5px 0 10px; }
+.contact-section p.muted { max-width: 540px; font-size: .92rem; margin-bottom: 0; }
+.contact-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.contact-actions a { min-height: 44px; white-space: normal; text-align: center; }
+.contact-compact a { font-size: .84rem; }
+.subpage-back {
+  display: inline-flex; align-items: center; margin-bottom: 18px;
+  font-size: .87rem; font-weight: 750; padding: 9px 0;
+  color: #21563b; text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.button-back { background: transparent; border: 0; cursor: pointer; }
+.venue-payment-instructions {
+  padding: 18px; background: #f6faf6; border: 1px solid #cddfd0;
+  border-radius: 13px; display: grid; gap: 12px;
+}
+.venue-payment-instructions > div:not(.alert) {
+  display: grid; gap: 3px;
+}
+.venue-payment-instructions > div:not(.alert) > span { color: #53675a; font-size: .8rem; }
+.venue-payment-instructions > div:not(.alert) > strong { color: #173b29; overflow-wrap: anywhere; }
+.venue-payment-instructions > button { justify-self: start; min-height: 44px; }
+.venue-payment-instructions .alert p { margin: 7px 0 12px; font-size: .85rem; }
+.venue-payment-instructions .form-hint { margin: 0; }
+.venue-payment-instructions .venue-qr {
+  border: 1px solid #d2ded4; border-radius: 10px; background: white;
+  width: min(100%, 230px); height: auto; object-fit: contain;
+}
+.venue-account-number { font-size: 1.2rem; letter-spacing: .035em; }
+.proof-image-button,.admin-proof-image-button {
+  border: 1px solid #cbdace; padding: 9px; border-radius: 12px;
+  background: #fff; display: grid; gap: 7px; justify-items: center;
+  max-width: 100%; color: #23533b;
+}
+.proof-image-button:hover,.admin-proof-image-button:hover { border-color: #5a916f; }
+.proof-image-button img { max-width: 100%; max-height: 310px; object-fit: contain; border-radius: 8px; }
+.proof-image-button span,.admin-proof-image-button span { font-size: .8rem; font-weight: 750; }
+.receipt-image-dialog {
+  width: min(970px, 94vw); max-height: 94dvh; padding: 17px;
+  border: 1px solid #dce8dd; border-radius: 16px;
+  background: white; color: #1b2c21;
+  box-shadow: 0 30px 100px rgba(0,0,0,.4);
+}
+.receipt-image-dialog::backdrop { background: rgba(0,0,0,.78); }
+.receipt-dialog-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 15px; padding-bottom: 12px;
+}
+.receipt-image-dialog > img {
+  display: block; width: 100%; max-height: calc(94dvh - 102px);
+  object-fit: contain; border-radius: 8px;
+}
+@media (max-width: 680px) {
+  .venue-gallery { margin: 35px 0 0; }
+  .contact-section { align-items: stretch; padding: 32px 0 48px; }
+  .contact-actions { width: 100%; }
+  .contact-actions a { flex: 1 1 150px; }
+  .venue-payment-instructions { padding: 14px; }
+  .proof-image-button { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .venue-gallery-track { scroll-behavior: auto; }
+}

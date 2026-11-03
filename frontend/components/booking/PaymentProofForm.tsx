@@ -3,15 +3,20 @@
 
 import { useEffect, useRef, useState } from "react";
 import { jsonRequest, money } from "@/lib/player";
+import { VenueContactLinks } from "@/components/ui/VenueContact";
+import { ReceiptImageDialog } from "@/components/ui/ReceiptImageDialog";
+import type { VenuePublicDetails } from "@/lib/venue-public";
 import type { Booking, Payment, Venue } from "@/types/player";
 
-export function PaymentProofForm({ booking, venue, onSuccess }: {
-  booking: Booking; venue: Venue; onSuccess: () => void;
+export function PaymentProofForm({ booking, venue, publicDetails, onSuccess }: {
+  booking: Booking; venue: Venue; publicDetails: VenuePublicDetails; onSuccess: () => void;
 }) {
   const [method, setMethod] = useState<"GCASH" | "BANK_TRANSFER">("GCASH");
   const [reference, setReference] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(false);
+  const [copyStatus, setCopyStatus] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const fileInput = useRef<HTMLInputElement>(null);
@@ -22,15 +27,25 @@ export function PaymentProofForm({ booking, venue, onSuccess }: {
   }, [preview]);
 
   function pickFile(next: File | null) {
-    setError("");
+    setError(""); setExpanded(false);
     if (next && (next.size > 5 * 1024 * 1024 || next.size === 0)) {
-      setPreview(null); setFile(null); setError("Choose a receipt smaller than 5 MB."); return;
+      setPreview(null); setFile(null); setError("Choose a receipt smaller than 5 MB.");
+      if (fileInput.current) fileInput.current.value = "";
+      return;
     }
     if (next && !["image/png", "image/jpeg", "image/webp", "application/pdf"].includes(next.type)) {
-      setPreview(null); setFile(null); setError("Use a JPG, PNG, WebP, or PDF receipt."); return;
+      setPreview(null); setFile(null); setError("Use a JPG, PNG, WebP, or PDF receipt.");
+      if (fileInput.current) fileInput.current.value = "";
+      return;
     }
-    setPreview(next && next.type.startsWith("image/") ? URL.createObjectURL(next) : null);
+    setPreview(next ? URL.createObjectURL(next) : null);
     setFile(next);
+  }
+
+  const instructions = method === "GCASH" ? publicDetails.payments.gcash : publicDetails.payments.bank;
+  async function copyNumber(value: string) {
+    try { await navigator.clipboard.writeText(value); setCopyStatus("Account number copied."); }
+    catch { setCopyStatus("Please select and copy the number manually."); }
   }
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
@@ -62,9 +77,9 @@ export function PaymentProofForm({ booking, venue, onSuccess }: {
     <section className="payment-card card-surface" aria-labelledby="payment-title">
       <p className="eyebrow">Next step · Payment proof</p>
       <h2 id="payment-title">Submit your receipt</h2>
-      <p className="muted">Your court is on a temporary hold. Transfer using the venue&apos;s
-        verified official payment instructions, then upload proof for manual review.
-        <strong> Uploading a receipt does not confirm payment.</strong></p>
+      <p className="muted">Your court is temporarily held. Check the official recipient details
+        below before transferring, then upload your receipt.
+        <strong> A submitted proof is not a verified payment or confirmed booking.</strong></p>
       <div className="payment-total">
         <span>Amount to pay</span>
         <strong>{money(booking.totalAmount, booking.currency || venue.currency)}</strong>
@@ -81,6 +96,32 @@ export function PaymentProofForm({ booking, venue, onSuccess }: {
               onChange={() => setMethod("BANK_TRANSFER")} /> Bank transfer
           </label>
         </fieldset>
+        <div className="venue-payment-instructions" aria-live="polite">
+          {instructions ? <>
+            <p className="eyebrow">Official venue payment recipient</p>
+            {method === "BANK_TRANSFER" && "bankName" in instructions &&
+              <div><span>Bank</span><strong>{instructions.bankName}</strong></div>}
+            <div><span>Account holder</span><strong>{instructions.accountName}</strong></div>
+            <div><span>Account number</span><strong className="venue-account-number">
+              {instructions.accountNumber}</strong></div>
+            <button type="button" className="button-outline"
+              onClick={() => void copyNumber(instructions.accountNumber)}>Copy account number</button>
+            {copyStatus && <span role="status" className="form-hint">{copyStatus}</span>}
+            {instructions.qrPath && <>
+              {/* eslint-disable-next-line @next/next/no-img-element -- developer-approved static QR */}
+              <img className="venue-qr" src={instructions.qrPath}
+                width={230} height={230} alt={"Official " +
+                  (method === "GCASH" ? "GCash" : "bank transfer") + " QR code"}/>
+            </>}
+            <p className="form-hint">Confirm the recipient name and number in your payment app
+              before sending. The venue verifies every transfer manually.</p>
+          </> : <div className="alert info" role="status">
+            <strong>Payment destination not yet published for {method === "GCASH" ? "GCash" : "bank transfer"}.</strong>
+            <p>Do not transfer money to an unverified number or account. Contact the venue first.
+              If you already paid using details confirmed directly by the venue, you may submit your receipt below.</p>
+            <VenueContactLinks contact={publicDetails.contact} compact/>
+          </div>}
+        </div>
         <label className="field">
           <span>Transaction reference <b aria-hidden="true">*</b></span>
           <input required value={reference} maxLength={150} minLength={3}
@@ -94,15 +135,26 @@ export function PaymentProofForm({ booking, venue, onSuccess }: {
           <span className="form-hint" id="proof-hint">PNG, JPG, WebP, or PDF · maximum 5 MB</span>
         </label>
         {file && <div className="proof-preview">
-          <div><strong>Selected receipt</strong><p>{file.name} · {(file.size / 1024).toFixed(0)} KB</p></div>
-          {preview && <img src={preview} alt="Preview of the receipt you selected" />}
-          {file.type === "application/pdf" &&
-            <p className="muted">PDF selected — open the file locally to review before submitting.</p>}
+          <div><strong>Review the selected receipt</strong>
+            <p>{file.name} · {(file.size / 1024).toFixed(0)} KB</p></div>
+          {preview && file.type.startsWith("image/") && <>
+            <button type="button" className="proof-image-button"
+              aria-label="Enlarge selected receipt image" onClick={() => setExpanded(true)}>
+              <img src={preview} alt="Thumbnail of the selected payment receipt" />
+              <span>Tap to enlarge</span>
+            </button>
+          </>}
+          {preview && file.type === "application/pdf" &&
+            <a className="button-outline" href={preview} target="_blank"
+              rel="noopener noreferrer">Open selected PDF locally</a>}
           <button type="button" className="text-button" onClick={() => {
             pickFile(null);
             if (fileInput.current) fileInput.current.value = "";
-          }}>Remove file</button>
+          }}>Remove and choose another</button>
         </div>}
+        <ReceiptImageDialog src={file?.type.startsWith("image/") ? preview : null}
+          open={expanded} onClose={() => setExpanded(false)}
+          alt="Full-size selected payment receipt"/>
         {error && <p className="alert error" role="alert">{error}</p>}
         <button className="button-primary full-button" type="submit" disabled={busy || !file}
           aria-busy={busy}>{busy ? "Uploading receipt…" : "Submit receipt for review"}</button>
