@@ -50,9 +50,33 @@ cleanup() {
 trap cleanup EXIT
 
 dc config --quiet
+# Inspect the *rendered* Compose configuration before creating any resources:
+# only frontend on loopback, no public DB/API ports, and no approved payee.
+dc config --format json | node -e '
+let input="";
+process.stdin.setEncoding("utf8");
+process.stdin.on("data", x => input += x);
+process.stdin.on("end", () => {
+  const cfg=JSON.parse(input), f=cfg.services.frontend,
+    a=cfg.services.api, d=cfg.services.database;
+  const ports=f.ports || [];
+  if(ports.length !== 1 || ports[0].host_ip !== "127.0.0.1" ||
+     String(ports[0].published) !== "3198" || (a.ports || []).length ||
+     (d.ports || []).length ||
+     d.environment.POSTGRES_DB !== "pickleball_release_test" ||
+     !a.environment.ConnectionStrings__Pickleball.includes("Database=pickleball_release_test") ||
+     String(f.environment.VENUE_PAYMENT_INSTRUCTIONS_APPROVED) !== "false") {
+    process.stderr.write("Refusing unexpected public port, payment, or database configuration.\\n");
+    process.exit(1);
+  }
+});'
 created=1
 dc build
-dc up -d database
+[[ "$(docker image inspect --format '{{.Config.User}}' "$API_IMAGE")" == "app" ]] ||
+  die "Production API image must run as a non-root app user"
+[[ "$(docker image inspect --format '{{.Config.User}}' "$FRONTEND_IMAGE")" == "node" ]] ||
+  die "Production frontend image must run as a non-root node user"
+dc up -d --wait database
 dc exec -T database psql -U pickleball_admin -d "$PHASE4_TEST_DATABASE" \
   -v ON_ERROR_STOP=1 < database/sql/01_schema.sql
 
