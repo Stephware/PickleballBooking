@@ -62,10 +62,10 @@ export default async function HomePage() {
           </div>
           <AvailabilityGrid venue={venue} connected={connected}/>
           <section className="steps-section" aria-labelledby="how-it-works">
-            <div><p className="eyebrow">It's easy to get started</p>
+            <div><p className="eyebrow">It&apos;s easy to get started</p>
               <h2 id="how-it-works">Three steps to game time.</h2></div>
             <div className="steps-grid">
-              <article><span>01</span><h3>Choose your court</h3><p>Pick a date and available time from the venue's live schedule.</p></article>
+              <article><span>01</span><h3>Choose your court</h3><p>Pick a date and available time from the venue&apos;s live schedule.</p></article>
               <article><span>02</span><h3>Reserve your slot</h3><p>Enter your details and place a temporary hold at the server-calculated rate.</p></article>
               <article><span>03</span><h3>Submit payment proof</h3><p>Upload a receipt if applicable. Your booking is confirmed only after the venue reviews it.</p></article>
             </div>
