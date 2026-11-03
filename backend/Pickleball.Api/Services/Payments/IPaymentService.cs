@@ -24,4 +24,4 @@ public interface IPaymentService
 public sealed record PendingPaymentResponse(
     long PaymentId, string BookingCode, string GuestName,
     string PaymentMethod, decimal Amount, DateTimeOffset SubmittedAtUtc,
-    bool HasProof);
+    bool HasProof, DateTimeOffset StartsAtUtc, string BookingStatus);

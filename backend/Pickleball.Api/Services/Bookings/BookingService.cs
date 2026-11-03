@@ -219,24 +219,33 @@ public sealed class BookingService(
             throw new BookingException(BookingError.Conflict,
                 "Online reservations require verified payment before confirmation.");
 
+        // Managers can explicitly release an AWAITING_REVIEW court after
+        // its start, but must record a clear, booking-specific reason.
+        if (!confirm && staff && locked.Status == BookingStatuses.AwaitingReview &&
+            string.IsNullOrWhiteSpace(reason))
+            throw new BookingException(BookingError.InvalidInput,
+                "Provide a reason to resolve a payment still awaiting review.");
+
         var query = db.CourtScheduleEntries.Where(s =>
-            s.Id == booking.ScheduleEntryId && s.StartsAt > now);
+            s.Id == booking.ScheduleEntryId);
 
         int affected;
         if (confirm)
         {
             // Only a live hold can be confirmed, never an expired one.
             affected = await query.Where(s => s.Status == BookingStatuses.Held &&
-                    s.ExpiresAt > now)
+                    s.StartsAt > now && s.ExpiresAt > now)
                 .ExecuteUpdateAsync(setters => setters
                     .SetProperty(s => s.Status, BookingStatuses.Confirmed)
                     .SetProperty(s => s.ExpiresAt, (DateTime?)null), ct);
         }
         else
         {
-            affected = await query.Where(s => s.Status == BookingStatuses.Held ||
-                    s.Status == BookingStatuses.AwaitingReview ||
-                    (staff && s.Status == BookingStatuses.Confirmed))
+            affected = await query.Where(s =>
+                    (s.StartsAt > now && (s.Status == BookingStatuses.Held ||
+                        s.Status == BookingStatuses.AwaitingReview ||
+                        (staff && s.Status == BookingStatuses.Confirmed))) ||
+                    (staff && s.Status == BookingStatuses.AwaitingReview))
                 .ExecuteUpdateAsync(setters => setters
                     .SetProperty(s => s.Status, BookingStatuses.Cancelled)
                     .SetProperty(s => s.ExpiresAt, (DateTime?)null), ct);
@@ -250,7 +259,7 @@ public sealed class BookingService(
 
         if (affected != 1)
             throw new BookingException(BookingError.Conflict,
-                "This booking cannot be changed in its current status or after its start time.");
+                "This booking cannot be changed in its current status or after its start time (except staff resolution of payment under review).");
 
         await tx.CommitAsync(ct);
         var updated = await db.CourtScheduleEntries.AsNoTracking()

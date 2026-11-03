@@ -4,7 +4,8 @@ using Pickleball.Api.Data;
 namespace Pickleball.Api.Background;
 
 /// <summary>
-/// Periodic SQL status transition; a past expires_at alone never frees a court.
+/// Expire only unpaid HELD reservations. Submitted proof under AWAITING_REVIEW
+/// has no automatic timeout, including when staff review is delayed.
 /// This worker is only one layer: booking transactions also expire stale holds.
 /// </summary>
 public sealed class PendingBookingExpiryWorker(
