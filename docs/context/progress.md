@@ -1,37 +1,30 @@
 # Progress and verification
 
-Last updated: 2026-11-03
+Last updated: 2026-11-03 (Asia/Manila).
 
-## Branch state
-- [x] Phases 1–2 on main.
-- [x] PRs #3–#5 closed against their **parent feature branches**, not merged to main.
-- [x] PR #7 closed/merged against Phase 6 parent feature branch at Phase 8 start.
-- [x] Phase 8 code built on feature/phase-7-player-frontend as a stacked feature branch.
-- [ ] Integrate Phases 3–8 all the way into main **after** successful runtime tests and integrated code review.
+## Implemented
 
-## Phase 8 source work
-- [x] New /admin page, staff login/logout and role-aware dashboard navigation.
-- [x] Server-side ASP.NET Core staff auth handshake: anonymous CSRF → login → authenticated CSRF.
-- [x] Admin HttpOnly + SameSite=Strict staff/antiforgery cookies, production Secure, origin checks and backend-forwarded CSRF on mutations.
-- [x] Explicit method/path admin allowlist; route-policy Node test source. No arbitrary admin path or public API proxy.
-- [x] Non-cacheable, authenticated private image-proof previews and PDF download path.
-- [x] Today's overview, bookings date/status list, owner/manager confirm/cancel.
-- [x] Pending payment reviews, amount/reference/proof side-by-side, approve/reject, review notes, record received payments, external refund references.
-- [x] Walk-in/phone/Messenger reservations, court blocks, courts CRUD, pricing rule CRUD/deactivation, operating hours, venue branding/policy and owner-only staff account management.
-- [x] Own-password change and sign-out, plus mobile/desktop admin CSS using Phase 7 visual tokens.
-- [x] docs/phase-8-owner-staff-dashboard.md, AGENTS.md, selective context wiki and frontend developer notes updated.
-- [x] No backend C#, SQL schema, Docker compose, data, secrets or upload files changed.
+- Phases 1–8 source integrated on `feature/phase-9-final-integration` from Phase 8 merge 3b0a67e. Main remains at the Phase 1–2 integration until approved merge.
+- Player booking/proof/status UI and separate role-aware staff dashboard, original SQL-first nine tables, transactional holds/expiry, manual verification and staff operations.
+- Phase 9 fixes payment reference/history, final-total rounding, build/test configuration, streamed BFF limits, trusted proxy/rate buckets, security headers, mobile keyboard behavior and contrast.
+- Real npm lockfile; non-root images, independent-venue Compose/configuration, least-privilege runtime role, guarded API/browser harnesses and CI definition.
 
-## Known limitations / verification required
-- [ ] npm install / npm run check / npm run build and real Next.js smoke run.
-- [ ] ASP.NET Core .NET restore/build/test and disposable PostgreSQL E2E across Phases 3–8.
-- [ ] Real browser authentication/cookie/CSRF/role verification, origin failure, staff deactivation, authenticated proof preview.
-- [ ] Admin UI rendered responsiveness, keyboard, screen-reader and color contrast audit at 320/375/768/1024px; run globally installed UI UX Pro Max + Impeccable locally.
-- [ ] Confirm actual venue-approved payment instructions, official recipient, and safe production receipt storage before customer launch.
-- [ ] No automated bank/GCash settlement/refund, no guest verified cross-device recovery, and manual booking channel lacks normalized booking_source DB field.
-- [ ] frontend/package-lock.json must be generated and tracked after real npm install; never fabricate it.
+## Executed locally
 
-## Next
-- [ ] Phase 9: comprehensive builds, end-to-end concurrency/security/accessibility testing, backups, deployment hardening and independent venue deployment.
+- .NET restore/build passed. Final full suite: **102 passed / 0 failed / 0 skipped** with disposable PostgreSQL; offline **88 passed / 14 skipped**, including an explicit invalid ambient-connection safety run.
+- Frontend check clean: **18 Node tests passed**, lint/types passed; standalone production build passed; runtime dependency audit **0 vulnerabilities**.
+- HTTP real API workflow: **29 checks passed / 0 failed** with repeatable synthetic fixtures.
+- Browser **79 checks passed** (76 layouts + 3 workflows), 0 runtime errors; sampled Axe checks 0 violations. Widths 320/375/768/1024; actual 3-court flows plus explicit read-only count/error fixtures.
+- Remote GitHub Actions run [41561368392](https://github.com/Stephware/PickleballBooking/actions/runs/41561368392) passed end-to-end on implementation commit 784cb5d.
+- Both container images built; production-image deployment **7 checks passed**, including per-client throttling and surviving staff/guest/proof access after application recreation.
+- Synthetic PostgreSQL dump restored into a different test database: nine tables, exclusion constraint and sample records verified.
 
-**Source present ≠ runtime-verified.** Preserve the existing PostgreSQL data and Docker volume; no unreviewed migrations or resets.
+## Pending / blocked
+
+- Main merge requires approval: review PR #9 and draft main integration PR #10 are open and unmerged. Remote CI run 41561368392 passed all implementation checks for 784cb5d, including Linux browser/Axe.
+- **Public launch blocked:** official payment recipient instructions, malware controls, actual TLS/DNS/certificate/CDN trust configuration and operator backup/retention/monitoring acceptance.
+- Physical touch devices, live screen readers, production load and actual external payment reconciliation are not verified.
+- Cross-device verified guest recovery, automated settlement/refund transfers and normalized booking-source reporting remain deferred.
+- Sixteen moderate development-tool advisories remain; no runtime dependency vulnerabilities reported. Existing xUnit cancellation analyzer warnings remain on clean compilation.
+
+See [Phase 9 final verification](../phase-9-final-verification.md) for coverage/limits, [development](../development.md) for reproduction and [deployment](../deployment.md) for operation/rollback. Existing local venue database/data/credentials were not reset or reseeded.

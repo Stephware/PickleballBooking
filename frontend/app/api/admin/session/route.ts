@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { BodyTooLargeError, readLimitedText } from "@/lib/request-body";
 import {
   adminCookieHeader, adminCsrf, adminError, backendAdmin, backendCookie,
   clearBackendSession, hasStaffCookie, relayJson, requestOriginValid,
@@ -21,11 +22,13 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   if (!requestOriginValid(request)) return adminError("Invalid request origin.", 403);
-  const length = Number(request.headers.get("content-length") || 0);
-  if (length > 4096) return adminError("Login request is too large.", 413);
-  const body = await request.json().catch(() => null) as {
-    email?: unknown; password?: unknown
-  } | null;
+  let body: { email?: unknown; password?: unknown } | null;
+  try { body = JSON.parse(await readLimitedText(request, 4096)); }
+  catch (cause) {
+    return adminError(cause instanceof BodyTooLargeError
+      ? "Login request is too large." : "Enter a valid email and password.",
+    cause instanceof BodyTooLargeError ? 413 : 400);
+  }
   if (typeof body?.email !== "string" || typeof body.password !== "string" ||
       body.email.length > 254 || body.password.length > 256)
     return adminError("Enter a valid email and password.", 400);

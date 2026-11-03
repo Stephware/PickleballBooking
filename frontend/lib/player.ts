@@ -91,7 +91,10 @@ export function brandStyle(venue: Pick<Venue, "primaryColor" | "secondaryColor">
   const channels = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
   const [r, g, b] = channels.map((c) => c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
   const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  const onBrand = (luminance + 0.05) / 0.05 >= 1.05 / (luminance + 0.05)
+  const darkChannels = [0x10, 0x20, 0x18].map((c) => c / 255)
+    .map((c) => c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+  const darkLuminance = 0.2126 * darkChannels[0] + 0.7152 * darkChannels[1] + 0.0722 * darkChannels[2];
+  const onBrand = (luminance + 0.05) / (darkLuminance + 0.05) >= 1.05 / (luminance + 0.05)
     ? "#102018" : "#ffffff";
   // Secondary venue color may be dark; blend it into white so reference
   // panels always retain legible dark text on a light surface.

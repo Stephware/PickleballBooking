@@ -216,7 +216,10 @@ public sealed class PaymentService(
 
         payment.ReviewedByStaffId = staffId;
         payment.ReviewedAt = now;
-        payment.Notes = Clean(notes);
+        var reviewNotes = Clean(notes);
+        if (reviewNotes is not null)
+            payment.Notes = string.Join("\n", new[] { payment.Notes, "Review: " + reviewNotes }
+                .Where(n => !string.IsNullOrWhiteSpace(n)));
         await unit.SaveChangesAsync(ct);
         await tx.CommitAsync(ct);
         return Map(payment);
@@ -241,9 +244,10 @@ public sealed class PaymentService(
         // This endpoint only records a real-world refund the operator already
         // completed. No money is sent by this system.
         payment.Status = PaymentStatuses.Refunded;
-        payment.ReviewedAt = clock.GetUtcNow().UtcDateTime;
-        payment.ReviewedByStaffId = staffId;
-        payment.Notes = "External refund reference: " + reference.Trim();
+        // Keep the verification actor/time; refunds add history rather than replacing it.
+        var refundNote = $"External refund reference: {reference.Trim()} (staff {staffId}, {clock.GetUtcNow():O})";
+        payment.Notes = string.Join("\n", new[] { payment.Notes, refundNote }
+            .Where(n => !string.IsNullOrWhiteSpace(n)));
         await unit.SaveChangesAsync(ct);
         await tx.CommitAsync(ct);
         return Map(payment);
@@ -289,10 +293,10 @@ public sealed class PaymentService(
             .SingleAsync(ct);
         var upper = reference.ToUpperInvariant();
         if (await db.Payments.AnyAsync(p => p.Id != payment.Id &&
-            p.Status == PaymentStatuses.Verified &&
+            (p.Status == PaymentStatuses.Verified || p.Status == PaymentStatuses.Refunded) &&
             p.PaymentMethod == payment.PaymentMethod &&
             p.TransactionReference != null &&
-            p.TransactionReference.ToUpper() == upper, ct))
+            p.TransactionReference.Trim().ToUpper() == upper, ct))
             throw Conflict("This transaction reference has already been verified for another payment.");
     }
 

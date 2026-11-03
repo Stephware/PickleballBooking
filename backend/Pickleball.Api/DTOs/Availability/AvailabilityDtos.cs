@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Pickleball.Api.DTOs.Availability;
 
 // All times are venue-local for display. UTC instants are included to avoid
@@ -12,7 +14,12 @@ public sealed record AvailabilityCourtResponse(
 public sealed record AvailabilitySlotResponse(
     TimeOnly StartsAt, TimeOnly EndsAt,
     DateTimeOffset StartsAtUtc, DateTimeOffset EndsAtUtc,
-    string Status, decimal TotalPrice);
+    string Status, decimal TotalPrice)
+{
+    // Preserve exact server amounts for multi-slot reservations without exposing them as quotes.
+    [JsonIgnore]
+    internal decimal UnroundedTotalPrice { get; init; } = TotalPrice;
+}
 
 public sealed record PriceQuoteResponse(
     DateOnly Date, long CourtId, TimeOnly StartsAt, TimeOnly EndsAt,

@@ -7,6 +7,7 @@ using Pickleball.Api.Middleware;
 using Pickleball.Api.Security;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.AddDeploymentConfiguration();
 
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
@@ -69,9 +70,18 @@ if (args.Contains("--bootstrap-owner", StringComparer.Ordinal))
     return;
 }
 
+app.UseForwardedHeaders();
 if (!app.Environment.IsDevelopment())
     app.UseHsts();
 
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.XContentTypeOptions = "nosniff";
+    context.Response.Headers.XFrameOptions = "DENY";
+    context.Response.Headers["Referrer-Policy"] = "no-referrer";
+    context.Response.Headers.CacheControl = "no-store";
+    await next();
+});
 app.UseExceptionHandler();
 app.UseRouting();
 app.UseCors(frontendCorsPolicy);

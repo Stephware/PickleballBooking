@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { BodyTooLargeError, readLimitedText } from "@/lib/request-body";
 import {
   adminAllowed, adminCookieHeader, adminCsrf, adminError, backendAdmin,
   clearBackendSession, hasStaffCookie, relayJson, requestOriginValid,
@@ -28,8 +29,7 @@ async function handle(request: NextRequest, context: Context, method: string) {
     query = "?date=" + encodeURIComponent(date);
   }
   try {
-    const body = method === "GET" ? undefined : await request.text();
-    if (body && body.length > 20000) return adminError("Request is too large.", 413);
+    const body = method === "GET" ? undefined : await readLimitedText(request, 20000);
     const backend = await backendAdmin("/api/v1/admin/" + path + query, {
       method,
       ...(method !== "GET" ? {
@@ -65,7 +65,10 @@ async function handle(request: NextRequest, context: Context, method: string) {
     if (path === "auth/change-password" && backend.ok)
       clearBackendSession(relayed); // .NET invalidates prior login after password change
     return relayed;
-  } catch { return adminError("The admin service is temporarily unavailable.", 503); }
+  } catch (cause) {
+    if (cause instanceof BodyTooLargeError) return adminError("Request is too large.", 413);
+    return adminError("The admin service is temporarily unavailable.", 503);
+  }
 }
 
 export async function GET(request: NextRequest, ctx: Context) {

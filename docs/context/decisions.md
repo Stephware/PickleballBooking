@@ -25,7 +25,7 @@ Last reviewed: 2026-11-03
 | D-018 | Generate idempotent PB- booking codes from UUID v4 + persistent per-venue HMAC secret; same intent retries | Phase 5 implementation |
 | D-019 | Guest lookup/cancel requires signed X-Booking-Token, never code-only | Phase 5 security rule |
 | D-020 | HELD hold duration uses venue settings, capped at booking start; expiry worker runs every ~30s plus transactional expiry | Phase 5 implementation |
-| D-021 | Customer may cancel HELD/AWAITING_REVIEW before start; confirmed reservations require staff for cancellation | Phase 5 provisional policy |
+| D-021 | Guest cancels unstarted pending bookings only when no submitted/verified payment exists; staff handles financial cancellations | Implemented/tested Phase 9 |
 | D-022 | Payments/deposits deferred to Phase 6; Phase 5 snapshots required_deposit=0 | Explicitly limited MVP |
 
 | D-023 | Manual proof review for GCash/bank; online booking confirmed only after owner/manager full-payment verification | Phase 6 |
@@ -53,3 +53,13 @@ Last reviewed: 2026-11-03
 | D-043 | Financial review requires human verification; manual recording/refund does not send money | Phase 8 |
 
 Documentation records decisions, not proof of a passing local build.
+
+| D-044 | Integrate the complete Phase 3–8 implementation chain through Phase 9, review before merging main | User-authorized; main merge pending |
+| D-045 | Preserve SQL-first schema; all mutation tests use explicitly opted-in disposable `_test` databases | Implemented/tested |
+| D-046 | Preserve original verification metadata; refunded references cannot be verified again elsewhere | Implemented/tested |
+| D-047 | Stable per-venue signing/Data Protection keys and private proof volumes survive container replacement | Implemented/tested in disposable production-image stack |
+| D-048 | Trust configured ingress/BFF hops explicitly; public origin controls upstream scheme; one validated client IP preserves throttling | Implemented/tested; real ingress acceptance pending |
+| D-049 | Use supported Webpack production build after local Turbopack socket-binding failure | Verified .NET/Next local environment |
+| D-050 | Public launch needs official payment instructions, malware controls and operator TLS/backups/monitoring acceptance | Open launch gates; no production deployment authorized |
+
+| D-051 | Round the exact full reservation total once; displayed rounded slot estimates are not authoritative totals | Phase 9 correctness fix; guest/manual persistence regression tested |

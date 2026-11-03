@@ -54,6 +54,8 @@ test("venue-supplied colors are validated and have contrasting foreground", () =
   const dark = brandStyle({ primaryColor: "#12422b", secondaryColor: "#f5f5f5" });
   assert.equal(light["--brand-ink"], "#102018");
   assert.equal(dark["--brand-ink"], "#ffffff");
+  assert.equal(brandStyle({ primaryColor: "#767676", secondaryColor: "#ffffff" })["--brand-ink"],
+    "#ffffff", "compare the actual dark text, not theoretical black");
   const tint = brandStyle({ primaryColor: "#000000", secondaryColor: "#000000" });
   assert.equal(tint["--brand-tint"], "#d6d6d6");
 });

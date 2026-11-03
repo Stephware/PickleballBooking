@@ -30,9 +30,8 @@ export function AdminManual({ venue }: { user: StaffProfile; venue: Venue }) {
   const [saved, setSaved] = useState<ManualResponse | null>(null);
 
   useEffect(() => {
-    if (!courtId) { setAvailability(null); return; }
+    if (!courtId) return;
     const controller = new AbortController();
-    setAvailability(null); setStart(""); setEnd("");
     fetch("/api/player/availability?date=" + date + "&courtId=" + courtId,
       { cache: "no-store", signal: controller.signal })
       .then(async response => {
@@ -45,7 +44,7 @@ export function AdminManual({ venue }: { user: StaffProfile; venue: Venue }) {
     return () => controller.abort();
   }, [courtId, date, availabilityVersion]);
 
-  const slots = availability?.courts[0]?.slots ?? [];
+  const slots = useMemo(() => availability?.courts[0]?.slots ?? [], [availability]);
   const endOptions = useMemo(() => {
     const i = slots.findIndex(slot => slot.startsAt === start);
     if (i < 0) return [];
@@ -74,7 +73,7 @@ export function AdminManual({ venue }: { user: StaffProfile; venue: Venue }) {
         guestEmail: guestEmail.trim() || null, notes: notes.trim() || null, channel,
       });
       setSaved(result); setGuestName(""); setGuestPhone(""); setGuestEmail(""); setNotes("");
-      setStart(""); setEnd(""); setAvailabilityVersion(v => v + 1);
+      setStart(""); setEnd(""); setAvailability(null); setAvailabilityVersion(v => v + 1);
     } catch (cause) { setError(extractError(cause)); }
     finally { setBusy(false); }
   }
@@ -90,9 +89,11 @@ export function AdminManual({ venue }: { user: StaffProfile; venue: Venue }) {
             <option value="MESSENGER">Messenger</option>
           </select></label>
           <label>Date<input type="date" required min={todayForVenue(venue.timezone)}
-            value={date} onChange={e => { setDate(e.target.value); setError(""); }} /></label>
+            value={date} onChange={e => { setDate(e.target.value); setError("");
+              setAvailability(null); setStart(""); setEnd(""); }} /></label>
           <label>Court<select required value={courtId}
-            onChange={e => { setCourtId(e.target.value); setError(""); }}>
+            onChange={e => { setCourtId(e.target.value); setError("");
+              setAvailability(null); setStart(""); setEnd(""); }}>
             <option value="">Select a court</option>
             {courts.data.filter(c => c.isActive).map(c =>
               <option value={c.id} key={c.id}>{c.courtName}</option>)}

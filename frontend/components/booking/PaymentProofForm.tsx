@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element -- local blob: previews must not use image optimization */
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { jsonRequest, money } from "@/lib/player";
 import type { Booking, Payment, Venue } from "@/types/player";
 
@@ -14,6 +14,7 @@ export function PaymentProofForm({ booking, venue, onSuccess }: {
   const [preview, setPreview] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const fileInput = useRef<HTMLInputElement>(null);
 
   // Revoke the previous image blob when the preview changes or unmounts.
   useEffect(() => {
@@ -88,7 +89,7 @@ export function PaymentProofForm({ booking, venue, onSuccess }: {
         </label>
         <label className="field">
           <span>Payment screenshot or receipt <b aria-hidden="true">*</b></span>
-          <input type="file" required accept=".png,.jpg,.jpeg,.webp,.pdf,image/png,image/jpeg,image/webp,application/pdf"
+          <input ref={fileInput} type="file" required accept=".png,.jpg,.jpeg,.webp,.pdf,image/png,image/jpeg,image/webp,application/pdf"
             aria-describedby="proof-hint" onChange={(e) => pickFile(e.target.files?.[0] || null)} />
           <span className="form-hint" id="proof-hint">PNG, JPG, WebP, or PDF · maximum 5 MB</span>
         </label>
@@ -97,7 +98,10 @@ export function PaymentProofForm({ booking, venue, onSuccess }: {
           {preview && <img src={preview} alt="Preview of the receipt you selected" />}
           {file.type === "application/pdf" &&
             <p className="muted">PDF selected — open the file locally to review before submitting.</p>}
-          <button type="button" className="text-button" onClick={() => pickFile(null)}>Remove file</button>
+          <button type="button" className="text-button" onClick={() => {
+            pickFile(null);
+            if (fileInput.current) fileInput.current.value = "";
+          }}>Remove file</button>
         </div>}
         {error && <p className="alert error" role="alert">{error}</p>}
         <button className="button-primary full-button" type="submit" disabled={busy || !file}

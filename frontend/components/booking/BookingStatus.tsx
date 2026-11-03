@@ -49,31 +49,31 @@ export function BookingStatus({ code, venue }: { code: string; venue: Venue }) {
   const [tokenInput, setTokenInput] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(() => Date.now());
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const b = await jsonRequest<Booking>("/api/player/bookings/" + encodeURIComponent(code));
+  const refresh = useCallback(() =>
+    jsonRequest<Booking>("/api/player/bookings/" + encodeURIComponent(code)).then(async b => {
       setBooking(b);
+      setError("");
       setMissingAccess(false);
       try {
         const summary = await jsonRequest<PaymentSummary>(
           "/api/player/bookings/" + encodeURIComponent(code) + "/payments");
         setPayments(summary);
       } catch { setPayments(null); } // Payment summary failure does not hide booking.
-    } catch (cause) {
+    }).catch(cause => {
       setBooking(null);
       setPayments(null);
       const reason = cause instanceof Error ? cause.message : "Could not load the reservation.";
       if (reason.includes("access") || reason.includes("not found"))
         setMissingAccess(true);
       else setError(reason);
-    } finally { setLoading(false); }
-  }, [code]);
+    }).finally(() => { setLoading(false); }), [code]);
 
   useEffect(() => { void refresh(); }, [refresh]);
+  function reload() {
+    setLoading(true); setError(""); return refresh();
+  }
   useEffect(() => {
     const id = window.setInterval(() => setNow(Date.now()), 10000);
     return () => window.clearInterval(id);
@@ -123,8 +123,8 @@ export function BookingStatus({ code, venue }: { code: string; venue: Venue }) {
         <p className="eyebrow">Private booking</p>
         <h1>Access your reservation</h1>
         <p className="muted">This booking is protected. Reservations created in this browser
-          are available here automatically. On another device, ask the venue for your
-          booking access token.</p>
+          are available here automatically. If the venue gave you a private access token,
+          enter it below. Otherwise, use the original browser or contact the venue.</p>
         <p className="reference-line">Reference <strong>{code}</strong></p>
         <form className="booking-form" onSubmit={recover}>
           <label className="field"><span>Booking access token</span>
@@ -143,7 +143,7 @@ export function BookingStatus({ code, venue }: { code: string; venue: Venue }) {
 
   if (!booking) return <div className="empty-card" role="alert">
     <h2>Booking unavailable</h2><p>{error || "Could not load your booking."}</p>
-    <button type="button" className="button-outline" onClick={() => void refresh()}>Try again</button>
+    <button type="button" className="button-outline" onClick={() => void reload()}>Try again</button>
   </div>;
 
   const meta = statusInfo[booking.status] || {
@@ -161,7 +161,7 @@ export function BookingStatus({ code, venue }: { code: string; venue: Venue }) {
       <section className="booking-result card-surface" aria-labelledby="result-title">
         <div className="result-header">
           <span className={"status-badge badge-" + booking.status.toLowerCase()}>{meta.badge}</span>
-          <button type="button" className="text-button" onClick={() => void refresh()}
+          <button type="button" className="text-button" onClick={() => void reload()}
             disabled={loading}>↻ Refresh status</button>
         </div>
         <h1 id="result-title">{meta.title}</h1>
@@ -204,7 +204,7 @@ export function BookingStatus({ code, venue }: { code: string; venue: Venue }) {
           </div>
         ))}
       </section>}
-      {canUpload && <PaymentProofForm booking={booking} venue={venue} onSuccess={() => void refresh()} />}
+      {canUpload && <PaymentProofForm booking={booking} venue={venue} onSuccess={() => void reload()} />}
       {booking.status === "AWAITING_REVIEW" && (
         <p role="status" className="alert info">Your receipt is awaiting manual approval.
           Do not send another payment unless the venue asks you to.</p>

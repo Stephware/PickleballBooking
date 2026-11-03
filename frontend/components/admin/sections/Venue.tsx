@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { adminRequest, extractError, hasOwnerRights } from "@/lib/admin-client";
 import type { StaffProfile, VenueSettingsAdmin } from "@/types/admin";
 import { AccessMessage, Loading, Notice, SectionHeader, useAdminResource } from "@/components/admin/AdminShared";
@@ -14,16 +14,14 @@ const fallback: VenueSettingsAdmin = {
 
 export function AdminVenue({ user }: { user: StaffProfile }) {
   const response = useAdminResource<VenueSettingsAdmin>("/venue", fallback);
-  const [form, setForm] = useState<VenueSettingsAdmin>(fallback);
+  const [draft, setForm] = useState<VenueSettingsAdmin | null>(null);
+  const form = draft ?? response.data;
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const canManage = hasOwnerRights(user);
-  useEffect(() => {
-    if (!response.loading && !response.error) setForm(response.data);
-  }, [response.data, response.loading, response.error]);
   function change<K extends keyof VenueSettingsAdmin>(key: K, value: VenueSettingsAdmin[K]) {
-    setForm(old => ({ ...old, [key]: value })); setMessage("");
+    setForm({ ...form, [key]: value }); setMessage("");
   }
   async function save(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault(); if (!canManage || busy) return;
@@ -31,7 +29,7 @@ export function AdminVenue({ user }: { user: StaffProfile }) {
     try {
       await adminRequest("/venue", "PUT", form);
       setMessage("Venue settings saved. Reload the site to see updated branding.");
-      await response.reload();
+      await response.reload(); setForm(null);
     } catch (cause) { setError(extractError(cause)); }
     finally { setBusy(false); }
   }

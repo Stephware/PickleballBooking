@@ -44,7 +44,7 @@ If submitted again with the same UUID and identical reservation details, the ser
 
 - 1–8 consecutive, complete, aligned venue slots inside the venue's same-day operating hours.
 - No partially elapsed slots; respect the venue's advance-booking window, minimum notice and active-court flag.
-- Uses **Phase 4 availability/pricing within the database transaction**. Current pricing is recalculated on the backend; one atomic booking spans the requested consecutive slots. The total equals the sum of current quoted slot prices and is snapshotted in `bookings.total_amount`.
+- Uses **Phase 4 availability/pricing within the database transaction**. Current pricing is recalculated on the backend; one atomic booking spans the requested consecutive slots. Phase 9 corrects fractional-cent accumulation: the total is the sum of exact server-calculated slot amounts, rounded once for the entire reservation and snapshotted in `bookings.total_amount`. Individually displayed rounded slot quotes are estimates and may sum to a slightly different amount.
 - Pending `HELD` reservation expires after `venue_settings.hold_minutes` (never later than the booking start). No payment is taken in Phase 5.
 - Inserts `court_schedule_entries` and `bookings` together in a transaction. The PostgreSQL GiST exclusion `ex_court_active_time_overlap` is the final guard against concurrent overlapping bookings. An overlap or unique key collision returns 409, never a double-booked confirmation.
 

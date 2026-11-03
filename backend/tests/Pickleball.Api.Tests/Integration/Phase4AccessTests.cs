@@ -8,8 +8,8 @@ using Xunit;
 
 namespace Pickleball.Api.Tests.Integration;
 
-public sealed class Phase4AccessTests(WebApplicationFactory<Program> factory)
-    : IClassFixture<WebApplicationFactory<Program>>
+public sealed class Phase4AccessTests(IsolatedApiFactory factory)
+    : IClassFixture<IsolatedApiFactory>
 {
     [Fact]
     public async Task PricingRuleRead_RequiresAuthentication()
@@ -20,12 +20,12 @@ public sealed class Phase4AccessTests(WebApplicationFactory<Program> factory)
     }
 
     [Fact]
-    public async Task PricingRuleWrite_RequiresCsrfEvenWithoutLogin()
+    public async Task PricingRuleWrite_DeniesAnonymous()
     {
         using var client = factory.CreateClient();
         var response = await client.PostAsync("/api/v1/admin/pricing/rules",
             new StringContent("{}", System.Text.Encoding.UTF8, "application/json"));
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
     [Fact]

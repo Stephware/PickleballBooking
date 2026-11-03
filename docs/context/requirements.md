@@ -7,7 +7,9 @@
 - Players book from a **list of courts or a court-by-time grid**, not a physical court-layout map.
 - Clear statuses on a selected date's slots: AVAILABLE (green), OCCUPIED (red), ELAPSED (gray). PENDING (yellow) and blocked/closed are useful additional states.
 
-## Proposed MVP — not all features approved or built
+## Application scope — approved for integration in Phase 9
+
+The Phase 9 request authorizes integration and verification of the existing Phase 1–8 player/staff flows. Implemented/tested status is tracked separately in progress.md and the Phase 9 report.
 
 ### Players
 

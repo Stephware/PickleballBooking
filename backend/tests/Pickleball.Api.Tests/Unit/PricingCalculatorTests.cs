@@ -91,4 +91,24 @@ public sealed class PricingCalculatorTests
             PricingCalculator.Calculate(Court(), new DateOnly(2026, 11, 3),
                 new TimeOnly(12, 0), new TimeOnly(11, 0), []));
     }
+
+    [Theory]
+    [InlineData("199.99", "100.00")]
+    [InlineData("0.01", "0.01")]
+    public void HalfCentSlotPrice_RoundsAwayFromZero(string hourlyRate, string expected)
+    {
+        var price = PricingCalculator.Calculate(Court(rate: decimal.Parse(hourlyRate,
+                System.Globalization.CultureInfo.InvariantCulture)), new DateOnly(2026, 11, 3),
+            new TimeOnly(9, 0), new TimeOnly(9, 30), []);
+        Assert.Equal(decimal.Parse(expected, System.Globalization.CultureInfo.InvariantCulture), price);
+    }
+
+    [Fact]
+    public void RuleBoundary_DoesNotRoundIntermediateAmounts()
+    {
+        var price = PricingCalculator.Calculate(Court(rate: 0.01m), new DateOnly(2026, 11, 3),
+            new TimeOnly(9, 0), new TimeOnly(9, 30),
+            [Rule(1, null, null, "09:15", "09:30", 0.01m)]);
+        Assert.Equal(0.01m, price);
+    }
 }

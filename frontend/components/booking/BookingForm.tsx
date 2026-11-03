@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { jsonRequest, money, prettyDate, timeLabel } from "@/lib/player";
 import type { Booking, SelectedRange } from "@/types/player";
@@ -17,6 +17,9 @@ export function BookingForm({ selection, onBack }: {
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const errorSummary = useRef<HTMLDivElement>(null);
+  useEffect(() => { if (error) errorSummary.current?.focus(); }, [error]);
+  const missingContact = Boolean(error) && !phone.trim() && !email.trim();
   const key = useRef<string | null>(null);
   const slots = selection.slots;
   const total = slots.reduce((sum, slot) => sum + slot.totalPrice, 0);
@@ -90,13 +93,15 @@ export function BookingForm({ selection, onBack }: {
           </label>
           <label className="field">
             <span>Mobile number</span>
-            <input name="phone" type="tel" autoComplete="tel" maxLength={32}
+            <input id="booking-phone" name="phone" type="tel" autoComplete="tel" maxLength={32}
+              aria-invalid={missingContact || undefined} aria-describedby={missingContact ? "booking-error" : undefined}
               placeholder="09xx xxx xxxx" value={phone}
               onChange={(e) => edit(setPhone, e.target.value)} />
           </label>
           <label className="field">
             <span>Email address</span>
-            <input name="email" type="email" autoComplete="email" maxLength={254}
+            <input id="booking-email" name="email" type="email" autoComplete="email" maxLength={254}
+              aria-invalid={missingContact || undefined} aria-describedby={missingContact ? "booking-error" : undefined}
               placeholder="you@example.com" value={email}
               onChange={(e) => edit(setEmail, e.target.value)} />
           </label>
@@ -113,7 +118,10 @@ export function BookingForm({ selection, onBack }: {
           <p>You will receive a booking reference and instructions to upload payment proof.
              The venue must review your payment before confirming your court.</p>
         </div>
-        {error && <p className="alert error" role="alert">{error}</p>}
+        {error && <div className="alert error" role="alert" tabIndex={-1}
+          ref={errorSummary} id="booking-error">{error}
+          {missingContact && <> <a href="#booking-phone">Add a mobile number</a> or <a href="#booking-email">email address</a>.</>}
+        </div>}
         <button type="submit" className="button-primary full-button" disabled={busy}
           aria-busy={busy}>
           {busy ? "Saving your court…" : "Hold court · " + money(total, selection.currency)}

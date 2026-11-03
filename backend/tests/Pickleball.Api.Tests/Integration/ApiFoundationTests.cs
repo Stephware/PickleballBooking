@@ -6,8 +6,8 @@ using Xunit;
 
 namespace Pickleball.Api.Tests.Integration;
 
-public sealed class ApiFoundationTests(WebApplicationFactory<Program> factory)
-    : IClassFixture<WebApplicationFactory<Program>>
+public sealed class ApiFoundationTests(IsolatedApiFactory factory)
+    : IClassFixture<IsolatedApiFactory>
 {
     [Fact]
     public async Task HealthEndpoint_ReturnsSuccess()

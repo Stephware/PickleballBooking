@@ -72,11 +72,12 @@ public sealed class AvailabilityService(
                     slot.StartUtc, slot.EndUtc, nowUtc, firstBookableUtc,
                     true,
                     courtEntries ?? []);
+                var amount = PricingCalculator.CalculateUnrounded(c, date, slot.Start, slot.End, rules);
                 return new AvailabilitySlotResponse(
                     slot.Start, slot.End,
                     new DateTimeOffset(slot.StartUtc, TimeSpan.Zero),
                     new DateTimeOffset(slot.EndUtc, TimeSpan.Zero),
-                    status, PricingCalculator.Calculate(c, date, slot.Start, slot.End, rules));
+                    status, PricingCalculator.RoundTotal(amount)) { UnroundedTotalPrice = amount };
             }).ToArray();
             return new AvailabilityCourtResponse(c.Id, c.CourtName, slots);
         }).ToArray();

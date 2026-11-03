@@ -1,4 +1,4 @@
-import type { Metadata } from "react";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BookingStatus } from "@/components/booking/BookingStatus";
 import { VenueHeader } from "@/components/ui/VenueHeader";

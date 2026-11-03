@@ -8,14 +8,14 @@ export function useAdminResource<T>(url: string, fallback: T) {
   const [data, setData] = useState<T>(fallback);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const reload = useCallback(async () => {
-    setLoading(true); setError("");
-    try { setData(await adminRequest<T>(url)); }
-    catch (cause) { setError(extractError(cause)); }
-    finally { setLoading(false); }
-  }, [url]);
+  const reload = useCallback(() => adminRequest<T>(url)
+    .then(value => { setData(value); setError(""); })
+    .catch(cause => { setError(extractError(cause)); })
+    .finally(() => { setLoading(false); }), [url]);
   useEffect(() => { void reload(); }, [reload]);
-  return { data, setData, loading, error, setError, reload };
+  return { data, setData, loading, error, setError, reload: () => {
+    setLoading(true); setError(""); return reload();
+  } };
 }
 
 export function SectionHeader({ eyebrow, title, description, action }: {

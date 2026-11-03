@@ -2,7 +2,7 @@
    All styles are scoped to .admin-app so public pages remain untouched. */
 .admin-app {
   min-height: 100vh; background: #f4f6f1; color: #183024;
-  --admin-panel: #ffffff; --admin-edge: #dfe7dd; --admin-muted: #687b6b;
+  --admin-panel: #ffffff; --admin-edge: #dfe7dd; --admin-muted: #566b59;
 }
 .admin-app h1,.admin-app h2,.admin-app h3,.admin-app h4 { margin: 0; }
 .admin-app button:disabled { opacity: .6; }
@@ -38,7 +38,7 @@
 .admin-logo small { display: block; font-size: .7rem; color: var(--admin-muted); }
 .admin-nav { padding-top: 16px; flex: 1; }
 .admin-nav-group { text-transform: uppercase; letter-spacing: .13em;
-  color: #7c9583; font-size: .67rem; font-weight: 800; padding: 20px 12px 8px; margin: 0; }
+  color: #576f5e; font-size: .67rem; font-weight: 800; padding: 20px 12px 8px; margin: 0; }
 .admin-nav-item { display: flex; align-items: center; justify-content: space-between; text-align: left;
   padding: 11px 13px; background: none; border: none; color: #53675a;
   width: 100%; font-size: .85rem; font-weight: 690; border-radius: 10px; margin: 2px 0; }
@@ -101,7 +101,7 @@
 .admin-notice.notice-error { color: #8b3831; background: #fff1ee; border-color: #eec4b8; }
 .admin-notice.notice-success { color: #195e42; background: #eaf7ed; border-color: #b6d9bf; }
 .admin-notice.notice-info { color: #27556d; background: #eef6fa; border-color: #c6dce9; }
-.admin-empty,.admin-loading { padding: 31px 13px; text-align: center; color: #78867a;
+.admin-empty,.admin-loading { padding: 31px 13px; text-align: center; color: #586b5c;
   font-size: .89rem; }
 .admin-toolbar { display: flex; flex-wrap: wrap; gap: 15px; align-items: end; margin-bottom: 20px; }
 .admin-form { display: grid; gap: 18px; }
@@ -121,7 +121,7 @@
   display: flex; justify-content: space-between; gap: 15px; align-items: center; }
 .admin-form-footer strong { display: block; font-size: 1.35rem; }
 .admin-form-footer small { display: block; font-weight: 500; font-size: .78rem; color: var(--admin-muted); }
-.admin-hint { font-size: .78rem; color: #6a806f; margin: 12px 0; }
+.admin-hint { font-size: .78rem; color: #536b58; margin: 12px 0; }
 .admin-table-wrap { overflow: auto; width: 100%; }
 .admin-table { width: 100%; border-collapse: collapse; font-size: .85rem; text-align: left; }
 .admin-table thead { background: #f9fbf8; }
@@ -196,8 +196,9 @@
   .admin-layout { display: block; }
   .admin-sidebar { position: fixed; top: 0; bottom: 0; left: 0;
     width: 270px; overflow: auto; transform: translateX(-101%);
+    visibility: hidden;
     transition: transform .2s ease; box-shadow: 20px 0 36px #1d382b18; }
-  .admin-sidebar.sidebar-open { transform: translateX(0); }
+  .admin-sidebar.sidebar-open { transform: translateX(0); visibility: visible; }
   .admin-menu-scrim { display: block; position: fixed; inset: 0;
     border: 0; background: #0f1d19a6; z-index: 9; }
   .admin-menu-button { display: grid; place-items: center; width: 40px; height: 40px;

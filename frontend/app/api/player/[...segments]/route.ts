@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { backendHeaders } from "@/lib/backend-headers";
 import { apiOrigin } from "@/lib/server-api";
+import { BodyTooLargeError, readLimitedBody, readLimitedText } from "@/lib/request-body";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -16,9 +18,10 @@ function validPostOrigin(request: NextRequest): boolean {
   if (process.env.NODE_ENV === "production" && !process.env.APP_ORIGIN) return false;
   return Boolean(origin && origin === (process.env.APP_ORIGIN || request.nextUrl.origin));
 }
-async function upstream(path: string, init: RequestInit = {}, token?: string) {
+async function upstream(path: string, init: RequestInit = {}, token?: string, incoming?: Headers) {
   const headers = new Headers(init.headers);
   if (token) headers.set("X-Booking-Token", token);
+  if (incoming) backendHeaders(incoming).forEach((value, name) => headers.set(name, value));
   const response = await fetch(new URL(path, apiOrigin()), {
     ...init, headers, cache: "no-store",
     signal: AbortSignal.timeout(25000), redirect: "manual",
@@ -53,6 +56,8 @@ type Context = { params: Promise<{ segments: string[] }> };
 
 async function handle(request: NextRequest, context: Context, method: "GET" | "POST") {
   const { segments } = await context.params;
+  const upstreamForRequest = (path: string, init: RequestInit = {}, token?: string) =>
+    upstream(path, init, token, request.headers);
   if (segments.length > 4) return error("Not found.", 404);
   if (method === "POST" && !validPostOrigin(request))
     return error("Invalid request origin. Reload the page and retry.", 403);
@@ -64,7 +69,7 @@ async function handle(request: NextRequest, context: Context, method: "GET" | "P
   try {
     if (method === "GET") {
       if (path === "venue") {
-        const result = await upstream("/api/v1/venue");
+        const result = await upstreamForRequest("/api/v1/venue");
         return proxy(result.data, result.response.status, result.message);
       }
       if (path === "availability") {
@@ -75,26 +80,25 @@ async function handle(request: NextRequest, context: Context, method: "GET" | "P
           return error("Choose a valid booking date and court.", 400);
         const query = new URLSearchParams({ date });
         if (courtId) query.set("courtId", courtId);
-        const result = await upstream("/api/v1/availability?" + query.toString());
+        const result = await upstreamForRequest("/api/v1/availability?" + query.toString());
         return proxy(result.data, result.response.status, result.message);
       }
       if (code && segments.length === 2) {
         if (!token) return error("Booking access required.", 404);
-        const result = await upstream("/api/v1/bookings/" + code, {}, token);
+        const result = await upstreamForRequest("/api/v1/bookings/" + code, {}, token);
         return proxy(result.data, result.response.status, result.message);
       }
       if (code && path === "bookings/" + code + "/payments") {
         if (!token) return error("Booking access required.", 404);
-        const result = await upstream("/api/v1/bookings/" + code + "/payments", {}, token);
+        const result = await upstreamForRequest("/api/v1/bookings/" + code + "/payments", {}, token);
         return proxy(result.data, result.response.status, result.message);
       }
     }
 
     if (method === "POST") {
       if (path === "bookings") {
-        const body = await request.text();
-        if (body.length > 5000) return error("Booking request is too large.", 413);
-        const result = await upstream("/api/v1/bookings", {
+        const body = await readLimitedText(request, 5000);
+        const result = await upstreamForRequest("/api/v1/bookings", {
           method: "POST", body, headers: { "Content-Type": "application/json" },
         });
         if (!result.response.ok) return proxy(null, result.response.status, result.message);
@@ -113,13 +117,12 @@ async function handle(request: NextRequest, context: Context, method: "GET" | "P
         return output;
       }
       if (code && path === "bookings/" + code + "/access") {
-        const length = Number(request.headers.get("content-length") ?? 0);
-        if (length > 2048) return error("Access request too large.", 413);
-        const data = await request.json().catch(() => null) as { accessToken?: unknown } | null;
+        const text = await readLimitedText(request, 2048);
+        const data = JSON.parse(text) as { accessToken?: unknown } | null;
         const received = data?.accessToken;
         if (typeof received !== "string" || !/^[A-Za-z0-9_-]{43}$/.test(received))
           return error("Enter a valid booking access token.", 400);
-        const result = await upstream("/api/v1/bookings/" + code, {}, received);
+        const result = await upstreamForRequest("/api/v1/bookings/" + code, {}, received);
         if (!result.response.ok) return error("Booking reference or access token is invalid.", 404);
         const output = NextResponse.json({ ok: true }, { headers: noStore });
         storeToken(output, code, received);
@@ -127,31 +130,34 @@ async function handle(request: NextRequest, context: Context, method: "GET" | "P
       }
       if (code && path === "bookings/" + code + "/cancel") {
         if (!token) return error("Booking access required.", 404);
-        const body = await request.text();
-        if (body.length > 1000) return error("Cancellation reason is too long.", 400);
-        const result = await upstream("/api/v1/bookings/" + code + "/cancel", {
+        const body = await readLimitedText(request, 1000);
+        const result = await upstreamForRequest("/api/v1/bookings/" + code + "/cancel", {
           method: "POST", body, headers: { "Content-Type": "application/json" },
         }, token);
         return proxy(result.data, result.response.status, result.message);
       }
       if (code && path === "bookings/" + code + "/payments") {
         if (!token) return error("Booking access required.", 404);
-        const length = Number(request.headers.get("content-length") ?? 0);
-        if (length > 6 * 1024 * 1024)
-          return error("Receipt upload is too large.", 413);
-        const form = await request.formData();
+        const body = await readLimitedBody(request, 6 * 1024 * 1024);
+        const form = await new Response(body, {
+          headers: { "Content-Type": request.headers.get("content-type") ?? "" },
+        }).formData().catch(() => null);
+        if (!form) return error("Upload a valid receipt form.", 400);
         const proof = form.get("Proof");
         if (!(proof instanceof File) || proof.size === 0 ||
             proof.size > 5 * 1024 * 1024)
           return error("Upload a receipt smaller than 5 MB.", 400);
-        const result = await upstream("/api/v1/bookings/" + code + "/payments", {
+        const result = await upstreamForRequest("/api/v1/bookings/" + code + "/payments", {
           method: "POST", body: form,
         }, token);
         return proxy(result.data, result.response.status, result.message);
       }
     }
     return error("Not found.", 404);
-  } catch {
+  } catch (cause) {
+    if (cause instanceof BodyTooLargeError) return error("Request is too large.", 413);
+    if (cause instanceof SyntaxError)
+      return error("Request body is invalid.", 400);
     return error("The booking service is temporarily unavailable. Try again.", 503);
   }
 }
