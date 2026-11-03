@@ -824,7 +824,10 @@ body { background: #fffaf6; color: #261c20; }
   .reserve-mobile-picker .reserve-time-choice:disabled { background: #f4f1f0; color: #9c9095; }
   .reserve-mobile-picker .reserve-time-choice:disabled small { color: #9c9095; }
   .reserve-time-hint { font-size: .72rem; color: #77666c; margin: 12px 0 0; }
-  .reserve-theme .schedule-wrap { display: none; }
+  /* The live court/time card picker is the only schedule UI on phones.
+     The desktop multi-column table stays visible at larger breakpoints. */
+  .reserve-theme .schedule-wrap,
+  .reserve-site .schedule-wrap { display: none; }
   .reserve-theme .selection-bar { border-radius: 12px; }
   .reserve-theme .steps-grid article { padding: 15px 5px; }
 }

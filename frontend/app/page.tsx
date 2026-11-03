@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element -- original developer-owned static hero asset */
 import { AvailabilityGrid } from "@/components/booking/AvailabilityGrid";
 import { VenueHeader } from "@/components/ui/VenueHeader";
 import { VenueGallery } from "@/components/ui/VenueGallery";
@@ -27,18 +26,9 @@ export default async function HomePage() {
                 <a className="hero-action" href="#availability-title">Book a Court <span aria-hidden="true">↗</span></a>
                 <a className="hero-action-secondary" href="#how-it-works">How It Works</a>
               </div>
-              <span className="hero-assurance">Online reservations · Clear schedules · No waiting in line</span>
             </div>
-            <div className="hero-visual" aria-hidden="true">
-              <img src="/venue/hero-paddle.svg" width={820} height={570} alt=""/>
-            </div>
+            <div className="hero-visual" aria-hidden="true" />
           </section>
-          <div className="trust-strip" aria-label="Booking benefits">
-            <span><strong aria-hidden="true">▦</strong> Live availability</span>
-            <span><strong aria-hidden="true">✓</strong> Easy reservations</span>
-            <span><strong aria-hidden="true">▤</strong> Payment proof review</span>
-            <span><strong aria-hidden="true">✦</strong> Mobile-friendly</span>
-          </div>
           <section className="court-showcase" aria-labelledby="our-courts-title">
             <div className="showcase-header">
               <div><p className="eyebrow">Get to know the venue</p>
