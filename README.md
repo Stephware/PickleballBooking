@@ -28,6 +28,12 @@ The latest task-focused improvements keep the existing five-section owner layout
 
 See [Phase 3 workflow guide](docs/improvements-phase-3-workflow-refinement.md). This is an interface/refinement phase, **not** a new booking/payment backend or database migration. Full CI and real-device verification status are tracked in [progress](docs/context/progress.md).
 
+## Final release verification (post-Phase-9 usability Phase 4)
+
+Phase 4 adds a second, **isolated production-image verification workflow** alongside the existing .NET/Next.js/disposable-Postgres/browser suite. It tests fresh production Compose containers, private authentication/proof persistence after recreation, production security headers and default-disabled venue customization, and an independent PostgreSQL backup restore with GiST overlap constraint. CI runs only on a unique synthetic `_test` project and cleans up only its own newly created volumes.
+
+Passing automated tests is **not** public launch approval. Actual venue official payment recipients, malware scanning, real mobile accessibility, live TLS/DNS, monitoring and encrypted off-site backups/restoration require explicit human signoff. See [Phase 4 release go/no-go guide](docs/improvements-phase-4-final-verification.md).
+
 ## Local API
 
 Connect to the *existing* local PostgreSQL 17 instance on port 5435. Configure connection credentials via local user-secrets, never Git:

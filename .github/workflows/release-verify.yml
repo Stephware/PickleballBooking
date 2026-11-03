@@ -1,0 +1,40 @@
+name: Verify isolated production release
+on:
+  pull_request:
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'deployment/**'
+      - 'database/**'
+      - 'scripts/**'
+      - '.github/workflows/release-verify.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: isolated-release-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  disposable-compose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      PHASE4_ISOLATED_TEST: '1'
+      COMPOSE_PROJECT_NAME: pickleball_phase4_${{ github.run_id }}_test
+      PHASE4_TEST_DATABASE: pickleball_release_test
+      APP_ORIGIN: https://phase4-ci.example.test
+      FRONTEND_PORT: '3198'
+      VENUE_NETWORK_PREFIX: 172.30.94
+      POSTGRES_PASSWORD: ci-phase4-test-admin-only
+      DB_APP_PASSWORD: ci-phase4-test-app-only
+      BOOKING_SIGNING_KEY: ci-phase4-only-signing-key-not-for-real-venue-0123456789
+      VENUE_PAYMENT_INSTRUCTIONS_APPROVED: 'false'
+      API_IMAGE: pickleball-api:phase4-disposable
+      FRONTEND_IMAGE: pickleball-frontend:phase4-disposable
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify ephemeral production container lifecycle and isolated restore
+        run: bash scripts/phase4-verify-release.sh

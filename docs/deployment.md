@@ -97,3 +97,25 @@ The frontend container passes through only **developer-managed public** `VENUE_*
 Provide `VENUE_PHONE`, `VENUE_FACEBOOK_URL` only for genuine published venue channels. For GCash/bank, independently verify the real recipient name, number and any QR destination, then set the relevant account fields and explicitly enable `VENUE_PAYMENT_INSTRUCTIONS_APPROVED=true` for that venue. If omitted/unapproved, the public UI warns users not to send transfers to unknown accounts. On changes to payment destination, disable the approval flag until the replacement has been verified.
 
 These `VENUE_*` variables are displayed publicly **when approved**, but keep the per-venue deployment .env private because it also contains PostgreSQL and signing secrets. Never put payment-proof images in `frontend/public/venue/` or use real account values in Git. Refer to [Phase 2 guide](improvements-phase-2-public-payment.md).
+
+## Phase 4 disposable production-image verification (not a venue deployment)
+
+A new independent GitHub Actions workflow `release-verify.yml` exercises real
+production API/frontend Docker images in a unique synthetic Compose project.
+It loads a fresh `pickleball_release_test` database only via
+`deployment/phase4-ci.compose.yaml`, runs the guarded
+`scripts/phase4-verify-release.sh`, then removes **only its own test volumes**.
+It never uses the existing `deployment/.env` of a venue or drops a real DB.
+
+The test checks staff/guest sessions and private PNG/PDF proof readability across
+API/frontend recreation, owner customization disabled by default, HTTP Origin/CSRF
+and rate-limit boundaries, and a custom PostgreSQL dump restored into
+`pickleball_restored_test` with nine tables, bookings, payments and exclusion
+constraint. It is intentionally **not** a copy of the actual production
+backup/restore runbook above. Do **not** use the `_test` overlay, synthetic
+credentials or test volume-cleanup steps on a real venue.
+
+Review [Phase 4 release acceptance](improvements-phase-4-final-verification.md)
+before authorizing live TLS, malware quarantine, real payment account publication,
+off-host backup, data retention or rollout. Both normal GitHub CI and this
+isolated production-image workflow must pass for the exact reviewed release.

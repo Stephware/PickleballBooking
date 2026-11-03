@@ -32,3 +32,7 @@ Added real-asset-only, developer-configured court photo slider, optional venue p
 ## 2026-11-03 — Post-Phase-9 usability Phase 3
 
 Refined existing customer/admin flows: front-loaded Today quick actions, proper per-booking cancellation reason and explicit destructive confirmation, collapsed advanced payment ledger, race-safe async loading and payment selection, retry-only hours on failed load, role-aware actions, admin Back/Forward history, progressive guest access token, keyboard-focused guided forms, top Back and mobile styles. Added browser smoke regression coverage. No backend/SQL schema/proof storage/Compose changes. CI and physical-device verification are separate.
+
+## 2026-11-03 — Post-Phase-9 usability Phase 4
+
+Added isolated production-image Compose CI (test-only override and guarded runner script), persistence tests for staff/guest tickets and private PNG/PDF receipts across container replacement, database dump/restore to separate synthetic database, and developer venue customization gate checks. Production launch blocked pending physical-device, real payment, malware scanning, TLS/ingress and encrypted off-site recovery acceptance. No production database, real credentials, live deployment or migrations were changed. Results require GitHub CI execution.
