@@ -44,4 +44,12 @@ Last reviewed: 2026-11-03
 | D-035 | No invented GCash/bank recipient instructions; add official venue-approved details before public launch | Launch blocker |
 | D-036 | Cross-device recovery for online holds unavailable until a secure verified channel is designed | Documented limitation |
 
+| D-037 | Separate staff workspace at /admin, not mixed with public player booking site | Phase 8 |
+| D-038 | Next.js BFF owns staff transport: ASP.NET Core staff+CSRF cookies stay in HttpOnly SameSite=Strict frontend cookies | Phase 8 security |
+| D-039 | Authenticate with anonymous CSRF then re-issue authenticated CSRF token; validate exact Origin on mutations | Phase 8 security |
+| D-040 | Restrict BFF to explicit method/path allowlist, never generic proxy; .NET remains role authority | Phase 8 security |
+| D-041 | Payment proof images only via staff-authenticated no-store route; PDFs downloaded; no public storage | Phase 8 |
+| D-042 | Admin shared design tokens with Phase 7; staff rights view-only for manager/owner actions | Phase 8 |
+| D-043 | Financial review requires human verification; manual recording/refund does not send money | Phase 8 |
+
 Documentation records decisions, not proof of a passing local build.

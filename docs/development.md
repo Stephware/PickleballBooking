@@ -1,4 +1,4 @@
-# Development setup — Phases 1–7
+# Development setup — Phases 1–8
 
 Prerequisites: .NET 10 SDK, Node.js 22 LTS recommended, and your **already-running** PostgreSQL 17 Docker instance on localhost:5435. Do not change the Docker volume.
 
@@ -103,3 +103,14 @@ Visit http://localhost:3000 and test a genuinely AVAILABLE future slot. A reserv
 The frontend tests cover pure helpers only. Manual real-browser responsive/accessibility checks and a disposable PostgreSQL full booking/payment flow are still mandatory. See [Phase 7 runbook](phase-7-player-frontend.md). Generate/commit frontend/package-lock.json after first npm install; don't fabricate lock dependencies.
 
 The repo still has stacked feature branches Phases 3–7, with main behind. Verify and integrate carefully before deployment.
+
+
+## Phase 8 admin dashboard
+
+With the same .NET API and PostgreSQL instance used for Phase 7, run frontend npm install, npm run check, npm run build, then npm run dev. Configure API_BASE_URL and APP_ORIGIN in frontend/.env.local (APP_ORIGIN=http://localhost:3000 locally, the exact HTTPS public origin in production).
+
+Visit http://localhost:3000/admin to log in with an existing staff email/password. A first Owner must be bootstrapped via the Phase 3 CLI (do not create a public admin registration endpoint). The Next.js server obtains anonymous/backend authenticated CSRF cookies, stores backend staff and antiforgery tokens as HttpOnly cookies, and proxies only explicitly approved admin API routes. Any Origin mismatch on modifying calls should receive HTTP 403.
+
+Verify Owner/Manager/Staff role separation, bookings/court conflicts, payment receipt image/PDF preview and approval, staff walk-ins, blocks, court/rate/hours settings, team accounts, password changes and logout using an isolated disposable database. Backend cookie/Data Protection keys must remain stable on multi-replica production deployment.
+
+See docs/phase-8-owner-staff-dashboard.md. All prior phases' .NET runtime and PostgreSQL checks are still pending; Phase 8 is source-only until npm and browser testing succeeds. Do not reset the existing Docker volume.

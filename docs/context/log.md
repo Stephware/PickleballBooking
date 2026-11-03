@@ -12,3 +12,5 @@
 - **2026-11-03 — Phase 6:** Added private GCash/bank payment proof storage, review/approval/rejection, manual payment/refund recording, confirmed staff bookings, schedule blocks, payment-sensitive booking status guards, API tests, AGENTS/wiki. No DB schema or Docker modifications. Build/live payment verification pending.
 
 - **2026-11-03 — Phase 7:** Branded Next.js player homepage, court/time availability matrix, 1–8-slot selection, booking/contact form, private token-backed booking status, receipt upload/preview, find-booking page, server-only gateway, status and offline UX, design tokens and pure helper tests. Stacked on Phase 6; no DB/backend schema or Docker modifications. Next.js build and live browser audit pending.
+
+- **2026-11-03 — Phase 8:** Added Next.js staff/owner dashboard, BFF admin session/CSRF proxy, role-aware bookings, payment review and private proof preview, manual bookings, blocks, courts/pricing/hours/venue/staff settings and account security. Added admin allowlist tests, UI styles, README/wiki/AGENTS. Backend SQL/Docker untouched. Local npm and database tests pending.

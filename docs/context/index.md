@@ -16,6 +16,7 @@ Read this index first, then only task-relevant pages. Current C# code and Postgr
 | [../phase-5-booking-engine.md](../phase-5-booking-engine.md) | Reservation requests, signed guest access, holds and expiry |
 | [../phase-6-payments-operations.md](../phase-6-payments-operations.md) | Proof uploads, staff payment review, bookings and maintenance blocks |
 | [../phase-7-player-frontend.md](../phase-7-player-frontend.md) | Player web routes, API gateway, secure guest access and responsive booking UI |
+| [../phase-8-owner-staff-dashboard.md](../phase-8-owner-staff-dashboard.md) | Admin login, protected gateway, role-aware operations and UI testing |
 | [../database-migrations.md](../database-migrations.md) | Migration safeguards |
 | [../development.md](../development.md) | How to run and test |
 | [../api/README.md](../api/README.md) | Current endpoints |
@@ -26,6 +27,6 @@ Read this index first, then only task-relevant pages. Current C# code and Postgr
 - Phase 1–2 code is on main. PR #3 merged to the Phase 2 branch, and PR #4 merged to the Phase 3 branch; main remains behind Phases 3–4.
 - Phase 5 provides booking/hold API, signed guest access and expiry worker. Phase 6 provides manual payment proof/review, staff bookings, block management and external refund records on top of it. No database schema changes.
 - Phase 7 implements the customer-facing booking, payment-proof preview and status source on a stacked branch, including server-only API gateway and helper tests. **No verified production frontend build or rendered UX audit yet.**
-- .NET builds, live PostgreSQL booking/payment tests and comprehensive E2E remain unverified. Automated settlement and **staff/owner frontend UI** remain unimplemented.
+- .NET builds, live PostgreSQL booking/payment tests and comprehensive E2E remain unverified. Phase 8 implements the **staff/owner frontend source** on a stacked branch; automated settlement remains unimplemented. Local npm/.NET integration, real browser security and accessibility checks are still pending.
 
 Open only the relevant pages for the task to conserve agent context.

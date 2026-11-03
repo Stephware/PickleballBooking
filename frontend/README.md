@@ -1,6 +1,6 @@
-# PickleballBooking — player frontend (Phase 7)
+# PickleballBooking — player and admin frontend (Phases 7–8)
 
-Next.js 16 App Router, TypeScript, Tailwind 4 and scoped CSS design tokens. Player booking website, court/time matrix, booking form, private status, manual payment-proof upload with preview, and lookup. Staff/owner dashboard is Phase 8.
+Next.js 16 App Router, TypeScript, Tailwind 4 and scoped CSS design tokens. Player booking website, court/time matrix, booking form, private status, manual payment-proof upload with preview, and lookup. Phase 8 adds a protected Owner/Manager/Staff dashboard at /admin.
 
 ## Run locally
 
@@ -34,3 +34,21 @@ Open http://localhost:3000. For production, APP_ORIGIN must match the public HTT
 Backend bearer tokens never enter localStorage or booking URLs; creation stores them in an HttpOnly cookie through the Next.js gateway. Same-browser status access works, but cross-device recovery is not implemented for online bookings; the optional private token entry supports tokens provided by the venue. Never treat a submitted receipt as verified payment. No GCash/bank receiver details are configured in the current API, so do not fabricate them in the UI.
 
 If the backend is down, the page shows offline and no booking buttons. The frontend currently requires local real-browser accessibility and mobile verification. See ../docs/phase-7-player-frontend.md and ../docs/context/ui-ux.md.
+
+
+## Phase 8 — staff administration
+
+Open **http://localhost:3000/admin** and log in with a Phase 3 staff account. First Owner account is still created only by the .NET bootstrap CLI. APP_ORIGIN must exactly match the public browser origin in production for every modifying admin request.
+
+Admin features: today's snapshot, reservations, payment proof queue with private preview, approved/external cash records and refund references, staff-created bookings, maintenance blocks, court and pricing management, opening hours, owner-only venue settings and team accounts, and account password changes.
+
+Secure BFF architecture:
+- app/api/admin/session/route.ts — login/logout/profile with backend authenticated cookie/antiforgery handshake
+- app/api/admin/[...segments]/route.ts — allowlisted staff operations, backend CSRF and private receipt response
+- lib/admin-proxy.ts and lib/admin-policy.ts — server-only cookie/CSRF forwarding, Origin validation, per-method allowlist
+- components/admin/ and app/admin/admin.css — role-aware frontend and scoped responsive design
+- tests/admin-policy.test.mjs — allowed/denied administrative paths for all supported methods
+
+Backend staff tickets and CSRF tokens reside only in HttpOnly, SameSite=Strict cookies set by the Next.js server, never frontend JS/storage. The backend still enforces all roles. Private receipt images/PDFs are not public files. See ../docs/phase-8-owner-staff-dashboard.md for full requirements, setup and pending verification.
+
+Before release run npm run check/build, check 320–1024px responsive/keyboard/reader behavior, actual HTTPS/CSRF/auth session and role restrictions, and disposable PostgreSQL E2E. UI UX Pro Max/Impeccable global skills have not yet been run through the GitHub connector.

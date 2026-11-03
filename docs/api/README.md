@@ -101,3 +101,13 @@ The Next.js server-only catch-all route app/api/player/[...segments]/route.ts ex
 - POST /api/player/bookings/{code}/access (optional private venue-issued token to reestablish browser cookie)
 
 For production APP_ORIGIN must be configured to the browser-facing HTTPS origin. See [Phase 7 frontend guide](../phase-7-player-frontend.md). The backend's existing API is unchanged.
+
+
+## Phase 8 Next.js admin BFF (not new .NET endpoints)
+
+- GET/POST/DELETE /api/admin/session: profile, login, logout
+- All supported admin paths live in frontend/lib/admin-policy.ts and are proxied to /api/v1/admin with backend session cookie+antiforgery validation, plus exact Origin check for mutating calls.
+- GET /api/admin/payments/{id}/proof is a special authenticated binary response; image preview or PDF attachment. No public static proof URLs.
+- Session tokens reside only in HttpOnly, SameSite=Strict cookies scoped to /api/admin. Production APP_ORIGIN and HTTPS required.
+
+The user interface at /admin exposes bookings, payments, maintenance, courts, rate rules, venue hours/settings and team accounts based on .NET role definitions. Follow docs/phase-8-owner-staff-dashboard.md; API security and financial behavior remain in the existing backend.
