@@ -111,3 +111,10 @@ have not been supplied, and receipt malware scanning, TLS/DNS, backups,
 cross-device guest recovery and physical-device/screen-reader evaluation remain
 separate operator work. Phase 3 will polish remaining UI friction, Phase 4
 will perform the final full UX/security/regression audit.
+
+## Executed verification — 2026-11-03
+
+GitHub Actions [41584555464](https://github.com/Stephware/PickleballBooking/actions/runs/41584555464) completed successfully on commit `c389e94`.
+.NET restore/build and 107 database-backed tests passed; frontend lint/types, 28 Node tests and Webpack production build passed. 29 synthetic HTTP API scenarios passed against an isolated PostgreSQL database. Existing Playwright and sampled Axe browser checks (320px, 375px, 768px, 1024px, guest/staff receipt workflow) passed with zero page runtime errors. The runtime dependency audit reported zero vulnerabilities; there remain 16 moderate advisories among development tooling dependencies.
+
+This confirms the existing player/admin booking and receipt flow with Phase 2 preview changes. **It does not mean real court photographs, account numbers, QR scans, real PDF files, physical phones or real transfers were verified.** Those require approved venue input and a final physical-device audit; no production deployment was performed.

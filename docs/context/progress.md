@@ -57,6 +57,6 @@ Read [Phase 1 usability implementation](../improvements-phase-1-admin-usability.
 - [x] No backend C#, SQL-first schema, booking/payment status, or Docker volume changes.
 - [ ] **Actual real court photos, phone/Facebook handles, GCash/bank recipient/QR not supplied**; must come from the venue and be approved before production usage.
 - [ ] Actual phone, QR, PDF and photo carousel checks with real media and physical touch devices remain pending.
-- [ ] Branch-specific CI .NET/npm/browser verification status to be recorded after GitHub checks.
+- [x] **GitHub Actions passed** [run 41584555464](https://github.com/Stephware/PickleballBooking/actions/runs/41584555464) on source commit c389e94: **107 .NET tests, 28 frontend Node tests, 29 live API scenarios**; lint, TypeScript, Next.js production build, runtime audit and disposable-venue browser/axe workflow all passed. No browser runtime errors.
 
 Earlier Phase 9 and usability Phase 1 passing runs do not establish Phase 2 validation. See [Phase 2 guide](../improvements-phase-2-public-payment.md).

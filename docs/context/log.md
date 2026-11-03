@@ -28,3 +28,5 @@ Introduced five-item owner navigation, hidden Team/Venue UI, default-off develop
 ## 2026-11-03 — Post-Phase-9 usability Phase 2
 
 Added real-asset-only, developer-configured court photo slider, optional venue phone/Facebook links, approved GCash/bank recipient/QR instructions with fail-closed unconfigured state, enlarged guest/staff proof image previews and local pre-upload PDF inspection. Added top back controls, styling, pure config tests and browser harness updates; no SQL/backend/Compose/credentials modified. Real venue media and production recipient details remain operator-provided; CI/run verification must be recorded separately.
+
+- **2026-11-03 — Phase 2 CI:** GitHub Actions run 41584555464 PASSED (107 .NET tests, 28 frontend tests, 29 API scenarios, browser/Axe and production build). No actual venue photos/recipient/account/QR were present; production media, transfer and physical-device verification remain blocked.
