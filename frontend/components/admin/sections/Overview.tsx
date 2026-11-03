@@ -37,7 +37,7 @@ export function AdminOverview({ user, venue, navigate }: {
       onClick={() => { setLoading(true); void reload(); }}>Try again</button></Notice>}
     {!loading && !error && reviewsNeedingAttention.length > 0 &&
       <Notice kind="info">{reviewsNeedingAttention.length} submitted payment{reviewsNeedingAttention.length === 1 ? "" : "s"}
-        {" "}need staff attention. Review the payment queue before the guests' game times.
+        {" "}need staff attention. Review the payment queue before the guests&apos; game times.
         Courts with submitted proof remain reserved until a manual decision.</Notice>}
     <section className="admin-quick-actions">
       <h3>Quick actions</h3>
