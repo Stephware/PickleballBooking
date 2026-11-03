@@ -98,7 +98,7 @@ export function AdminPayments({ user }: { user: StaffProfile }) {
                 {selected.hasProof ? <div className="admin-proof">
                   <p className="micro-label">PRIVATE PAYMENT PROOF</p>
                   <p className="admin-hint">Inspect the receipt closely, then independently
-                    verify the transaction in the venue's bank or GCash account before approving.</p>
+                    verify the transaction in the venue&apos;s bank or GCash account before approving.</p>
                   {!proofError ? <button type="button" className="admin-proof-image-button"
                     disabled={!proofReady} aria-label="Enlarge submitted payment receipt"
                     onClick={() => setEnlarged(true)}>

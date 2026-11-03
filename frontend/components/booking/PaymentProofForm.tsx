@@ -108,7 +108,6 @@ export function PaymentProofForm({ booking, venue, publicDetails, onSuccess }: {
               onClick={() => void copyNumber(instructions.accountNumber)}>Copy account number</button>
             {copyStatus && <span role="status" className="form-hint">{copyStatus}</span>}
             {instructions.qrPath && <>
-              {/* eslint-disable-next-line @next/next/no-img-element -- developer-approved static QR */}
               <img className="venue-qr" src={instructions.qrPath}
                 width={230} height={230} alt={"Official " +
                   (method === "GCASH" ? "GCash" : "bank transfer") + " QR code"}/>

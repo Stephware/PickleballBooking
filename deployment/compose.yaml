@@ -47,6 +47,18 @@ services:
       API_BASE_URL: http://api:8080
       APP_ORIGIN: ${APP_ORIGIN:?Set the exact HTTPS public origin}
       TRUST_PROXY_HEADERS: "1"
+      # Developer-managed public venue presentation (no owner-side customization).
+      VENUE_PHONE: ${VENUE_PHONE:-}
+      VENUE_FACEBOOK_URL: ${VENUE_FACEBOOK_URL:-}
+      VENUE_GALLERY_JSON: ${VENUE_GALLERY_JSON:-[]}
+      VENUE_PAYMENT_INSTRUCTIONS_APPROVED: ${VENUE_PAYMENT_INSTRUCTIONS_APPROVED:-false}
+      VENUE_GCASH_NAME: ${VENUE_GCASH_NAME:-}
+      VENUE_GCASH_NUMBER: ${VENUE_GCASH_NUMBER:-}
+      VENUE_GCASH_QR_PATH: ${VENUE_GCASH_QR_PATH:-}
+      VENUE_BANK_NAME: ${VENUE_BANK_NAME:-}
+      VENUE_BANK_ACCOUNT_NAME: ${VENUE_BANK_ACCOUNT_NAME:-}
+      VENUE_BANK_ACCOUNT_NUMBER: ${VENUE_BANK_ACCOUNT_NUMBER:-}
+      VENUE_BANK_QR_PATH: ${VENUE_BANK_QR_PATH:-}
     networks:
       default:
         ipv4_address: ${VENUE_NETWORK_PREFIX:-172.30.91}.3
