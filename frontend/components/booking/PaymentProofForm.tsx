@@ -158,8 +158,9 @@ export function PaymentProofForm({ booking, venue, publicDetails, onSuccess }: {
         <button className="button-primary full-button" type="submit" disabled={busy || !file}
           aria-busy={busy}>{busy ? "Uploading receipt…" : "Submit receipt for review"}</button>
       </form>
-      <p className="form-hint">The venue checks payment manually. If the hold or review window
-        expires, please contact the venue before sending another transfer.</p>
+      <p className="form-hint">You must submit proof before the displayed hold deadline
+        (10 minutes by default). After accepted proof, the court remains reserved until
+        staff review. Do not make another transfer while waiting.</p>
     </section>
   );
 }

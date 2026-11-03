@@ -23,6 +23,10 @@ export function AdminBookings({ user, venue }: { user: StaffProfile; venue: Venu
   async function action(booking: AdminBooking, type: "confirm" | "cancel") {
     // Cancellation requires the explicit inline booking-specific confirmation.
     if (type === "cancel" && cancelling !== booking.bookingCode) return;
+    if (type === "cancel" && booking.status === "AWAITING_REVIEW" && !reason.trim()) {
+      setError("A reason is required to release a court with submitted payment proof.");
+      return;
+    }
     setBusy(booking.bookingCode); setError(""); setMessage("");
     try {
       await adminRequest("/bookings/" + booking.bookingCode + "/" + type, "POST",
@@ -82,8 +86,9 @@ export function AdminBookings({ user, venue }: { user: StaffProfile; venue: Venu
               {canManage && cancelling === b.bookingCode && <div className="admin-inline-cancel"
                 role="group" aria-label={"Confirm cancellation of " + b.bookingCode}>
                 <strong>Cancel {b.bookingCode}?</strong>
-                <p>This releases the court. Any refund must be handled separately.</p>
-                <label>Reason (optional)
+                <p>This releases the court. Any refund must be handled separately.
+                  Submitted proofs remain in the review queue for reconciliation.</p>
+                <label>{b.status === "AWAITING_REVIEW" ? "Reason (required)" : "Reason (optional)"}
                   <input value={reason} maxLength={300}
                     placeholder="Reason for this booking only"
                     onChange={e => setReason(e.target.value)} />
@@ -92,7 +97,8 @@ export function AdminBookings({ user, venue }: { user: StaffProfile; venue: Venu
                   <button type="button" className="button-outline" disabled={Boolean(busy)}
                     onClick={() => { setCancelling(null); setReason(""); }}>Keep booking</button>
                   <button type="button" className="button-outline destructive"
-                    disabled={Boolean(busy)} onClick={() => void action(b, "cancel")}>
+                    disabled={Boolean(busy) || (b.status === "AWAITING_REVIEW" && !reason.trim())}
+                    onClick={() => void action(b, "cancel")}>
                     {busy === b.bookingCode ? "Cancelling…" : "Confirm cancellation"}
                   </button>
                 </div>

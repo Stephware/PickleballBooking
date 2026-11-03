@@ -123,3 +123,13 @@ See [Phase 4 release verification](../improvements-phase-4-final-verification.md
 - [x] Fix phone schedule CSS selector to hide duplicate desktop table under 681px, retaining the live court/time cards, selection summary and booking form.
 - [x] Extend browser smoke checks for exclusive phone/desktop layouts across 1, 3, 8 and 12 courts.
 - [ ] Verify this branch's GitHub CI and fresh phone browser/a11y results before merging.
+
+## Protected payment review and 10-minute proof policy — 2026-11-03
+
+- [x] Reduced default HELD proof deadline from 15 to 10 minutes (still capped at game start); old-default venue rows can be upgraded by forward-only SQL.
+- [x] Removed automatic expiry for payment-submitted `AWAITING_REVIEW`; active GiST exclusion continues reserving the court.
+- [x] Staff can verify valid transfers after the game start; explicit reason needed for management cancellation of a pending review.
+- [x] Guest copy, owner configuration, and staff queue notifications updated; legacy review-timeout control removed.
+- [x] Added forward-only idempotent existing-DB patch and disposable migration verification step.
+- [ ] Fresh branch CI, browser, and live deployment upgrade acceptance must be verified.
+- [ ] Real venue database migration must be applied by an authorized operator after consistent backup; **not performed from GitHub**.

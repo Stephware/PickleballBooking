@@ -8,7 +8,7 @@ import { AccessMessage, Loading, Notice, SectionHeader, useAdminResource } from 
 const fallback: VenueSettingsAdmin = {
   venueName: "", venueSlug: "", timezone: "Asia/Manila", currency: "PHP",
   logoUrl: null, primaryColor: "#176e4b", secondaryColor: "#f2f7f4",
-  slotMinutes: 60, holdMinutes: 15, reviewTimeoutHours: 4,
+  slotMinutes: 60, holdMinutes: 10,
   bookingAdvanceDays: 30, minimumNoticeMinutes: 30,
 };
 
@@ -61,12 +61,9 @@ export function AdminVenue({ user }: { user: StaffProfile }) {
           value={form.slotMinutes} onChange={e => change("slotMinutes", Number(e.target.value))}>
           {[30, 60, 90, 120].map(v => <option key={v} value={v}>{v} minutes</option>)}
         </select></label>
-        <label>Hold minutes<input type="number" min={1} max={120} step={1}
+        <label>Payment proof deadline (minutes)<input type="number" min={1} max={120} step={1}
           disabled={!canManage} value={form.holdMinutes}
           onChange={e => change("holdMinutes", Number(e.target.value))} /></label>
-        <label>Review timeout (hours)<input type="number" min={1} max={72} step={1}
-          disabled={!canManage} value={form.reviewTimeoutHours}
-          onChange={e => change("reviewTimeoutHours", Number(e.target.value))} /></label>
         <label>Booking window (days)<input type="number" min={1} max={365} step={1}
           disabled={!canManage} value={form.bookingAdvanceDays}
           onChange={e => change("bookingAdvanceDays", Number(e.target.value))} /></label>
@@ -74,7 +71,9 @@ export function AdminVenue({ user }: { user: StaffProfile }) {
           disabled={!canManage} value={form.minimumNoticeMinutes}
           onChange={e => change("minimumNoticeMinutes", Number(e.target.value))} /></label>
       </div>
-      <p className="admin-hint">Changing timezone, slot duration or advance policies can alter future
+      <p className="admin-hint">Proof received within the payment deadline reserves
+        the court until staff verifies, rejects, or manually resolves it. There is no
+        automatic payment-review timeout. Changing timezone, slot duration or advance policies can alter future
         availability. Review existing reservations before saving. Real GCash/bank recipient
         settings are not available in the backend yet; do not put credentials in public fields.</p>
       {canManage && <button type="submit" className="button-primary" disabled={busy}>

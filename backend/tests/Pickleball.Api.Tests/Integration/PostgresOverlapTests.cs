@@ -65,6 +65,57 @@ public sealed class PostgresOverlapTests
         }
     }
     [Fact]
+    public async Task ProtectedPaymentReview_PreventsOverlappingCourtReservation()
+    {
+        var connection = Environment.GetEnvironmentVariable("PICKLEBALL_TEST_CONNECTION_STRING");
+        if (string.IsNullOrWhiteSpace(connection) ||
+            Environment.GetEnvironmentVariable("PICKLEBALL_TEST_MUTATIONS_ENABLED") != "1")
+            Assert.Skip("Requires explicitly enabled disposable PostgreSQL mutations.");
+        Assert.EndsWith("_test", new NpgsqlConnectionStringBuilder(connection).Database);
+
+        await using var db = new PickleballDbContext(
+            new DbContextOptionsBuilder<PickleballDbContext>().UseNpgsql(connection).Options);
+        await using var tx = await db.Database.BeginTransactionAsync();
+        try
+        {
+            var court = new Court
+            {
+                CourtName = "__pending_review_" + Guid.NewGuid().ToString("N"),
+                BaseHourlyRate = 250m, IsActive = true
+            };
+            db.Courts.Add(court);
+            await db.SaveChangesAsync();
+            var start = DateTime.UtcNow.Date.AddDays(2).AddHours(3);
+            var review = new CourtScheduleEntry
+            {
+                CourtId = court.Id, EntryType = ScheduleEntryTypes.Booking,
+                Status = BookingStatuses.AwaitingReview,
+                StartsAt = start, EndsAt = start.AddHours(1), ExpiresAt = null
+            };
+            db.CourtScheduleEntries.Add(review);
+            await db.SaveChangesAsync();
+
+            _ = await db.Database.SqlQueryRaw<int>(
+                "SELECT expire_pending_schedule_entries() AS \"Value\"").SingleAsync();
+            db.ChangeTracker.Clear();
+            Assert.Equal(BookingStatuses.AwaitingReview,
+                (await db.CourtScheduleEntries.AsNoTracking().SingleAsync(
+                    s => s.Id == review.Id)).Status);
+
+            db.CourtScheduleEntries.Add(new CourtScheduleEntry
+            {
+                CourtId = court.Id, EntryType = ScheduleEntryTypes.Booking,
+                Status = BookingStatuses.Held, StartsAt = start.AddMinutes(30),
+                EndsAt = start.AddMinutes(90), ExpiresAt = DateTime.UtcNow.AddMinutes(10)
+            });
+            var error = await Assert.ThrowsAsync<DbUpdateException>(() => db.SaveChangesAsync());
+            Assert.Equal(PostgresErrorCodes.ExclusionViolation,
+                (error.InnerException as PostgresException)?.SqlState);
+        }
+        finally { await tx.RollbackAsync(); }
+    }
+
+    [Fact]
     public async Task ExpiredHold_ReleasesSlotOnlyAfterSqlStatusTransition()
     {
         var connection = Environment.GetEnvironmentVariable("PICKLEBALL_TEST_CONNECTION_STRING");

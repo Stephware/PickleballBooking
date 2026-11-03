@@ -57,12 +57,6 @@ public sealed class PaymentService(
                      p.Status == PaymentStatuses.Verified), ct))
                 throw Conflict("A payment is already under review or verified.");
 
-            var venue = await RequireVenueAsync(ct);
-            var reviewExpiry = now.AddHours(venue.ReviewTimeoutHours);
-            if (reviewExpiry > schedule.StartsAt) reviewExpiry = schedule.StartsAt;
-            if (reviewExpiry <= now)
-                throw Conflict("The booking is too close to its start for payment review.");
-
             var payment = new Payment
             {
                 BookingId = booking.Id, PaymentMethod = method, Amount = input.Amount,
@@ -72,7 +66,9 @@ public sealed class PaymentService(
             };
             payments.Add(payment);
             schedule.Status = BookingStatuses.AwaitingReview;
-            schedule.ExpiresAt = reviewExpiry;
+            // Proof was submitted before the original hold expired. A staff
+            // delay must not automatically free the reserved court.
+            schedule.ExpiresAt = null;
             await unit.SaveChangesAsync(ct);
             await tx.CommitAsync(ct);
             committed = true;
@@ -181,9 +177,10 @@ public sealed class PaymentService(
         if (approve)
         {
             await EnsureReferenceUniqueAsync(payment, ct);
-            if (schedule.Status == BookingStatuses.AwaitingReview &&
-                schedule.ExpiresAt > now && schedule.StartsAt > now)
+            if (schedule.Status == BookingStatuses.AwaitingReview)
             {
+                // A delayed review may complete even after the court start. Proof was
+                // received within the original hold; never punish staff delay.
                 // Only full verified bank/GCash submission can confirm online holds.
                 if (payment.Amount != booking.TotalAmount)
                     throw Conflict("Online reservations require full payment verification.");
@@ -257,13 +254,17 @@ public sealed class PaymentService(
     {
         var items = await (from p in db.Payments.AsNoTracking()
             join b in db.Bookings.AsNoTracking() on p.BookingId equals b.Id
+            join s in db.CourtScheduleEntries.AsNoTracking()
+                on b.ScheduleEntryId equals s.Id
             where p.Status == PaymentStatuses.Submitted
-            orderby p.SubmittedAt descending
-            select new PendingPaymentResponse(p.Id, b.BookingCode, b.GuestName,
-                p.PaymentMethod, p.Amount, AsOffset(p.SubmittedAt),
-                p.ProofStorageKey != null))
+            orderby s.StartsAt, p.SubmittedAt
+            select new { Payment = p, Booking = b, Schedule = s })
             .Take(100).ToListAsync(ct);
-        return items;
+        return items.Select(row => new PendingPaymentResponse(
+            row.Payment.Id, row.Booking.BookingCode, row.Booking.GuestName,
+            row.Payment.PaymentMethod, row.Payment.Amount,
+            AsOffset(row.Payment.SubmittedAt), row.Payment.ProofStorageKey != null,
+            AsOffset(row.Schedule.StartsAt), row.Schedule.Status)).ToArray();
     }
 
     public async Task<ProofContent> ReadProofAsync(long id, CancellationToken ct)

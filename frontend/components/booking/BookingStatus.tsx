@@ -16,7 +16,7 @@ const statusInfo: Record<string, { title: string; description: string; badge: st
   },
   AWAITING_REVIEW: {
     title: "Payment proof received",
-    description: "The venue is reviewing your receipt. Your booking is not confirmed yet.",
+    description: "Your receipt was accepted for review before the deadline. The court remains reserved until staff resolves your payment; confirmation still requires verification.",
     badge: "Under review",
   },
   CONFIRMED: {
@@ -26,7 +26,7 @@ const statusInfo: Record<string, { title: string; description: string; badge: st
   },
   EXPIRED: {
     title: "This booking has expired",
-    description: "The hold or review deadline passed. This court is no longer reserved for you.",
+    description: "The proof submission deadline passed without an accepted receipt. This court is no longer reserved for you.",
     badge: "Expired",
   },
   CANCELLED: {
@@ -152,7 +152,13 @@ export function BookingStatus({ code, venue, publicDetails }: {
     </div>
   </div>;
 
-  const meta = statusInfo[booking.status] || {
+  const pastVerifiedSession = booking.status === "CONFIRMED" &&
+    Date.parse(booking.endsAtUtc) <= now;
+  const meta = pastVerifiedSession ? {
+    title: "Payment verified",
+    description: "Your scheduled court time has passed. Contact the venue to resolve game access, rebooking or refund questions.",
+    badge: "Verified",
+  } : statusInfo[booking.status] || {
     title: "Booking status: " + booking.status, description: "Check with the venue for details.",
     badge: booking.status,
   };
@@ -187,7 +193,7 @@ export function BookingStatus({ code, venue, publicDetails }: {
           <div><dt>Start</dt><dd>{instantLabel(booking.startsAtUtc, venue.timezone)}</dd></div>
           <div><dt>End</dt><dd>{instantLabel(booking.endsAtUtc, venue.timezone)}</dd></div>
           <div><dt>Booking total</dt><dd>{money(booking.totalAmount, booking.currency)}</dd></div>
-          {booking.expiresAtUtc && <div><dt>Current deadline</dt>
+          {booking.expiresAtUtc && <div><dt>Submit payment proof by</dt>
             <dd>{instantLabel(booking.expiresAtUtc, venue.timezone)}
               {expiredTime <= now && <span className="danger-text"> · Time passed; refresh status</span>}
             </dd></div>}
@@ -214,8 +220,9 @@ export function BookingStatus({ code, venue, publicDetails }: {
       {canUpload && <PaymentProofForm booking={booking} venue={venue} publicDetails={publicDetails}
         onSuccess={() => void reload()} />}
       {booking.status === "AWAITING_REVIEW" && (
-        <p role="status" className="alert info">Your receipt is awaiting manual approval.
-          Do not send another payment unless the venue asks you to.</p>
+        <p role="status" className="alert info">Your payment proof is awaiting manual approval.
+          This court remains reserved without an automatic review deadline. Do not send another payment.
+          Contact the venue if the game is approaching and staff have not reviewed it.</p>
       )}
       {booking.status === "HELD" && booking.totalAmount === 0 && (
         <p role="status" className="alert info">No payment is due for this reservation.

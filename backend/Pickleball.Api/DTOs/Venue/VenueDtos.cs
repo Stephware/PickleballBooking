@@ -9,7 +9,7 @@ public sealed record PublicVenueResponse(
 public sealed record VenueSettingsResponse(
     string VenueName, string VenueSlug, string Timezone, string Currency,
     string? LogoUrl, string PrimaryColor, string SecondaryColor,
-    int SlotMinutes, int HoldMinutes, int ReviewTimeoutHours,
+    int SlotMinutes, int HoldMinutes,
     int BookingAdvanceDays, int MinimumNoticeMinutes);
 
 public sealed class SaveVenueRequest
@@ -36,8 +36,7 @@ public sealed class SaveVenueRequest
     public string SecondaryColor { get; set; } = "#F2F7F4";
 
     public int SlotMinutes { get; set; } = 60;
-    [Range(1, 120)] public int HoldMinutes { get; set; } = 15;
-    [Range(1, 72)] public int ReviewTimeoutHours { get; set; } = 4;
+    [Range(1, 120)] public int HoldMinutes { get; set; } = 10;
     [Range(1, 365)] public int BookingAdvanceDays { get; set; } = 30;
     [Range(0, int.MaxValue)] public int MinimumNoticeMinutes { get; set; } = 30;
 }

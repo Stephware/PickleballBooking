@@ -47,3 +47,14 @@ Added isolated production-image Compose CI (test-only override and guarded runne
 ## 2026-11-03 — Pickleball Reserve identity
 
 Imported the venue-supplied logo and four real indoor-court photographs from historical Phase 9, integrated the approved burgundy/cream system-wide look on a main-based feature branch, and added a custom paddle/ball hero graphic over a real court photograph. Redesigned landing/header/gallery and branded owner workflows while preserving server-authoritative booking, payment and authorization logic. Configuration tests and documentation added; no database schema, stored user data, secrets or backend behavior changed. CI and physical device acceptance remain pending; no main merge or deployment performed.
+
+## 2026-11-03 — Payment review policy correction
+
+Default proof submission window changed to 10 minutes. Accepted proof
+creates non-expiring `AWAITING_REVIEW` reservations to protect paying guests
+from staff inactivity, and restores late manual verification. A guarded
+forward-only SQL patch updates the existing schema check/expiry function,
+preserving stored payment evidence and the court-overlap exclusion. Staff
+urgency alerts and explicit cancellation reason implemented. No production
+database, credentials or actual transfers touched; fresh CI and operator
+migration still required.

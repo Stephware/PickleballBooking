@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { adminRequest, extractError, hasManagerRights } from "@/lib/admin-client";
 import { instantLabel, money } from "@/lib/player";
+import { reviewPriority, reviewPriorityLabel } from "@/lib/payment-review";
 import { PaymentLedger } from "@/components/admin/sections/PaymentLedger";
 import { ReceiptImageDialog } from "@/components/ui/ReceiptImageDialog";
 import { Empty, Loading, Notice, SectionHeader, useAdminResource } from "@/components/admin/AdminShared";
@@ -23,6 +24,7 @@ export function AdminPayments({ user }: { user: StaffProfile }) {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const canManage = hasManagerRights(user);
+  const attention = pending.filter(item => reviewPriority(item) !== "NORMAL");
 
   async function select(payment: PendingPayment) {
     const version = ++detailVersion.current;
@@ -64,6 +66,10 @@ export function AdminPayments({ user }: { user: StaffProfile }) {
       description="Compare proof and reference against actual bank or GCash records before approving."
       action={<button type="button" className="button-outline"
         onClick={() => void reload()} disabled={loading}>↻ Refresh queue</button>} />
+    {!loading && !loadError && attention.length > 0 &&
+      <Notice kind="info">{attention.length} payment review{attention.length === 1 ? "" : "s"}
+        {" "}need attention. Check the upcoming game times and contact the guest if needed.
+        Submitted proof never expires automatically; do not release courts without a reasoned decision.</Notice>}
     <div className="admin-review-layout">
       <section className="admin-panel card-surface" aria-label="Pending payment queue">
         <div className="admin-panel-heading"><h3>Awaiting verification</h3>
@@ -77,7 +83,8 @@ export function AdminPayments({ user }: { user: StaffProfile }) {
             className={"admin-queue-item" + (selected?.paymentId === p.paymentId ? " selected" : "")}
             onClick={() => void select(p)}>
             <span><strong>{p.guestName}</strong>
-              <small>{p.bookingCode} · {p.paymentMethod.replaceAll("_", " ")}</small></span>
+              <small>{p.bookingCode} · {p.paymentMethod.replaceAll("_", " ")}</small>
+              <small>{reviewPriorityLabel(reviewPriority(p))}</small></span>
             <strong>{money(p.amount, details?.currency || "PHP")}</strong>
           </button>)}
       </section>
@@ -102,6 +109,8 @@ export function AdminPayments({ user }: { user: StaffProfile }) {
                   <div><dt>Claimed amount</dt><dd>{money(selected.amount, details.currency)}</dd></div>
                   <div><dt>Booking total</dt><dd>{money(details.bookingTotal, details.currency)}</dd></div>
                   <div><dt>Submitted</dt><dd>{instantLabel(selected.submittedAtUtc, "Asia/Manila")}</dd></div>
+                  <div><dt>Game starts</dt><dd>{instantLabel(selected.startsAtUtc, "Asia/Manila")}</dd></div>
+                  <div><dt>Attention</dt><dd>{reviewPriorityLabel(reviewPriority(selected))}</dd></div>
                   <div><dt>Reference</dt><dd>{details.payments.find(p => p.id === selected.paymentId)
                     ?.transactionReference || "None supplied"}</dd></div>
                 </dl>
@@ -153,7 +162,9 @@ export function AdminPayments({ user }: { user: StaffProfile }) {
         <span>Find a booking, record an external payment or a completed refund</span></summary>
       <PaymentLedger user={user} />
     </details>
-    <p className="admin-hint">Approving a receipt is a manual financial attestation, not an
-      automatic bank verification. Expired bookings may need separate reconciliation.</p>
+    <p className="admin-hint">Submitted proof keeps the court reserved until management
+      approves, rejects or explicitly resolves the booking. There is no review timeout.
+      Independently verify actual funds before approval; rejected/cancelled payments
+      may require separate external reconciliation or refunds.</p>
   </>;
 }

@@ -38,3 +38,32 @@ PICKLEBALL_TEST_CONNECTION_STRING="Host=localhost;Port=5435;Database=YOUR_ISOLAT
 ```
 
 Never set `PICKLEBALL_TEST_MUTATIONS_ENABLED=1` unless using an isolated disposable database. Write tests wrap changes in a rollback transaction but still require test-only credentials.
+
+## 2026-11-03 — Payment proof 10-minute hold and protected review upgrade
+
+This policy change has a **reviewed, forward-only SQL patch**:
+[`database/sql/06_payment_review_no_expiry.sql`](../database/sql/06_payment_review_no_expiry.sql).
+This is an exceptional SQL-first patch before the EF Core baseline exists,
+not an EF migration or an authorization to rebuild the venue database.
+
+Before deploying the new API:
+1. Stop app writes; take a consistent PostgreSQL backup and archive private proof files.
+2. Using a **DB administrator** on the existing venue DB, execute `06_payment_review_no_expiry.sql`
+   with `psql -v ON_ERROR_STOP=1`. It is transactional and safe to reapply.
+3. Run `05_verify_existing_schema.sql` read-only. If it reports legacy timed
+   review expiration, do not start the new app.
+4. Deploy the **matching** API + frontend commit, start services and verify a
+   synthetic 10-minute hold and a protected review on a disposable environment.
+5. Record backup and restore references; do not run `01_schema.sql` or
+   `docker compose down -v` against an existing volume.
+
+The patch keeps all nine tables, existing payments/proofs, IDs and GiST
+exclusion protection. Existing unexpired `AWAITING_REVIEW` rows have their old
+deadline cleared. Rows **already marked EXPIRED** are not automatically
+reinstated: an operator must separately verify actual funds and decide on
+rebooking/refund. Existing HELD rows retain their original deadline; new HELD
+rows use the updated setting (10m if previously at the old 15m default).
+The unused `review_timeout_hours` database column is retained for backward
+compatibility, but the API no longer exposes or applies it. Include this
+policy change in the eventual canonical EF baseline; do not create fake
+`__EFMigrationsHistory` entries.

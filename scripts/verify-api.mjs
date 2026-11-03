@@ -47,6 +47,11 @@ await check('database readiness',async()=>status(await call('/health/db'),200));
 await check('security headers on API responses',async()=>{ const r=await call('/health'); assert.equal(r.headers.get('X-Content-Type-Options'),'nosniff'); assert.match(r.headers.get('Cache-Control'),/(^|,\s*)no-store($|,)/); });
 await check('anonymous admin access denied',async()=>status(await call('/api/v1/admin/payments/pending'),401));
 await check('owner authenticates with real anonymous and authenticated CSRF',async()=>assert.equal((await login(owner,email,password)).role,'OWNER'));
+await check('new reservations have a ten-minute proof window',async()=>{
+ const settings=status(await call('/api/v1/admin/venue',{session:owner}),200);
+ assert.equal(settings.holdMinutes,10);
+ assert.equal(Object.hasOwn(settings,'reviewTimeoutHours'),false);
+});
 await check('isolated repeatable court fixtures',async()=>{
  court=status(await call('/api/v1/admin/courts',{method:'POST',session:owner,body:{courtName:'API Test A '+randomUUID(),baseHourlyRate:courts[0].baseHourlyRate,displayOrder:90,isActive:true}}),201).id;
  court2=status(await call('/api/v1/admin/courts',{method:'POST',session:owner,body:{courtName:'API Test B '+randomUUID(),baseHourlyRate:courts[1].baseHourlyRate,displayOrder:91,isActive:true}}),201).id;
@@ -74,7 +79,10 @@ await check('proof creates SUBMITTED payment and AWAITING_REVIEW only',async()=>
  const form=new FormData();form.set('PaymentMethod','GCASH');form.set('Amount',String(guest.booking.totalAmount));form.set('TransactionReference','PHASE9-'+randomUUID());
  form.set('Proof',new Blob([Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=','base64')],{type:'image/png'}),'synthetic.png');
  payment=status(await call(`/api/v1/bookings/${code}/payments`,{method:'POST',body:form,token}),201);
- assert.equal(payment.status,'SUBMITTED');assert.equal(status(await call(`/api/v1/bookings/${code}`,{token}),200).status,'AWAITING_REVIEW');
+ assert.equal(payment.status,'SUBMITTED');
+ const pendingBooking=status(await call(`/api/v1/bookings/${code}`,{token}),200);
+ assert.equal(pendingBooking.status,'AWAITING_REVIEW');
+ assert.equal(pendingBooking.expiresAtUtc,null,"Submitted proof must not have a review deadline");
 });
 await check('proof unavailable anonymously',async()=>status(await call(`/api/v1/admin/payments/${payment.id}/proof`),401));
 await check('staff preview is private and nosniff',async()=>{const r=await call(`/api/v1/admin/payments/${payment.id}/proof`,{session:owner});status(r,200);assert.equal(r.headers.get('Content-Type'),'image/png');assert.match(r.headers.get('Cache-Control'),/(^|,\s*)no-store($|,)/);});

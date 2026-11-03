@@ -119,3 +119,29 @@ Review [Phase 4 release acceptance](improvements-phase-4-final-verification.md)
 before authorizing live TLS, malware quarantine, real payment account publication,
 off-host backup, data retention or rollout. Both normal GitHub CI and this
 isolated production-image workflow must pass for the exact reviewed release.
+
+## Protected payment-review deployment (2026-11-03)
+
+**Existing venue databases MUST be upgraded before deploying this API release.**
+Follow [database migration instructions](database-migrations.md). After a backup
+and while old API/frontend writes are stopped, run:
+
+```sh
+# Admin credentials only, on the correct existing venue database:
+psql -v ON_ERROR_STOP=1 -f database/sql/06_payment_review_no_expiry.sql
+psql -v ON_ERROR_STOP=1 -f database/sql/05_verify_existing_schema.sql
+```
+
+Do not use the synthetic CI database, erase any volume, or assume container
+recreation reruns the SQL bootstrap. Old API binaries expect review expiry and
+must **not** process bookings after this schema change.
+
+New holds have a 10-minute proof deadline by default (capped at game start).
+Proof submitted before the deadline transitions to `AWAITING_REVIEW`, keeping
+the court occupied until OWNER/MANAGER approval, rejection or explicitly
+reasoned booking cancellation. Pending reviews never auto-expire — **even after
+game start** — and approved late reviews must be reconciled with actual game
+access. The dashboard flags reviews older than one hour and games starting
+within an hour; these are in-app alerts, not email/push notifications.
+Staff must check the queue regularly. This policy alone does not authorize
+payments, issue refunds or guarantee a game occurred.

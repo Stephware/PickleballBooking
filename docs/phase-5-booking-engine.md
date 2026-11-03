@@ -92,3 +92,11 @@ Integration test `PostgresOverlapTests` is **disabled by default** and should on
 Payment proof, deposits, admin payment approval, actual guest reservation UI, self-service cancellation policies for confirmed/paid bookings, staff-entered walk-in source tagging, e-mail/SMS notifications, recurring/multi-court bookings, and server-issued account-based recovery. Phase 6 will expand HELD → AWAITING_REVIEW → CONFIRMED with payment verification. The current schema's `required_deposit` is set to 0 in Phase 5; this is **not** a completed paid reservation flow.
 
 **No database migration, SQL bootstrap modifications, or Docker volume operations occur in Phase 5.**
+
+## Current policy since 2026-11-03
+
+The original Phase 5 guide documents the historical 15-minute starter default.
+The current default is **10 minutes to submit proof**, or until game start,
+whichever comes first. Only `HELD` status auto-expires. See
+[forward-only DB policy upgrade](database-migrations.md). Any previously
+existing HELD row retains its original stored expiry.

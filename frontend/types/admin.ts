@@ -15,7 +15,7 @@ export type AdminBooking = {
 export type PendingPayment = {
   paymentId: number; bookingCode: string; guestName: string;
   paymentMethod: string; amount: number; submittedAtUtc: string;
-  hasProof: boolean;
+  hasProof: boolean; startsAtUtc: string; bookingStatus: string;
 };
 export type PaymentAdmin = {
   id: number; paymentMethod: string; amount: number; status: string;
@@ -35,7 +35,7 @@ export type PricingRuleAdmin = {
 export type VenueSettingsAdmin = {
   venueName: string; venueSlug: string; timezone: string; currency: string;
   logoUrl: string | null; primaryColor: string; secondaryColor: string;
-  slotMinutes: number; holdMinutes: number; reviewTimeoutHours: number;
+  slotMinutes: number; holdMinutes: number;
   bookingAdvanceDays: number; minimumNoticeMinutes: number;
 };
 export type OperatingHourAdmin = {

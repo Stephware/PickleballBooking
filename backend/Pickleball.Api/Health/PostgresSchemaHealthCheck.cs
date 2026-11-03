@@ -35,6 +35,27 @@ public sealed class PostgresSchemaHealthCheck(IServiceProvider provider) : IHeal
             if (tables != 9)
                 return HealthCheckResult.Unhealthy("Expected PostgreSQL tables are missing.");
 
+            // Refuse a deployment whose existing database was not upgraded:
+            // the legacy expiry worker would otherwise release submitted proofs.
+            const string reviewPolicySql = """
+                SELECT CASE WHEN pg_get_functiondef(
+                    'public.expire_pending_schedule_entries()'::regprocedure
+                ) LIKE '%WHERE status = ''HELD''%'
+                AND EXISTS (
+                    SELECT 1 FROM pg_constraint c
+                    JOIN pg_class t ON t.oid = c.conrelid
+                    WHERE t.relname = 'court_schedule_entries'
+                      AND c.conname = 'schedule_pending_has_expiry'
+                      AND pg_get_constraintdef(c.oid) NOT LIKE '%AWAITING_REVIEW%'
+                )
+                THEN 1 ELSE 0 END AS "Value"
+                """;
+            var policyCurrent = await db.Database.SqlQueryRaw<int>(reviewPolicySql)
+                .SingleAsync(cancellationToken);
+            if (policyCurrent != 1)
+                return HealthCheckResult.Unhealthy(
+                    "Payment review policy upgrade required. Apply the reviewed SQL patch.");
+
             // Use actual EF mapping; catches broken configuration/data.
             if (!await db.VenueSettings.AsNoTracking().AnyAsync(cancellationToken))
                 return HealthCheckResult.Unhealthy("Venue configuration row is missing.");
