@@ -152,7 +152,13 @@ export function BookingStatus({ code, venue, publicDetails }: {
     </div>
   </div>;
 
-  const meta = statusInfo[booking.status] || {
+  const pastVerifiedSession = booking.status === "CONFIRMED" &&
+    Date.parse(booking.endsAtUtc) <= now;
+  const meta = pastVerifiedSession ? {
+    title: "Payment verified",
+    description: "Your scheduled court time has passed. Contact the venue to resolve game access, rebooking or refund questions.",
+    badge: "Verified",
+  } : statusInfo[booking.status] || {
     title: "Booking status: " + booking.status, description: "Check with the venue for details.",
     badge: booking.status,
   };
