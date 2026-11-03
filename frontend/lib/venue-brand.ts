@@ -5,7 +5,7 @@ import type { Venue } from "@/types/player";
  * Other venue deployments can supply their own public color/logo settings.
  * "api" in VENUE_BRAND_MODE respects the backend-configured venue branding.
  */
-export const RESERVE_PRIMARY = "#79051f";
+export const RESERVE_PRIMARY = "#80011f";
 export const RESERVE_SECONDARY = "#f7e9d7";
 export const RESERVE_LOGO = "/venue/brand-logo.jpg";
 

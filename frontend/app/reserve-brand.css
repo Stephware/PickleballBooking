@@ -6,9 +6,9 @@
   --surface: #ffffff;
   --muted: #6b6061;
   --border: #e9dedb;
-  --brand: #79051f;
+  --brand: #80011f;
   --brand-ink: #ffffff;
-  --brand-tint: #f9ede8;
+  --brand-tint: #fff1ed;
   --radius: 17px;
 }
 body {
@@ -262,3 +262,10 @@ body {
 @media (prefers-reduced-motion:reduce) {
   .app-shell .hero-action:hover { transform:none; }
 }
+
+/* Availability colors have a distinct semantic meaning. */
+.reserve-theme .slot-cell.slot-available,.app-shell .slot-cell.slot-available { background:#eaf8ef; color:#165f3d; }
+.reserve-theme .slot-cell.slot-available:hover,.app-shell .slot-cell.slot-available:hover { background:#d7f0e1; }
+.reserve-theme .slot-cell.slot-occupied,.app-shell .slot-cell.slot-occupied { background:#fff1ee; color:#8f3d35; }
+.reserve-theme .slot-cell.slot-pending,.app-shell .slot-cell.slot-pending { background:#fff7df; color:#805817; }
+.reserve-theme .slot-cell.selected,.app-shell .slot-cell.selected { background:#d8eee0; color:#155637; outline-color:#80011f; }

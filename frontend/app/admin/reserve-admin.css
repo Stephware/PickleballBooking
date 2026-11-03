@@ -75,7 +75,7 @@
   .admin-app .admin-menu-button { background:#fff1eb; color:#771029; border-color:#e6c9c4; }
   .admin-app .admin-content { padding-bottom:110px; }
   .admin-bottom-nav {
-    display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:0;
+    display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0;
     position:fixed; left:0; right:0; bottom:0; z-index:12;
     padding:6px max(5px,env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom))
       max(5px,env(safe-area-inset-right));
@@ -97,3 +97,10 @@
   .admin-bottom-nav button small { font-size:.6rem; }
   .admin-app .admin-content { padding-inline:12px; }
 }
+
+/* Semantic availability states remain independent of venue branding. */
+.reserve-admin .admin-slot-cell.admin-slot-available { background:#eaf7ee; color:#205e3d; }
+.reserve-admin .admin-slot-cell.admin-slot-available:hover { background:#d8f0de; }
+.reserve-admin .admin-slot-cell.admin-slot-walk_in_now { background:#d5ebdf; color:#164a32; }
+.reserve-admin .admin-slot-cell.admin-slot-selected { background:#daf1e2; outline-color:#80011f; color:#164a32; }
+@media(max-width:950px) { .reserve-admin .admin-bottom-nav { grid-template-columns:repeat(4,minmax(0,1fr)); } }

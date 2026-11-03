@@ -17,10 +17,5 @@ export const RESERVE_LOGO_PATH = "/venue/brand-logo.jpg";
 export function reserveBrandStyle(
   venue: Pick<Venue, "primaryColor" | "secondaryColor">,
 ): CSSProperties {
-  return {
-    ...brandStyle(venue),
-    "--brand": RESERVE_PALETTE.burgundy,
-    "--brand-tint": "#fff1ed",
-    "--brand-ink": "#ffffff",
-  } as CSSProperties;
+  return brandStyle(venue) as CSSProperties;
 }
