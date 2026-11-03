@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { adminRequest, apiTime, extractError, hasManagerRights, weekdayNames } from "@/lib/admin-client";
 import type { OperatingHourAdmin, StaffProfile } from "@/types/admin";
-import { AccessMessage, Loading, Notice, SectionHeader, useAdminResource } from "@/components/admin/AdminShared";
+import { AccessMessage, Empty, Loading, Notice, SectionHeader, useAdminResource } from "@/components/admin/AdminShared";
 
 const defaults: OperatingHourAdmin[] = weekdayNames.map((_, dayOfWeek) => ({
   dayOfWeek, isClosed: false, opensAt: "08:00", closesAt: "22:00",
