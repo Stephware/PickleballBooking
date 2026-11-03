@@ -30,7 +30,19 @@ export function AdminOverview({ user, venue, navigate }: {
       description="A snapshot of today's reservations and pending reviews."
       action={<button className="button-outline" type="button" disabled={loading}
         onClick={() => { setLoading(true); setError(""); void reload(); }}>↻ Refresh</button>} />
-    {error && <Notice>{error}</Notice>}
+    {error && <Notice>{error} <button className="inline-link" type="button"
+      onClick={() => { setLoading(true); void reload(); }}>Try again</button></Notice>}
+    <section className="admin-quick-actions">
+      <h3>Quick actions</h3>
+      <div className="admin-action-row">
+        <button className="button-primary" type="button"
+          onClick={() => navigate("schedule", "booking")}>+ Add Booking</button>
+        <button className="button-outline" type="button"
+          onClick={() => navigate("payments")}>Review payments</button>
+        <button className="button-outline" type="button"
+          onClick={() => navigate("schedule", "block")}>Block Court</button>
+      </div>
+    </section>
     <div className="admin-kpi-grid">
       {[
         { label: "Today's confirmed", value: confirmed, hint: "Court reservations" },
@@ -68,16 +80,5 @@ export function AdminOverview({ user, venue, navigate }: {
           </div>)}
       </section>
     </div>
-    <section className="admin-quick-actions">
-      <h3>Quick actions</h3>
-      <div className="admin-action-row">
-        <button className="button-primary" type="button"
-          onClick={() => navigate("schedule", "booking")}>+ Add Booking</button>
-        <button className="button-outline" type="button"
-          onClick={() => navigate("payments")}>Review payments</button>
-        <button className="button-outline" type="button"
-          onClick={() => navigate("schedule", "block")}>Block Court</button>
-      </div>
-    </section>
   </>;
 }

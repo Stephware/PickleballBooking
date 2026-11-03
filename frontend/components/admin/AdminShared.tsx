@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { adminRequest, extractError } from "@/lib/admin-client";
 import type { StaffProfile } from "@/types/admin";
 
@@ -8,14 +8,31 @@ export function useAdminResource<T>(url: string, fallback: T) {
   const [data, setData] = useState<T>(fallback);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const reload = useCallback(() => adminRequest<T>(url)
-    .then(value => { setData(value); setError(""); })
-    .catch(cause => { setError(extractError(cause)); })
-    .finally(() => { setLoading(false); }), [url]);
-  useEffect(() => { void reload(); }, [reload]);
-  return { data, setData, loading, error, setError, reload: () => {
-    setLoading(true); setError(""); return reload();
-  } };
+  const requestVersion = useRef(0);
+
+  // Ignore responses from a previous date/tab and requests that finish after unmount.
+  // On a new URL or manual refresh, keep old data behind the loading state instead
+  // of flashing stale reservations or payment information as if current.
+  const reload = useCallback(async () => {
+    const version = ++requestVersion.current;
+    setLoading(true);
+    setError("");
+    try {
+      const value = await adminRequest<T>(url);
+      if (version === requestVersion.current) setData(value);
+    } catch (cause) {
+      if (version === requestVersion.current) setError(extractError(cause));
+    } finally {
+      if (version === requestVersion.current) setLoading(false);
+    }
+  }, [url]);
+
+  useEffect(() => {
+    void reload();
+    return () => { ++requestVersion.current; };
+  }, [reload]);
+
+  return { data, setData, loading, error, setError, reload };
 }
 
 export function SectionHeader({ eyebrow, title, description, action }: {

@@ -14,20 +14,20 @@ export function AdminBookings({ user, venue }: { user: StaffProfile; venue: Venu
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [reason, setReason] = useState("");
+  const [cancelling, setCancelling] = useState<string | null>(null);
   const { data, loading, error: loadError, reload } =
     useAdminResource<AdminBooking[]>("/bookings?date=" + date, []);
   const canManage = hasManagerRights(user);
   const items = data.filter((b) => filter === "ALL" || b.status === filter);
 
   async function action(booking: AdminBooking, type: "confirm" | "cancel") {
-    if (type === "cancel" && !window.confirm(
-      "Cancel " + booking.bookingCode + "? This may require a separate external refund."
-    )) return;
+    // Cancellation requires the explicit inline booking-specific confirmation.
+    if (type === "cancel" && cancelling !== booking.bookingCode) return;
     setBusy(booking.bookingCode); setError(""); setMessage("");
     try {
       await adminRequest("/bookings/" + booking.bookingCode + "/" + type, "POST",
         type === "cancel" ? { reason: reason.trim() || "Cancelled by staff" } : {});
-      setReason("");
+      setReason(""); setCancelling(null);
       setMessage(type === "cancel" ? "Booking cancelled. Reconcile any payments separately."
         : "Booking confirmed.");
       await reload();
@@ -42,16 +42,22 @@ export function AdminBookings({ user, venue }: { user: StaffProfile; venue: Venu
         onClick={() => void reload()}>↻ Refresh</button>} />
     <div className="admin-toolbar">
       <label>Booking date<input type="date" value={date}
-        onChange={(e) => setDate(e.target.value)} /></label>
-      <label>Status<select value={filter} onChange={(e) => setFilter(e.target.value)}>
+        onChange={(e) => { setDate(e.target.value); setCancelling(null); setError(""); setMessage(""); }} /></label>
+      <label>Status<select value={filter} onChange={(e) => { setFilter(e.target.value); setCancelling(null); }}>
         {["ALL", "HELD", "AWAITING_REVIEW", "CONFIRMED", "EXPIRED", "CANCELLED", "COMPLETED"].map(s =>
           <option key={s} value={s}>{s.replaceAll("_", " ")}</option>)}
       </select></label>
     </div>
-    {(error || loadError) && <Notice>{error || loadError}</Notice>}
+    {(error || loadError) && <Notice>{error || loadError} <button type="button"
+      className="inline-link" onClick={() => void reload()}>Try again</button></Notice>}
     {message && <Notice kind="success">{message}</Notice>}
     {loading ? <Loading text="Loading reservations…" />
-      : items.length === 0 ? <Empty text="No reservations match the selected day and status." />
+      : items.length === 0 ? <div className="admin-empty-with-action">
+          <Empty text={data.length === 0 ? "No reservations for this date." :
+            "No reservations match this status."} />
+          {filter !== "ALL" && <button type="button" className="button-outline"
+            onClick={() => setFilter("ALL")}>Show all statuses</button>}
+        </div>
       : <div className="admin-table-wrap card-surface">
         <table className="admin-table admin-booking-table"><thead><tr><th>Booking</th><th>When</th>
           <th>Court</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
@@ -63,18 +69,36 @@ export function AdminBookings({ user, venue }: { user: StaffProfile; venue: Venu
             <td data-label="Court">Court {b.courtId}</td><td data-label="Amount">{money(b.totalAmount, venue.currency)}</td>
             <td data-label="Status"><span className={"admin-status status-" + b.status.toLowerCase()}>
               {b.status.replaceAll("_", " ")}</span></td>
-            <td data-label="Actions">{canManage && b.status === "HELD" && <button
+            <td data-label="Actions">{canManage && b.status === "HELD" &&
+              cancelling !== b.bookingCode && <button
               type="button" className="button-outline admin-small-button"
               disabled={Boolean(busy)} onClick={() => void action(b, "confirm")}>Confirm</button>}
               {canManage && ["HELD", "AWAITING_REVIEW", "CONFIRMED"].includes(b.status) &&
+                cancelling !== b.bookingCode &&
                 <button className="admin-danger-link" type="button" disabled={Boolean(busy)}
-                  onClick={() => void action(b, "cancel")}>Cancel</button>}
+                  onClick={() => { setCancelling(b.bookingCode); setReason(""); setError(""); }}>
+                  Cancel booking</button>}
+              {canManage && cancelling === b.bookingCode && <div className="admin-inline-cancel"
+                role="group" aria-label={"Confirm cancellation of " + b.bookingCode}>
+                <strong>Cancel {b.bookingCode}?</strong>
+                <p>This releases the court. Any refund must be handled separately.</p>
+                <label>Reason (optional)
+                  <input value={reason} maxLength={300}
+                    placeholder="Reason for this booking only"
+                    onChange={e => setReason(e.target.value)} />
+                </label>
+                <div className="admin-inline-cancel-actions">
+                  <button type="button" className="button-outline" disabled={Boolean(busy)}
+                    onClick={() => { setCancelling(null); setReason(""); }}>Keep booking</button>
+                  <button type="button" className="button-outline destructive"
+                    disabled={Boolean(busy)} onClick={() => void action(b, "cancel")}>
+                    {busy === b.bookingCode ? "Cancelling…" : "Confirm cancellation"}
+                  </button>
+                </div>
+              </div>}
               {!canManage && <span className="muted">View only</span>}</td>
           </tr>)}</tbody></table>
       </div>}
-    {canManage && <label className="admin-cancel-reason">Optional cancellation reason
-      <input value={reason} maxLength={300} placeholder="Reason recorded on cancelled booking"
-        onChange={(e) => setReason(e.target.value)} /></label>}
     <p className="admin-hint">Only the backend can confirm a qualifying hold. Online paid bookings
       require verified payment first; cancelling a paid reservation does not send a refund.</p>
   </>;
