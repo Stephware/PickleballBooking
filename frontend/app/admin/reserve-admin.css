@@ -108,3 +108,8 @@
 /* Axe AA on staff Today: small labels must meet >=4.5:1 on warm-white cards. */
 .reserve-admin .admin-page-intro .micro-label { color:#64515a; }
 .reserve-admin .admin-kpi small { color:#62515a; }
+
+/* Common low-emphasis staff labels need AA text contrast on white/cream. */
+.reserve-admin .micro-label { color:#64515a; }
+.reserve-admin .admin-list-row small,
+.reserve-admin .admin-queue-item small { color:#60515a; }
