@@ -61,7 +61,7 @@ Read [Phase 1 usability implementation](../improvements-phase-1-admin-usability.
 
 Earlier Phase 9 and usability Phase 1 passing runs do not establish Phase 2 validation. See [Phase 2 guide](../improvements-phase-2-public-payment.md).
 
-## Post-Phase-9 usability Phase 3 — workflow refinement (merged via PR #14)
+## Post-Phase-9 usability Phase 3 — workflow refinement (merged into main via PR #14)
 
 - [x] Today quick actions moved above KPIs; unauthorized staff don't see Block Court quick action.
 - [x] Booking-specific inline cancellation editor (reason attached to the correct booking), deliberate final confirmation; status-filter empty state can be cleared in one tap.
@@ -72,8 +72,36 @@ Earlier Phase 9 and usability Phase 1 passing runs do not establish Phase 2 vali
 - [x] Optional cross-device booking token behind accessible disclosure; top back control and removed redundant reload.
 - [x] Admin browser Back/Forward works for five top-level sections; staff-only actions remain role-restricted.
 - [x] Responsive inline cancellation and advanced ledger styling; browser smoke assertions updated.
-- [x] **Phase 3 GitHub CI passed** [run 41587873946](https://github.com/Stephware/PickleballBooking/actions/runs/41587873946): 107 backend tests, 28 Node tests, 29 API scenarios; Next.js production build and Playwright/Axe checks, zero runtime browser errors.
+- [x] Phase 3 GitHub Actions run [41587873946](https://github.com/Stephware/PickleballBooking/actions/runs/41587873946) passed: 107 .NET, 28 frontend, 29 API scenarios, Next.js and Playwright/Axe. Merged via PR #14.
 - [ ] Physical-phone, real screen reader, flaky network and rapid payment selection manual checks; final UX Phase 4.
 - [x] No backend/database schema, Docker, secret or payment state-machine changes.
 
 Detailed design and validation: [Phase 3 guide](../improvements-phase-3-workflow-refinement.md).
+
+## Post-Phase-9 usability Phase 4 — final release audit
+
+- [x] Added a *separate* isolated production Docker Compose regression workflow for app code/deployment/script PRs and explicit manual dispatch.
+- [x] CI-only test overlay uses distinct `pickleball_release_test` with explicit disposable project guard and isolated seeded OWNER/courts; never uses an existing database or persistent venue volume.
+- [x] Checks production image builds, public/private routing, Secure/HttpOnly staff/guest cookies, CSRF/origin/rate limit, locked owner venue settings, staff-only schedule, private PNG and downloadable PDF.
+- [x] Recreates only test API/frontend containers and checks existing signed session/guest/proof access across restarts.
+- [x] Dumps only the test DB and restores to a **different** test DB, checking nine tables, bookings, payments, GiST exclusion constraint.
+- [x] Documents explicit operator go/no-go and unresolved launch gates.
+- [ ] **Current Phase 4 workflow results to be recorded after GitHub CI executes**; do not reuse Phase 2/3 test counts.
+- [ ] No real iPhone/Android device, live screen reader or real bank/GCash settlement, real venue asset, live TLS/DNS or off-site encrypted restore signoff in this phase.
+- [ ] Actual public launch remains blocked until human/venue acceptance gates in [Phase 4 guide](../improvements-phase-4-final-verification.md) are completed.
+
+No production volumes, venue database data or real secrets were touched.
+
+## Post-Phase-9 usability Phase 4 — final release verification
+
+- [x] PR #16 adds a dedicated disposable production-image Docker Compose CI release check; main production schema, environment and Docker volumes remain unchanged.
+- [x] Synthetic production gateway/session/origin/CSRF/rate limiting, guest token and private PNG/PDF access, and owner venue customization default-off checks.
+- [x] Persistence tested after API/frontend container recreation using isolated named proof/keys/database volumes.
+- [x] Database dump restored into a **different disposable test database**, including 9 tables, 4 bookings, 4 payments and working GiST exclusion.
+- [x] Actual conflicting active schedule insertion rejected; adjacent half-open slot insertion accepted then rolled back.
+- [x] [Integrated workflow 41593785871](https://github.com/Stephware/PickleballBooking/actions/runs/41593785871) **PASSED** on `291e453`: 107 C# tests, 28 frontend tests, 29 HTTP scenarios, Next.js build and Playwright/Axe, zero browser runtime errors.
+- [x] [Production release workflow 41593785968](https://github.com/Stephware/PickleballBooking/actions/runs/41593785968) **PASSED** on `291e453`: nine pre-restart and ten post-restart deployment scenarios plus restored DB overlap constraint.
+- [ ] **Public launch: NO-GO** until venue payment recipient/QR/photo/contact approval, proof malware/retention, live TLS/DNS, physical-device and screen-reader, backup/restore, monitoring and rollback signoff.
+- [ ] Merge PR #16 only after final review; a passing synthetic CI is not permission to deploy.
+
+See [Phase 4 release verification](../improvements-phase-4-final-verification.md) for evidence and blocked gates.

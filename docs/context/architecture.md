@@ -96,3 +96,7 @@ Normal owners can still edit courts, prices, hours and payments. Venue brand/glo
 ## Usability Phase 3 — UI-only guardrails
 
 The shared `frontend/components/admin/AdminShared.tsx` request hook maintains a monotonic request version so an older URL refresh cannot replace a later date/tab result; selected payment details have their own version guard. The public and admin pages are otherwise unchanged architecturally. Opening Hours exposes no mutable fallback when its GET fails. Browser history is supported in `AdminPortal` for the five allowed sections; hash aliases map legacy pages only to Schedule/Manage. No new backend API, schema or financial state transition exists in Phase 3.
+
+## Phase 4 verification-only overlay
+
+The real one-venue Compose file remains in `deployment/compose.yaml`. New `deployment/phase4-ci.compose.yaml` is a GitHub Actions-only override of the database name, healthcheck and API connection; it never alters the production Compose template. `scripts/phase4-verify-release.sh` enforces the GitHub run ID, unique `_test` project/database and fixed synthetic credentials before any Docker writes. It validates production images and preserved keys/proofs across container recreation, then restores a PostgreSQL custom dump into a second synthetic DB and checks the overlap exclusion. No application, schema, repository, routing, venue/staff model or financial state-machine change is introduced.
