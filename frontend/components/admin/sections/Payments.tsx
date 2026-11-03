@@ -67,9 +67,11 @@ export function AdminPayments({ user }: { user: StaffProfile }) {
     <div className="admin-review-layout">
       <section className="admin-panel card-surface" aria-label="Pending payment queue">
         <div className="admin-panel-heading"><h3>Awaiting verification</h3>
-          <span className="admin-count">{pending.length}</span></div>
-        {loadError && <Notice>{loadError}</Notice>}
-        {loading ? <Loading /> : pending.length === 0
+          <span className="admin-count">{loading || loadError ? "—" : pending.length}</span></div>
+        {loadError && <Notice>{loadError} <button type="button"
+          className="inline-link" onClick={() => void reload()}>Try again</button></Notice>}
+        {loading ? <Loading /> : loadError ? <Empty text="Payment queue could not be loaded." /> :
+          pending.length === 0
           ? <Empty text="No payment submissions are waiting for review." />
           : pending.map((p) => <button type="button" key={p.paymentId}
             className={"admin-queue-item" + (selected?.paymentId === p.paymentId ? " selected" : "")}

@@ -54,7 +54,12 @@ export function AdminHours({ user }: { user: StaffProfile }) {
     {!canManage && <AccessMessage need="MANAGER" />}
     {(error || response.error) && <Notice>{error || response.error}</Notice>}
     {message && <Notice kind="success">{message}</Notice>}
-    {response.loading ? <Loading /> : <form className="admin-form-panel card-surface admin-form" onSubmit={save}>
+    {response.loading ? <Loading /> : response.error ?
+      <div className="admin-empty-with-action">
+        <Empty text="Opening hours could not be loaded. No settings have been changed." />
+        <button type="button" className="button-outline" onClick={() => void response.reload()}>
+          Try loading hours again</button>
+      </div> : <form className="admin-form-panel card-surface admin-form" onSubmit={save}>
       <div className="admin-hours-list">
         {hours.map(h => <div className="admin-hour-row" key={h.dayOfWeek}>
           <strong>{weekdayNames[h.dayOfWeek]}</strong>

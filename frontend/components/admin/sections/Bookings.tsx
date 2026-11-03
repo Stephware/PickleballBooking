@@ -52,6 +52,7 @@ export function AdminBookings({ user, venue }: { user: StaffProfile; venue: Venu
       className="inline-link" onClick={() => void reload()}>Try again</button></Notice>}
     {message && <Notice kind="success">{message}</Notice>}
     {loading ? <Loading text="Loading reservations…" />
+      : loadError ? <Empty text="Reservations could not be loaded. Please retry." />
       : items.length === 0 ? <div className="admin-empty-with-action">
           <Empty text={data.length === 0 ? "No reservations for this date." :
             "No reservations match this status."} />
