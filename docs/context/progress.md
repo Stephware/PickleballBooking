@@ -61,7 +61,7 @@ Read [Phase 1 usability implementation](../improvements-phase-1-admin-usability.
 
 Earlier Phase 9 and usability Phase 1 passing runs do not establish Phase 2 validation. See [Phase 2 guide](../improvements-phase-2-public-payment.md).
 
-## Post-Phase-9 usability Phase 3 — workflow refinement (feature branch)
+## Post-Phase-9 usability Phase 3 — workflow refinement (merged via PR #14)
 
 - [x] Today quick actions moved above KPIs; unauthorized staff don't see Block Court quick action.
 - [x] Booking-specific inline cancellation editor (reason attached to the correct booking), deliberate final confirmation; status-filter empty state can be cleared in one tap.
@@ -72,7 +72,7 @@ Earlier Phase 9 and usability Phase 1 passing runs do not establish Phase 2 vali
 - [x] Optional cross-device booking token behind accessible disclosure; top back control and removed redundant reload.
 - [x] Admin browser Back/Forward works for five top-level sections; staff-only actions remain role-restricted.
 - [x] Responsive inline cancellation and advanced ledger styling; browser smoke assertions updated.
-- [ ] Run this branch's GitHub CI (.NET, Node, Next.js, disposable PostgreSQL API, Playwright/Axe).
+- [x] **Phase 3 GitHub CI passed** [run 41587873946](https://github.com/Stephware/PickleballBooking/actions/runs/41587873946): 107 backend tests, 28 Node tests, 29 API scenarios; Next.js production build and Playwright/Axe checks, zero runtime browser errors.
 - [ ] Physical-phone, real screen reader, flaky network and rapid payment selection manual checks; final UX Phase 4.
 - [x] No backend/database schema, Docker, secret or payment state-machine changes.
 

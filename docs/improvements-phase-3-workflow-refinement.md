@@ -68,8 +68,9 @@ fast date selection requests, slow payment detail responses, inline cancellation
 confirm/abort, lost network while opening hours load, mobile form navigation,
 and role-limited staff views.
 
-**Status:** Source implemented; results must be recorded from this branch's actual
-CI run, not reused from Phase 2.
+**Status:** Source merged to `main` through PR #14 after CI passed.
+The verified results below are for the exact feature implementation commit
+`193ef532`, not inherited from Phase 2.
 
 ## Deferred
 
@@ -77,3 +78,17 @@ Phase 4 is the final holistic regression/security/deployment and physical-device
 audit. Actual venue photos, contact/payment recipient/QR approval, malware controls,
 production TLS/backup acceptance, and genuine payment reconciliation remain separate
 launch requirements; no real financial transfer was simulated here.
+
+## Executed GitHub verification — 2026-11-03
+
+[Run 41587873946](https://github.com/Stephware/PickleballBooking/actions/runs/41587873946)
+**passed** on Phase 3 source commit `193ef5325c12`:
+
+- `.NET 10` restore and build successful; **107 backend tests passed**, 0 failed, 0 skipped with a disposable PostgreSQL 17 database.
+- Next.js/TypeScript ESLint and typecheck passed, **28 frontend Node tests passed**, 0 failed; standalone Next.js production build passed.
+- Existing HTTP API integration harness: **29 scenarios passed**, 0 failed.
+- Playwright and sampled Axe browser checks passed at 320/375/768/1024px, including Phase 3 focused booking, progressive token, Today actions, payment ledger, browser Back, and safe Opening Hours error/retry flows. No browser JavaScript runtime errors recorded.
+- `npm audit --omit=dev --audit-level=high` reported **zero runtime dependency vulnerabilities**. Development tooling still has moderate advisories requiring separate planned updates.
+
+PR #14 merged into main with merge SHA `7b1b7755a61a7dacb0782856ff0648d86b500789`.
+No production venue database, payment recipients, real accounts or private proof storage were modified. Actual physical-phone, real screen-reader and real financial-flow acceptance still belong to the final Phase 4 review.

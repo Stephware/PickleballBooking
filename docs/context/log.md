@@ -32,3 +32,5 @@ Added real-asset-only, developer-configured court photo slider, optional venue p
 ## 2026-11-03 — Post-Phase-9 usability Phase 3
 
 Refined existing customer/admin flows: front-loaded Today quick actions, proper per-booking cancellation reason and explicit destructive confirmation, collapsed advanced payment ledger, race-safe async loading and payment selection, retry-only hours on failed load, role-aware actions, admin Back/Forward history, progressive guest access token, keyboard-focused guided forms, top Back and mobile styles. Added browser smoke regression coverage. No backend/SQL schema/proof storage/Compose changes. CI and physical-device verification are separate.
+
+- **2026-11-03 — Phase 3 CI and merge:** GitHub Actions [41587873946](https://github.com/Stephware/PickleballBooking/actions/runs/41587873946) passed (107 .NET tests, 28 frontend tests, 29 API scenarios, Next.js build, Playwright/Axe, zero browser errors). PR #14 merged into main. Real physical phone and venue financial acceptance deferred to Phase 4.
