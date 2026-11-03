@@ -99,7 +99,7 @@ dc run --rm --no-deps \
   -e Bootstrap__OwnerName="Phase 4 CI Owner" \
   -e Bootstrap__OwnerEmail="owner@phase4.example.test" \
   -e Bootstrap__OwnerPassword="CI-Phase4-Owner-Only!" \
-  api dotnet Pickleball.Api.dll --bootstrap-owner
+  api --bootstrap-owner
 
 dc up -d api frontend
 check_frontend() {

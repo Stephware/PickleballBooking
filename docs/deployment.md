@@ -36,7 +36,7 @@ dc exec -T database psql -U pickleball_admin -d pickleball -v ON_ERROR_STOP=1 < 
 
 Create the runtime role using `deployment/01_runtime_role.sql` in an interactive administrator psql session. `\password pickleball_app` prompts without echo: enter the generated `DB_APP_PASSWORD`. The script grants SELECT/INSERT/UPDATE, sequence use and the expiry function, with no DDL, table ownership or DELETE rights. Keep the database administrator credential out of the API container. This role script is for the fixed `pickleball` database supplied by this Compose stack; adapt the CONNECT grant explicitly for other database names.
 
-Bootstrap the first owner once using `dc run --rm --no-deps api dotnet Pickleball.Api.dll --bootstrap-owner`, injecting `Bootstrap__OwnerName`, `Bootstrap__OwnerEmail` and `Bootstrap__OwnerPassword` through a temporary private environment/secret provider. Do not save bootstrap credentials to the persistent Compose file; remove them immediately after the command. The CLI refuses once staff accounts exist. No public owner signup exists.
+Bootstrap the first owner once using `dc run --rm --no-deps api --bootstrap-owner`, injecting `Bootstrap__OwnerName`, `Bootstrap__OwnerEmail` and `Bootstrap__OwnerPassword` through a temporary private environment/secret provider. Do not save bootstrap credentials to the persistent Compose file; remove them immediately after the command. The CLI refuses once staff accounts exist. No public owner signup exists.
 
 Start API/frontend and verify readiness:
 
