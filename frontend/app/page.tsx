@@ -1,43 +1,53 @@
-import Link from "next/link";
+import { AvailabilityGrid } from "@/components/booking/AvailabilityGrid";
+import { VenueHeader } from "@/components/ui/VenueHeader";
+import { getServerVenue } from "@/lib/server-api";
+import { brandStyle } from "@/lib/player";
 
-const plannedFeatures = [
-  { title: "Court availability", description: "View courts and time slots in one clear schedule." },
-  { title: "Simple reservations", description: "Book online without waiting for a reply." },
-  { title: "Venue management", description: "Keep walk-ins and online bookings in one place." },
-];
+export const dynamic = "force-dynamic";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const { venue, connected } = await getServerVenue();
   return (
-    <main className="page-shell">
-      <header className="site-header">
-        <Link href="/" className="wordmark" aria-label="PickleballBooking home">
-          <span className="mark" aria-hidden="true">P</span>
-          <span>PickleballBooking</span>
-        </Link>
-        <span className="phase-pill">Foundation · Phase 1</span>
-      </header>
-
-      <section className="hero" aria-labelledby="hero-title">
-        <p className="eyebrow">A better booking experience for every court</p>
-        <h1 id="hero-title">Less messaging.<br />More playing.</h1>
-        <p className="hero-description">
-          A booking system designed for independently branded pickleball venues.
-          The player and owner experiences are under development.
-        </p>
-        <p className="development-note" role="status">
-          This is a development placeholder. Reservations are not open yet.
-        </p>
-      </section>
-
-      <section className="features" aria-label="Planned features">
-        {plannedFeatures.map((feature) => (
-          <article key={feature.title} className="feature-card">
-            <h2>{feature.title}</h2>
-            <p>{feature.description}</p>
-          </article>
-        ))}
-      </section>
-      <footer className="site-footer">Built as one adaptable platform for individual pickleball venues.</footer>
-    </main>
+    <div className="app-shell" style={brandStyle(venue)}>
+      <div className="page-shell">
+        <VenueHeader venue={venue} />
+        <main>
+          <section className="player-hero" aria-labelledby="hero-title">
+            <div className="hero-copy">
+              <p className="hero-kicker"><span className="live-dot" aria-hidden="true" /> THE COURT IS CALLING</p>
+              <h1 id="hero-title">Less waiting.<br /><em>More playing.</em></h1>
+              <p>Pick a court, choose your time, and get back to what matters —
+                the next great rally.</p>
+              <a className="hero-action" href="#availability-title">Find an open court
+                <span aria-hidden="true">↘</span></a>
+            </div>
+            <div className="court-art" aria-hidden="true">
+              <div className="court-line court-line-a" />
+              <div className="court-line court-line-b" />
+              <span className="court-art-label">YOUR NEXT MATCH STARTS HERE</span>
+              <span className="court-ball" />
+            </div>
+          </section>
+          <div className="section-divider">
+            <span>01 / RESERVE</span>
+            <span>Real-time court schedule</span>
+          </div>
+          <AvailabilityGrid venue={venue} connected={connected} />
+          <section className="steps-section" aria-labelledby="how-it-works">
+            <div><p className="eyebrow">Simple from start to finish</p>
+              <h2 id="how-it-works">Three steps to game time.</h2></div>
+            <div className="steps-grid">
+              <article><span>01</span><h3>Find your slot</h3><p>See open courts and live rates at a glance.</p></article>
+              <article><span>02</span><h3>Hold your court</h3><p>Enter your details to hold a time temporarily.</p></article>
+              <article><span>03</span><h3>Submit proof</h3><p>Upload a receipt; the venue verifies it before confirmation.</p></article>
+            </div>
+          </section>
+        </main>
+        <footer className="site-footer">
+          <span>{venue.venueName} · Court reservations</span>
+          <span>Availability is subject to final booking confirmation.</span>
+        </footer>
+      </div>
+    </div>
   );
 }

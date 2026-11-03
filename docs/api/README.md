@@ -89,3 +89,15 @@ GCash/bank submissions require a transaction reference; duplicate verified refer
 Staff manual bookings are immediately CONFIRMED but may have a nonzero balance due. The source channel is encoded in booking notes until a reviewed schema migration adds booking_source.
 
 See [Phase 6 detailed contract](../phase-6-payments-operations.md).
+
+## Phase 7 frontend gateway (Next.js, not new ASP.NET endpoints)
+
+The Next.js server-only catch-all route app/api/player/[...segments]/route.ts explicitly forwards allowed public venue/availability/booking/payment endpoints to the API. It does not forward staff admin endpoints, stores the guest HMAC token in an HttpOnly cookie and checks Origin for POST. Frontend URLs:
+
+- GET /api/player/venue and /api/player/availability?date=YYYY-MM-DD
+- POST /api/player/bookings (returns booking only; private token stored in cookie)
+- GET /api/player/bookings/{code}; POST /api/player/bookings/{code}/cancel
+- GET/POST /api/player/bookings/{code}/payments
+- POST /api/player/bookings/{code}/access (optional private venue-issued token to reestablish browser cookie)
+
+For production APP_ORIGIN must be configured to the browser-facing HTTPS origin. See [Phase 7 frontend guide](../phase-7-player-frontend.md). The backend's existing API is unchanged.

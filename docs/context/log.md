@@ -10,3 +10,5 @@
 - **2026-11-03 — Phase 5:** Added transactional guest bookings/holds with deterministic HMAC idempotency, guest access tokens, staff confirmation/cancellation, automatic SQL hold expiry, rate limits, tests and operator guide. Branched from Phase 4. No PostgreSQL schema or Docker changes. Build/live DB verification pending.
 
 - **2026-11-03 — Phase 6:** Added private GCash/bank payment proof storage, review/approval/rejection, manual payment/refund recording, confirmed staff bookings, schedule blocks, payment-sensitive booking status guards, API tests, AGENTS/wiki. No DB schema or Docker modifications. Build/live payment verification pending.
+
+- **2026-11-03 — Phase 7:** Branded Next.js player homepage, court/time availability matrix, 1–8-slot selection, booking/contact form, private token-backed booking status, receipt upload/preview, find-booking page, server-only gateway, status and offline UX, design tokens and pure helper tests. Stacked on Phase 6; no DB/backend schema or Docker modifications. Next.js build and live browser audit pending.

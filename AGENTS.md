@@ -13,7 +13,7 @@
 ## Architecture and safety
 
 - Keep the requested repository layout: backend/Pickleball.Api, frontend, database, docs, and PickleballBooking.slnx.
-- Backend: ASP.NET Core (.NET 10); planned frontend: Next.js and TypeScript; database: PostgreSQL 17 on Docker.
+- Backend: ASP.NET Core (.NET 10); frontend: Next.js 16 and TypeScript (player UI Phase 7, admin UI planned Phase 8); database: PostgreSQL 17 on Docker.
 - The user's PostgreSQL instance is ALREADY working. Never run docker compose down -v, reset its volumes, rerun schema initialization SQL on real data, call EnsureCreated/EnsureDeleted/Migrate at startup, or overwrite local .env credentials. Read docs/database-migrations.md before ANY EF migration changes.
 - Each venue has its own database and deployment; court count, rates, hours, policy and branding are configuration, not new tables per client.
 - EF Core mapping must preserve the SQL-first nine-table schema, UTC timestamptz, TimeOnly for hours, SQL indexes/triggers and PostgreSQL exclusion constraint. Coordinate changes using repositories + IUnitOfWork. Enforce booking transaction safety and PostgreSQL overlap exclusions. Expired HELD/AWAITING_REVIEW rows must transition to EXPIRED before time becomes free.
@@ -46,8 +46,20 @@
 
 ## Current implementation
 
-Phases 1–2 are on main; Phase 3 and 4 PRs were merged into their parent **feature branches**, not directly into main. Phase 5 merged into its parent Phase 4 feature branch, not into main. Phase 6 is stacked on Phase 5, and runtime build/PostgreSQL verification is still pending. See [docs/context/progress.md](docs/context/progress.md) before claiming a feature is verified. The API now has booking/hold, manual payments/receipt review and staff operations source, but not automated settlement or public/admin booking UI.
+Phases 1–2 are on main; Phase 3 and 4 PRs were merged into their parent **feature branches**, not directly into main. Phase 5 merged into its parent Phase 4 feature branch, not into main. Phase 6 is stacked on Phase 5, and runtime build/PostgreSQL verification is still pending. See [docs/context/progress.md](docs/context/progress.md) before claiming a feature is verified. The API has booking/holds, manual payments and staff operations source. Phase 7 adds player booking UI but NOT an admin dashboard or automated payment settlement.
 
 ## Documentation hygiene
 
 Prefer concise topic pages linking to canonical SQL/code. Update decisions.md when decisions change; do not confuse a plan with working code.
+
+## Phase 7 player frontend safeguards
+
+- Before editing frontend, read docs/context/ui-ux.md and docs/phase-7-player-frontend.md; reuse frontend/app/globals.css and frontend/lib/player.ts design tokens.
+- The frontend is **one branded player site per venue**, not a marketplace. Fetch venue name, logo, brand, timezone/currency and courts from the API; no hardcoded count, schedule, prices or GCash recipient details.
+- Build court-by-time UI with semantic status text plus color, keyboard focus, mobile horizontal scrolling, proper empty/error/loading/closed states, and 1–8 contiguous AVAILABLE slots.
+- Price on the client is a non-authoritative quote. Backend Phase 5 must always validate the final hold, so show conflicts and expired holds accurately. A submitted receipt is never paid until Phase 6 review/verification.
+- Keep API_BASE_URL and the booking bearer access token **server-only**. On booking creation, Next.js Route Handler removes accessToken from JSON and stores it in an HttpOnly, SameSite=Lax cookie (Secure in production). No localStorage, analytics, query parameters, or public client code may read the secret.
+- Restrict the Next.js player gateway to explicit backend public routes; verify Origin for POST, set APP_ORIGIN to the public HTTPS origin in production, disable caching of booking/payment responses, and never proxy staff admin endpoints through player routes.
+- Online guest cross-device recovery remains unimplemented due to non-exportable HttpOnly tokens; the optional recovery input is only for venue-supplied tokens. Do not imply booking reference alone grants access.
+- UI UX Pro Max and Impeccable are installed globally on developer machine but not callable through GitHub connector. Conduct real browser/mobile/accessibility audit using them locally; never mark a rendered UI verification as passed without evidence. Run npm run check and npm run build locally.
+- AGENTS.md and docs/context/*.md MUST remain committed, never excluded by .gitignore.

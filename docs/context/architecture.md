@@ -44,3 +44,17 @@ See [Phase 5 operator guide](../phase-5-booking-engine.md). There is no payment 
 - `Controllers/Admin/OperationsController.cs`: walk-in/phone/Messenger bookings and court blocks; existing Phase 3 cookie+CSRF rules apply.
 
 The canonical nine-table SQL bootstrap remains unchanged. A future reviewed migration should add a true booking_source field and potentially an auditable payment-action history. Phase 6 provides manual verification only: no settlement API, no actual refund payments, no automated invoices or SMS.
+
+## Phase 7 Next.js player web
+
+- app/page.tsx: server-side venue branding and live player availability UI.
+- app/booking/[code]/page.tsx: private guest status, payment proof and eligible hold cancellation.
+- app/find-booking/page.tsx: booking reference and optional venue-provided access token input.
+- components/booking/: dynamic grid, contact/hold, payment file preview, booking status/recovery.
+- lib/player.ts: pure client-safe date, price, slot-range and brand/contrast helpers.
+- lib/server-api.ts: private server-only API_BASE_URL and public venue retrieval.
+- app/api/player/[...segments]/route.ts: **explicitly allowlisted same-origin gateway**; it calls only public .NET booking/venue/availability/payment endpoints, never admin API. It stores HMAC guest bearer token in a Secure (production), HttpOnly, SameSite=Lax cookie instead of exposing it to frontend JavaScript. State-changing requests verify Origin; APP_ORIGIN is required on production deployment. All dynamic responses use no-store.
+
+Browser does not compute authoritative prices or confirm payment. File uploads remain server-validated in Phase 6. No cross-device recovery for online bookings: the returned token is intentionally never exposed to client JS or URL; venue-provided tokens can be entered through an optional private recovery form. See [Phase 7 runbook](../phase-7-player-frontend.md).
+
+The frontend is not a venue marketplace. Each deployment uses its own branding, API origin, data and secrets.

@@ -14,7 +14,7 @@ Applies to player-facing booking pages and staff/owner admin screens for individ
 ## Design system
 
 1. Inspect implemented tokens, shared components, screens, and venue configurations before adding styles.
-2. On first frontend build, define a compact documented token system: color, typography, spacing, radii, states, focus outlines and responsive breakpoints. Keep token definitions in frontend source and link to them here. Phase 1 currently contains **temporary, neutral tokens** in [frontend/app/globals.css](../../frontend/app/globals.css); these are not an approved brand system.
+2. On first frontend build, define a compact documented token system: color, typography, spacing, radii, states, focus outlines and responsive breakpoints. Keep token definitions in frontend source and link to them here. Phase 7 establishes the **player design tokens** in [frontend/app/globals.css](../../frontend/app/globals.css) and per-venue contrast-aware CSS variables in [frontend/lib/player.ts](../../frontend/lib/player.ts). New screens must reuse them, not invent a second palette.
 3. Build a consistent base UI reusable across venues. Inject logo, brand colors, images, court names/counts and booking policy via config; use scoped, deliberate variations only when justified.
 4. Keep player booking, owner dashboard and marketing pages internally consistent. Brand colors must not reduce status clarity or accessibility.
 5. Prefer clear, functional and fast interfaces over decorative complexity. Avoid gratuitous animations and arbitrary style changes.
@@ -44,3 +44,12 @@ Applies to player-facing booking pages and staff/owner admin screens for individ
 - [ ] Update context wiki when behavior or durable design rules change.
 
 Document approved design-system paths here once frontend exists; do not duplicate source tokens in docs.
+
+## Phase 7 implemented design baseline
+
+- Sport-editorial typography and visual hierarchy; warm neutral surfaces, restrained CSS court illustration, no stock imagery or gratuitous motion.
+- Venue-approved primary/secondary colors are loaded from the public venue API, validated as hex and paired with light/dark foreground chosen for contrast. Status colors remain independent.
+- Court/time matrix has sticky time labels, horizontal scrolling on narrow screens and live backend statuses with accessible text (not color-only). Free cells support up to 8 contiguous slots.
+- Booking summary and contact form show estimated total, clearly identify a temporary hold and require server-side validation. Payment page never claims an uploaded receipt has been verified.
+- Private booking status and proof preview use a server-only gateway and HttpOnly guest token cookie. See [Phase 7 guide](../phase-7-player-frontend.md) for architecture and limitations.
+- **Pending UI audit:** actual viewport screenshots at 320/375/768/1024px, keyboard/screen-reader, WCAG contrast sampling, reduced-motion and failed requests. UI UX Pro Max and Impeccable global skill execution is a developer-local step; GitHub alone does not establish that they ran.
