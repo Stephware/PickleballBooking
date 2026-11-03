@@ -50,6 +50,12 @@ BEGIN
     RAISE EXCEPTION 'Expiration transition function is missing';
   END IF;
 
-  RAISE NOTICE 'PASS: all 9 tables, overlap exclusion, 7 triggers and expiry function are present';
+  -- Reject deployments still running the old timed payment-review function.
+  IF (SELECT pg_get_functiondef('expire_pending_schedule_entries()'::regprocedure))
+      NOT LIKE '%WHERE status = ''HELD''%' THEN
+    RAISE EXCEPTION 'Legacy review expiry active: apply 06_payment_review_no_expiry.sql';
+  END IF;
+
+  RAISE NOTICE 'PASS: 9 tables, overlap exclusion, 7 triggers, HELD-only expiry';
 END;
 $$;

@@ -19,7 +19,7 @@ public sealed class VenueSettingsConfiguration : IEntityTypeConfiguration<VenueS
         builder.Property(e => e.PrimaryColor).HasColumnName("primary_color").HasColumnType("character(7)").IsRequired().HasDefaultValue("#16805D");
         builder.Property(e => e.SecondaryColor).HasColumnName("secondary_color").HasColumnType("character(7)").IsRequired().HasDefaultValue("#F2F7F4");
         builder.Property(e => e.SlotMinutes).HasColumnName("slot_minutes").HasColumnType("integer").HasDefaultValue(60);
-        builder.Property(e => e.HoldMinutes).HasColumnName("hold_minutes").HasColumnType("integer").HasDefaultValue(15);
+        builder.Property(e => e.HoldMinutes).HasColumnName("hold_minutes").HasColumnType("integer").HasDefaultValue(10);
         builder.Property(e => e.ReviewTimeoutHours).HasColumnName("review_timeout_hours").HasColumnType("integer").HasDefaultValue(4);
         builder.Property(e => e.BookingAdvanceDays).HasColumnName("booking_advance_days").HasColumnType("integer").HasDefaultValue(30);
         builder.Property(e => e.MinimumNoticeMinutes).HasColumnName("minimum_notice_minutes").HasColumnType("integer").HasDefaultValue(30);

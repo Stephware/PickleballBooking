@@ -19,7 +19,7 @@ CREATE TABLE venue_settings (
     primary_color CHAR(7) NOT NULL DEFAULT '#16805D',
     secondary_color CHAR(7) NOT NULL DEFAULT '#F2F7F4',
     slot_minutes INTEGER NOT NULL DEFAULT 60 CHECK (slot_minutes IN (30, 60, 90, 120)),
-    hold_minutes INTEGER NOT NULL DEFAULT 15 CHECK (hold_minutes BETWEEN 1 AND 120),
+    hold_minutes INTEGER NOT NULL DEFAULT 10 CHECK (hold_minutes BETWEEN 1 AND 120),
     review_timeout_hours INTEGER NOT NULL DEFAULT 4 CHECK (review_timeout_hours BETWEEN 1 AND 72),
     booking_advance_days INTEGER NOT NULL DEFAULT 30 CHECK (booking_advance_days BETWEEN 1 AND 365),
     minimum_notice_minutes INTEGER NOT NULL DEFAULT 30 CHECK (minimum_notice_minutes >= 0),
@@ -128,8 +128,8 @@ CREATE TABLE court_schedule_entries (
         OR (entry_type = 'BLOCK' AND status IN ('BLOCKED', 'CANCELLED'))
     ),
     CONSTRAINT schedule_pending_has_expiry CHECK (
-        (status IN ('HELD', 'AWAITING_REVIEW') AND expires_at IS NOT NULL)
-        OR (status NOT IN ('HELD', 'AWAITING_REVIEW') AND expires_at IS NULL)
+        (status = 'HELD' AND expires_at IS NOT NULL)
+        OR (status <> 'HELD' AND expires_at IS NULL)
     )
 );
 
@@ -146,7 +146,7 @@ ALTER TABLE court_schedule_entries
     ));
 CREATE INDEX ix_schedule_entries_court_start ON court_schedule_entries (court_id, starts_at);
 CREATE INDEX ix_schedule_entries_expiry ON court_schedule_entries (expires_at)
-    WHERE status IN ('HELD', 'AWAITING_REVIEW');
+    WHERE status = 'HELD';
 
 -- 8. Booking details (one court per booking). Booking status comes from schedule entry.
 CREATE TABLE bookings (
@@ -221,7 +221,8 @@ CREATE TRIGGER trg_bookings_updated BEFORE UPDATE ON bookings
 CREATE TRIGGER trg_payments_updated BEFORE UPDATE ON payments
     FOR EACH ROW EXECUTE FUNCTION set_record_updated_at();
 
--- Expire both unsubmitted temporary holds and pending owner-review requests.
+-- Expire only HELD reservations with no submitted proof. AWAITING_REVIEW is
+-- reserved until manual staff approval, rejection, or explicit resolution.
 -- Call at the beginning of an availability/booking transaction AND periodically
 -- from a background worker. Treat expiration as an explicit status transition.
 CREATE FUNCTION expire_pending_schedule_entries()
@@ -231,7 +232,7 @@ DECLARE
 BEGIN
     UPDATE court_schedule_entries
        SET status = 'EXPIRED', expires_at = NULL
-     WHERE status IN ('HELD', 'AWAITING_REVIEW')
+     WHERE status = 'HELD'
        AND expires_at <= NOW();
     GET DIAGNOSTICS affected = ROW_COUNT;
     RETURN affected;

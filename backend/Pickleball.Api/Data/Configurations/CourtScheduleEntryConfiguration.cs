@@ -24,7 +24,7 @@ public sealed class CourtScheduleEntryConfiguration : IEntityTypeConfiguration<C
         builder.HasOne<Court>().WithMany().HasForeignKey(e => e.CourtId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<StaffUser>().WithMany().HasForeignKey(e => e.CreatedByStaffId).OnDelete(DeleteBehavior.SetNull);
         builder.HasIndex(e => new { e.CourtId, e.StartsAt }).HasDatabaseName("ix_schedule_entries_court_start");
-        builder.HasIndex(e => e.ExpiresAt).HasDatabaseName("ix_schedule_entries_expiry").HasFilter("status IN ('HELD', 'AWAITING_REVIEW')");
+        builder.HasIndex(e => e.ExpiresAt).HasDatabaseName("ix_schedule_entries_expiry").HasFilter("status = 'HELD'");
         // SQL-only objects (functional indexes, exclusion constraints and triggers)
         // remain authoritative in database/sql/01_schema.sql.
     }
