@@ -41,3 +41,15 @@ docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U pickleball_app -d pic
 The source of truth is sql/01_schema.sql. It defines venue_settings, staff_users, courts, operating_hours, pricing_rules, customers, court_schedule_entries, bookings, and payments.
 
 The btree_gist exclusion constraint on court_schedule_entries prevents overlapping active holds, confirmed bookings, and blocked periods. The API/worker must explicitly expire stale HELD/AWAITING_REVIEW entries; the schema alone does not implement complete booking policy or authentication.
+
+## Payment review upgrade for existing venues
+
+New installations use `sql/01_schema.sql`, which creates a 10-minute default
+HELD period and a non-expiring `AWAITING_REVIEW` state. For an **existing**
+PostgreSQL volume, first back up the actual database/proofs, stop API writes,
+apply `sql/06_payment_review_no_expiry.sql` as a DB administrator, and run
+`sql/05_verify_existing_schema.sql` to verify. This does not modify or
+erase any booking, payment, proof or ID, and does not recreate the database.
+Already expired bookings require manual reconciliation; they cannot simply
+be reinstated. The unused legacy `review_timeout_hours` column remains stored
+for compatibility but is not used or shown in the new API.

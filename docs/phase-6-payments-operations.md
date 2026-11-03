@@ -75,3 +75,19 @@ All mutations require the existing Phase 3 cookie and `X-CSRF-TOKEN` header. `GE
 6. Confirm file durability and reverse-proxy HTTPS/secure cookies in production. Malicious file scanning and payment-provider reconciliation are operator responsibilities until explicitly integrated.
 
 This Phase 6 implementation is source-only until actual .NET builds and integration tests have passed. Phase 7 is the customer frontend, Phase 8 is the admin frontend.
+
+## Current policy since 2026-11-03
+
+The original Phase 6 implementation had a four-hour `AWAITING_REVIEW`
+deadline. This has been intentionally removed. Proof accepted before the
+booking's initial 10-minute HELD deadline sets `AWAITING_REVIEW` with
+`expires_at = NULL`; the court remains reserved and cannot be double-booked.
+Only management's actual verified approval, rejection, or a reasoned staff
+cancellation can release/resolve it. Late review approval is permitted after
+scheduled start and never automatically triggers a refund. The old
+`review_timeout_hours` DB field is deprecated and ignored.
+
+The staff Today/Payments views now highlight payment reviews older than
+one hour, games starting within one hour, and reviews needing reconciliation.
+These are in-app reminders only; no automatic email/SMS delivery is configured.
+Unreviewed bookings need active monitoring, especially near game time.

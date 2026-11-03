@@ -112,3 +112,15 @@ Inspect 320/375/768/1024px, screen reader, keyboard Tab/Escape, no horizontal ov
 - Phones at 680 px and below show only Select Court / Select Time cards, not the duplicate horizontally scrolling court-by-time table. The responsive selector still uses the same server-sourced availability, pricing and 1–8 adjacent slot selection; the selection summary, Continue, booking form and payment process remain functional.
 - At wider breakpoints keep the existing desktop schedule grid. Browser regression tests assert a single visible picker at 320/375 px and a visible table at 768/1024 px, with the real-photo hero and no illustration/strip.
 - No data, API, payment, authentication, owner operations or database changes. Device/venue acceptance gates still apply.
+
+## 2026-11-03 — Proof submission vs staff review
+
+Distinguish the **10-minute proof submission deadline** for HELD from the
+**no-expiry manual verification** for AWAITING_REVIEW. Never show a review
+countdown after proof was accepted. Show the genuine specific hold deadline
+from the API; staff verification remains a separate step before CONFIRMED.
+Use Today/Payments in-app urgency reminders for receipts older than an hour,
+games starting within an hour and canceled/other unresolved payment records.
+Do not imply that reminders are email/push notifications. A reason must be
+recorded when management releases a court with submitted proof. No invented
+payment account, automatic refund or guaranteed play access.
