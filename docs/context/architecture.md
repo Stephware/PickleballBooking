@@ -1,47 +1,82 @@
 # Architecture and data model
 
-## Deployment model
+One reusable deployment/codebase, separately configured PostgreSQL database per pickleball venue. The original SQL-first nine-table schema remains the source of truth. No schema changes in Phases 4–9.
 
-One reusable codebase, separately deployed per pickleball venue with its own PostgreSQL database. The SQL-first schema is **single-venue** (`venue_settings.id = 1`), so no `venue_id` discriminator is needed in every table. The frontend remains a Next.js 16 + TypeScript + Tailwind starter awaiting real booking/admin features.
+## API layering
+- `Controllers/Public/`: public venue/court APIs plus `AvailabilityController` and `PricingController` (read-only).
+- `Controllers/Admin/`: cookie-authenticated owner/manager/staff routes including `PricingRulesController`; unsafe calls require CSRF.
+- `DTOs/`: request/response contracts, no customer names or booking IDs in availability responses.
+- `Services/Availability/`: `AvailabilityService`, pure `AvailabilityCalculator`, `LocalTimeSlots` (local times → UTC).
+- `Services/Pricing/`: `PricingService` admin CRUD and pure `PricingCalculator` server-side pricing.
+- `Repositories/`: SQL-first EF query/persistence; `ScheduleRepository.ListActiveInRangeAsync` returns one batched list, `PricingRuleRepository` handles rules; `IUnitOfWork` coordinates saves.
+- `Models/Entities/`: nine existing database entities; `Models/Enums/` includes persisted status constants and derived `AvailabilityStatuses`.
+- `Data/`: EF Core mappings to existing columns, no auto-migrate.
 
-## Phase 2 backend layers
+## Availability time semantics
+Venue `operating_hours`/slot_minutes determine same-day wall-clock slots; timezone (default Asia/Manila) converts each to UTC; slots overlapping active `court_schedule_entries` are resolved by blocked > occupied > pending. Started slots are elapsed; future open slots within minimum-notice/advance rules are available. Invalid/ambiguous DST boundaries are skipped rather than guessed. PostgreSQL `tstzrange` uses half-open intervals so adjacent slots can coexist. A held row with expired `expires_at` still blocks until status changes to EXPIRED.
 
-- `Models/Entities/` — nine POCO entities corresponding to the nine existing tables. SQL status strings are kept as constants in `Models/Enums/BookingStatuses.cs`, not implicitly converted into PostgreSQL enums.
-- `Data/PickleballDbContext.cs` — EF Core context; mappings are loaded from `Data/Configurations/` for every entity and preserve SQL-first table/column names, identity semantics, types and foreign keys.
-- `Data/PickleballDbContextFactory.cs` — design-time context using user-secrets/env configuration; no automatic schema changes.
-- `Repositories/` — venue, court, schedule and booking repositories. Write methods stage changes; `IUnitOfWork` coordinates `SaveChangesAsync` and transactions.
-- `Extensions/DatabaseServiceExtensions.cs` — conditional PostgreSQL DI setup. If no local connection string exists, regular `/health` still responds and `/health/db` reports unhealthy.
-- `Health/PostgresSchemaHealthCheck.cs` — read-only check for a connection, nine required tables and the existing venue row; no external SQL or sensitive details returned.
-- `backend/tests/` — metadata unit tests and gated live integration tests.
+## Pricing semantics
+Rule filters: nullable court/date weekday (0=Sun), time ranges, active flag; precedence court-specific then priority DESC then ID DESC. Split slots at matching rule boundaries, prorate per minute, round at end. Falls back to court base rate. Quote is **estimated under current rules**, not a booking guarantee, and can change before a Phase 5 transactional booking.
 
-**No CRUD controllers or booking business services are exposed in Phase 2.** Roles, write authorization, booking conflict handling and payment flows belong to later phases.
+## Security and boundaries
+Admin rule changes require OWNER/MANAGER session and CSRF from Phase 3. Public endpoints expose only availability and prices, not customer/booking data. Authentication and client-frontend pages remain outside Phase 4. Phase 5 revalidates availability/pricing inside a transaction and relies on PostgreSQL exclusion constraints for final conflict prevention.
 
-## Canonical nine tables
+See [Phase 4 specifications](../phase-4-availability-pricing.md), [migration safeguards](../database-migrations.md) and progress.md.
 
-| SQL table | C# entity |
-| --- | --- |
-| venue_settings | VenueSettings |
-| staff_users | StaffUser |
-| courts | Court |
-| operating_hours | OperatingHour |
-| pricing_rules | PricingRule |
-| customers | Customer |
-| court_schedule_entries | CourtScheduleEntry |
-| bookings | Booking |
-| payments | Payment |
+## Phase 5 transaction and guest security
 
-## PostgreSQL-specific behavior
+- `Services/Bookings/BookingService.cs`: create/lookup/cancel/confirm and staff calendar read. Validates a contiguous range of 1–8 slots, recalculates quote inside a transaction, expires overdue rows with the canonical SQL function, saves HELD schedule + booking atomically, and catches SQLSTATE 23P01/23505.
+- `Background/PendingBookingExpiryWorker.cs`: runs SQL `expire_pending_schedule_entries()` every 30s; stale HELD/AWAITING_REVIEW entries remain occupied until their persisted status changes.
+- `Security/GuestBookingTokens.cs`: **Booking:SigningKey** (per-venue persistent 32+-byte secret from user-secrets/env), purpose-separated HMAC for deterministic idempotency booking code and bearer guest token. Never expose the key. Changing key invalidates existing tokens.
+- `Controllers/Public/BookingsController.cs`: rate-limited booking creation, guest lookup/cancellation with `X-Booking-Token`, no-store responses. No customer data in public availability.
+- `Controllers/Admin/BookingsController.cs`: staff list, manager/owner confirm or cancel with existing staff cookie and CSRF.
+- `Repositories/`: existing booking and schedule repositories and EF Core unit-of-work, with complex atomic status transitions via EF `ExecuteUpdateAsync`. All writes use the SQL-first schema.
 
-- `btree_gist` enables the GiST exclusion constraint `ex_court_active_time_overlap` that rejects overlapping active bookings and blocks.
-- Functional case-insensitive indexes, `updated_at` triggers, SQL check constraints, generated booking codes and `expire_pending_schedule_entries()` remain managed by `database/sql/01_schema.sql` rather than being silently rebuilt by EF conventions.
-- `timestamptz` maps to `DateTime` and **must use UTC**; `time` maps to `TimeOnly`. The venue timezone is a separate setting (initially Asia/Manila).
-- Expired pending schedule entries remain active until their status is explicitly changed to `EXPIRED`; a future service/worker will perform that transition. A read-only availability query alone cannot eliminate the concurrency race.
-- The current schema lacks specialized per-court overnight hours and secure booking-access tokens; those are future reviewed migrations.
+See [Phase 5 operator guide](../phase-5-booking-engine.md). There is no payment flow, admin interface, or guest booking frontend in this phase.
 
-## Migrations
+## Phase 6 payment and staff operations
 
-See [docs/database-migrations.md](../database-migrations.md). The schema already exists, and EF's initial generated migration would otherwise try to create duplicate tables. **No migrations are applied or auto-run in Phase 2**. Generate the baseline and snapshot only in a local .NET-enabled environment, review it against a disposable copy first, and keep the original bootstrap SQL for new venues.
+- `Services/Payments/PaymentService.cs` + `Repositories/Payments/`: guest proof submission, manual staff payment entries, verification/rejection, payment balances and external refund records. Payment + booking state changes serialize through a locked `court_schedule_entries` row and persist in one transaction.
+- `Storage/IProofStorage.cs`, `LocalProofStorage.cs`: private filesystem storage, random non-user filenames, header checks and 5 MiB upload cap. Requires `ProofStorage:Directory` outside public wwwroot. No public file routes; protected admin image preview/PDF attachment only.
+- `Services/Operations/OperationsService.cs`: confirmed staff/manual bookings and future maintenance BLOCKED entries with SQL overlap protection. All channels are stored as a structured notes prefix because `bookings.booking_source` does not yet exist.
+- `Controllers/Public/PaymentsController.cs`: token-authenticated guest receipt upload/status.
+- `Controllers/Admin/PaymentsController.cs`: protected proof access, review, manual record and external refund logging.
+- `Controllers/Admin/OperationsController.cs`: walk-in/phone/Messenger bookings and court blocks; existing Phase 3 cookie+CSRF rules apply.
 
-## Source of truth
+The canonical nine-table SQL bootstrap remains unchanged. A future reviewed migration should add a true booking_source field and potentially an auditable payment-action history. Phase 6 provides manual verification only: no settlement API, no actual refund payments, no automated invoices or SMS.
 
-`database/sql/01_schema.sql` for current SQL objects, mapped entity configurations for EF, and context wiki for product decisions. Keep the actual database/volume untouched during scaffolding.
+## Phase 7 Next.js player web
+
+- app/page.tsx: server-side venue branding and live player availability UI.
+- app/booking/[code]/page.tsx: private guest status, payment proof and eligible hold cancellation.
+- app/find-booking/page.tsx: booking reference and optional venue-provided access token input.
+- components/booking/: dynamic grid, contact/hold, payment file preview, booking status/recovery.
+- lib/player.ts: pure client-safe date, price, slot-range and brand/contrast helpers.
+- lib/server-api.ts: private server-only API_BASE_URL and public venue retrieval.
+- app/api/player/[...segments]/route.ts: **explicitly allowlisted same-origin gateway**; it calls only public .NET booking/venue/availability/payment endpoints, never admin API. It stores HMAC guest bearer token in a Secure (production), HttpOnly, SameSite=Lax cookie instead of exposing it to frontend JavaScript. State-changing requests verify Origin; APP_ORIGIN is required on production deployment. All dynamic responses use no-store.
+
+Browser does not compute authoritative prices or confirm payment. File uploads remain server-validated in Phase 6. No cross-device recovery for online bookings: the returned token is intentionally never exposed to client JS or URL; venue-provided tokens can be entered through an optional private recovery form. See [Phase 7 runbook](../phase-7-player-frontend.md).
+
+The frontend is not a venue marketplace. Each deployment uses its own branding, API origin, data and secrets.
+
+
+## Phase 8 administration interface and BFF
+
+- /admin is a separate Next.js route with a client-side session gate, responsive left navigation and role-aware panels. It does not SSR private guest/staff data before session verification.
+- app/api/admin/session/route.ts performs ASP.NET Core login/CSRF handshake and stores three HttpOnly SameSite=Strict frontend cookies for backend session ticket, antiforgery cookie and per-identity request token.
+- app/api/admin/[...segments]/route.ts forwards **only** documented admin method/path combinations through lib/admin-policy.ts and lib/admin-proxy.ts. Production requires APP_ORIGIN and HTTPS. It validates Origin for unsafe methods, forwards backend CSRF and staff cookies, and never accepts arbitrary backend endpoints from users.
+- Backend ASP.NET Core still checks authorization, active account, role, password fingerprint and antiforgery per operation. UI hiding owner controls is only convenience.
+- Authenticated private payment proof preview enforces MIME and 5 MiB limit and does not write files to static/public assets; PDFs remain attachments.
+- components/admin/sections: Overview, Bookings, Payments, PaymentLedger, Manual, Blocks, Courts, Pricing, Hours, Venue, Staff, Account. Styling in app/admin/admin.css, inheriting Phase 7 brand tokens.
+- All data remains per-venue. No database migration or backend controllers changed in Phase 8.
+
+See [Phase 8 operations guide](../phase-8-owner-staff-dashboard.md). See Phase 9 for actual runtime authentication, UI and verification results.
+
+## Phase 9 runtime and deployment
+
+- `Extensions/DeploymentConfiguration.cs` validates production secrets/private paths/hosts and persists Data Protection keys. Explicit trusted BFF proxy addresses preserve HTTPS antiforgery and per-client throttling across the internal HTTP hop.
+- `frontend/lib/backend-headers.ts` derives scheme from configured public origin and only forwards one validated IP when a trusted ingress is explicitly configured. The Compose frontend is loopback-published with a reserved internal address; API and DB have no public ports.
+- Frontend streams are byte-limited before JSON/multipart buffering; cookies/token transport and route allowlists remain unchanged. `next.config.ts` supplies standalone output and response security headers.
+- Backend/frontend Dockerfiles run as unprivileged application users. `deployment/compose.yaml` supplies per-project database/proof/key volumes; runtime DB role has no DDL or DELETE. No automatic schema migration/initialization on deployment.
+- Payment reference uniqueness includes REFUNDED history and legacy surrounding whitespace. Review/refund notes append rather than overwrite original verification metadata; no new audit table was introduced.
+- `.github/workflows/verify.yml`, unit/integration tests and guarded HTTP/browser scripts exercise disposable databases. Local execution evidence is in [Phase 9 verification](../phase-9-final-verification.md); [deployment](../deployment.md) documents operational acceptance.

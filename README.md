@@ -1,20 +1,18 @@
 # PickleballBooking
 
-A reusable court booking platform with **one independently branded application deployment and PostgreSQL database per venue**. Multiple venues use the same code, but each sets its own courts, prices, opening hours, booking policy and branding. This is not a shared marketplace.
+Reusable, independently branded pickleball court booking systems: **one deployment and PostgreSQL database per venue**, shared source code, configurable courts/hours/rates/branding. Not a marketplace.
 
-## Current state
+## Implementation and verification
 
-- **API:** ASP.NET Core .NET 10, controllers/services/DI, process health + database health, centralized errors and CORS.
-- **Data (Phase 2):** Npgsql EF Core 10 mapping to the existing nine-table PostgreSQL schema, context, repositories and unit-of-work. No DB schema recreated.
-- **Frontend:** Next.js 16 + TypeScript + Tailwind 4 development placeholder. No booking UI yet.
-- **Tests:** Unit and opt-in PostgreSQL integration tests included; execution still needs local .NET verification.
-- **Documentation:** Tracked [AGENTS.md](AGENTS.md), [context wiki](docs/context/index.md), [UI/UX guide](docs/context/ui-ux.md).
+Phases 1–8 provide the .NET/SQL-first API, transactional holds, manual payment review and staff operations, player website and owner dashboard. Phase 9 integrates their stacked branch history, fixes payment/security/build/UI defects and supplies reproducible tests and independent-venue deployment artifacts.
 
-## Run the existing database connection
+See [Phase 9 verification](docs/phase-9-final-verification.md) for actual test counts and coverage, [development](docs/development.md) to run the system, and [deployment](docs/deployment.md) for containers, trusted HTTPS ingress, private storage, backups and rollback. The canonical nine-table schema is unchanged and existing local database data is untouched.
 
-Your Docker/PostgreSQL instance on port 5435 is already working; do **not** delete its volume, rerun the initialization SQL or move it into a new Compose project.
+Main integration requires review/approval. Public launch still needs official venue payment instructions, malware controls, real TLS ingress and operator backup/monitoring acceptance. Automated settlement/refund transfers, verified cross-device guest recovery and normalized booking-source reporting remain deferred.
 
-Configure backend credentials outside Git:
+## Local API
+
+Connect to the *existing* local PostgreSQL 17 instance on port 5435. Configure connection credentials via local user-secrets, never Git:
 
 ```bash
 dotnet user-secrets set "ConnectionStrings:Pickleball" "Host=localhost;Port=5435;Database=pickleball_db;Username=pickleball_app;Password=YOUR_PASSWORD" --project backend/Pickleball.Api
@@ -24,21 +22,54 @@ dotnet test PickleballBooking.slnx
 dotnet run --project backend/Pickleball.Api
 ```
 
-Then open `http://localhost:5090/health` and `http://localhost:5090/health/db`. Database health must return 200 after connecting. You can also run read-only [database schema verification SQL](database/sql/05_verify_existing_schema.sql) in DBeaver.
+The example command can expose the password in shell history; use an interactive secret input in real development. **Phase 5 needs a persistent Booking:SigningKey**; Phase 6 additionally needs a durable, private absolute **ProofStorage:Directory**. Configure both outside Git as described in the phase guides. Open `http://localhost:5090/health/db` before API queries.
 
-Frontend:
+```text
+GET /api/v1/availability?date=2026-11-03
+GET /api/v1/availability?date=2026-11-03&courtId=1
+GET /api/v1/pricing/quote?date=2026-11-03&courtId=1&startsAt=09:00
+```
+
+Dates in the sample are illustrative; use a current date within the configured booking window. Availability/quote endpoints return **estimated prices**, not reservations.
+
+Phase 5 guest booking routes:
+```text
+POST /api/v1/bookings
+GET /api/v1/bookings/{bookingCode}              # X-Booking-Token required
+POST /api/v1/bookings/{bookingCode}/cancel     # X-Booking-Token required
+GET /api/v1/admin/bookings?date=YYYY-MM-DD
+POST /api/v1/admin/bookings/{bookingCode}/confirm  # OWNER/MANAGER + CSRF
+POST /api/v1/admin/bookings/{bookingCode}/cancel   # OWNER/MANAGER + CSRF
+```
+See [Phase 5 API, token and idempotency details](docs/phase-5-booking-engine.md). Booking creation places a time-limited **HELD** entry; it is not payment confirmation.
+
+## Player frontend — Phase 7
 
 ```bash
 cd frontend
-npm install
+cp .env.example .env.local
+npm ci
 npm run check
+npm run build
 npm run dev
 ```
 
-Open http://localhost:3000. Commit `frontend/package-lock.json` after first successful npm installation.
+Open http://localhost:3000 for venue branding, date/court grid and booking, and **http://localhost:3000/admin** for the Owner/Manager/Staff dashboard. The private /booking/{code} page supports proof upload/status. APP_ORIGIN must match the frontend public origin (required in production) and API_BASE_URL is server-only. Commit frontend/package-lock.json after the first actual local npm ci. See [Phase 7 guide](docs/phase-7-player-frontend.md).
 
-## Important
+## Docs and safety
 
-**Do not run `dotnet ef database update` yet.** The database existed before EF Core; migration baseline + snapshot must be generated and reviewed first. See [docs/database-migrations.md](docs/database-migrations.md) and [docs/development.md](docs/development.md).
+- [AGENTS.md](AGENTS.md) — coding-agent rules
+- [docs/context/index.md](docs/context/index.md) — Karpathy-style selective wiki
+- [docs/context/ui-ux.md](docs/context/ui-ux.md) — UI UX Pro Max for design; Impeccable for audit/polish
+- [docs/phase-4-availability-pricing.md](docs/phase-4-availability-pricing.md) — rules and endpoints
+- [docs/phase-5-booking-engine.md](docs/phase-5-booking-engine.md) — bookings, holds, signed guest access and expiry
+- [docs/phase-6-payments-operations.md](docs/phase-6-payments-operations.md) — manual payments, proof storage, staff bookings and court blocks
+- [docs/phase-7-player-frontend.md](docs/phase-7-player-frontend.md) — player pages, server-only gateway, secure booking access and UI verification
+- [docs/phase-8-owner-staff-dashboard.md](docs/phase-8-owner-staff-dashboard.md) — staff sign-in, role-aware dashboard, payment proof and operations
+- [docs/phase-3-authentication.md](docs/phase-3-authentication.md) — staff auth and one-time owner bootstrap
+- [docs/database-migrations.md](docs/database-migrations.md) — SQL-first EF migration safeguards
+- [docs/phase-9-final-verification.md](docs/phase-9-final-verification.md) — executed tests and launch gates
+- [docs/deployment.md](docs/deployment.md) — independent venue runtime and recovery
+- [docs/development.md](docs/development.md) — local setup
 
-Future work: Phase 3 staff auth/venue/courts, Phase 4 availability/pricing, Phase 5 atomic booking engine, Phase 6 payments/manual booking, Phase 7–8 UI, Phase 9 deployment/testing. The database and Compose files remain tracked and unchanged, while passwords, backups and .env are ignored.
+No database migration or existing database reset was performed. Phase 9 executed local .NET, PostgreSQL, frontend/browser and disposable production-container verification.

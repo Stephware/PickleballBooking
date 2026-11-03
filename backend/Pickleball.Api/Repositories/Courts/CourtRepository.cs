@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Pickleball.Api.Data;
 using Pickleball.Api.Models.Entities;
+using Pickleball.Api.Models.Enums;
 
 namespace Pickleball.Api.Repositories.Courts;
 
@@ -14,6 +15,13 @@ public sealed class CourtRepository(PickleballDbContext db) : ICourtRepository
     // Tracked entity; later CourtService may update its properties.
     public Task<Court?> FindAsync(long id, CancellationToken cancellationToken = default) =>
         db.Courts.SingleOrDefaultAsync(c => c.Id == id, cancellationToken);
+
+    public Task<bool> HasFutureBookingsAsync(long courtId, DateTime utcNow,
+        CancellationToken cancellationToken = default) =>
+        db.CourtScheduleEntries.AsNoTracking().AnyAsync(s => s.CourtId == courtId &&
+            s.EntryType == ScheduleEntryTypes.Booking && s.EndsAt > utcNow &&
+            (s.Status == BookingStatuses.Held || s.Status == BookingStatuses.AwaitingReview ||
+             s.Status == BookingStatuses.Confirmed), cancellationToken);
 
     public void Add(Court court) => db.Courts.Add(court);
     public void Remove(Court court) => db.Courts.Remove(court);

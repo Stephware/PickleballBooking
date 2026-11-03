@@ -1,0 +1,65 @@
+# One Compose project and private set of volumes per venue. No schema auto-initialization.
+services:
+  database:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: pickleball
+      POSTGRES_USER: pickleball_admin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set a unique database admin password}
+    volumes:
+      - database:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U pickleball_admin -d pickleball']
+      interval: 10s
+      timeout: 5s
+      retries: 6
+  api:
+    image: ${API_IMAGE:-pickleball-api:local}
+    build:
+      context: ..
+      dockerfile: backend/Pickleball.Api/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__Pickleball: Host=database;Database=pickleball;Username=pickleball_app;Password=${DB_APP_PASSWORD:?Set a unique app database password}
+      Booking__SigningKey: ${BOOKING_SIGNING_KEY:?Set a persistent random signing key}
+      ProofStorage__Directory: /var/lib/pickleball/proofs
+      DataProtection__Directory: /var/lib/pickleball/keys
+      AllowedHosts: api
+      Cors__AllowedOrigins__0: ${APP_ORIGIN:?Set the exact HTTPS public origin}
+      Logging__Console__FormatterName: json
+      ReverseProxy__KnownProxies__0: ${VENUE_NETWORK_PREFIX:-172.30.91}.3
+    volumes:
+      - proofs:/var/lib/pickleball/proofs
+      - keys:/var/lib/pickleball/keys
+  frontend:
+    image: ${FRONTEND_IMAGE:-pickleball-frontend:local}
+    build:
+      context: ../frontend
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      API_BASE_URL: http://api:8080
+      APP_ORIGIN: ${APP_ORIGIN:?Set the exact HTTPS public origin}
+      TRUST_PROXY_HEADERS: "1"
+    networks:
+      default:
+        ipv4_address: ${VENUE_NETWORK_PREFIX:-172.30.91}.3
+    ports:
+      - 127.0.0.1:${FRONTEND_PORT:-3000}:3000
+volumes:
+  database:
+  proofs:
+  keys:
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: ${VENUE_NETWORK_PREFIX:-172.30.91}.0/24
+          ip_range: ${VENUE_NETWORK_PREFIX:-172.30.91}.128/25

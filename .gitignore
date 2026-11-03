@@ -32,3 +32,8 @@ coverage/
 .vscode/*
 !.vscode/extensions.json
 # AGENTS.md and docs/context/*.md MUST remain tracked
+
+# Private payment files (never track uploads)
+**/storage/
+**/proofs/
+**/uploads/

@@ -20,5 +20,12 @@ public sealed class ScheduleRepository(PickleballDbContext db) : IScheduleReposi
             .OrderBy(e => e.StartsAt).ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<CourtScheduleEntry>> ListActiveInRangeAsync(
+        DateTime fromUtc, DateTime toUtc, CancellationToken cancellationToken = default) =>
+        await db.CourtScheduleEntries.AsNoTracking()
+            .Where(e => BookingStatuses.Active.Contains(e.Status) &&
+                e.StartsAt < toUtc && e.EndsAt > fromUtc)
+            .OrderBy(e => e.StartsAt).ToListAsync(cancellationToken);
+
     public void Add(CourtScheduleEntry entry) => db.CourtScheduleEntries.Add(entry);
 }

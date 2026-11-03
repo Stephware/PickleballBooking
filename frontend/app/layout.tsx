@@ -3,8 +3,9 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Pickleball Booking",
-  description: "Reusable venue-specific pickleball court booking platform.",
+  title: { default: "Court Booking", template: "%s · Court Booking" },
+  description: "Check live court availability and reserve your next pickleball session.",
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {

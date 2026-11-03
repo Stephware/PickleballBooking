@@ -1,13 +1,113 @@
-# API endpoints
+# API inventory — Phases 1–6
 
-Only infrastructure endpoints exist; real court, booking, staff and payment APIs are **not implemented**.
+Phase 5 adds guest booking holds and staff management endpoints, but **does not implement payment processing or a player calendar UI**. Administrative writes require the Phase 3 staff cookie/CSRF; public slot and quote routes are read-only.
 
-| Method | Endpoint | Auth | Purpose |
-| --- | --- | --- | --- |
-| GET | `/health` | Public | Process health only; doesn't depend on database |
-| GET | `/health/db` | Public | PostgreSQL reachable, nine required tables and configured venue row |
-| GET | `/api/v1/system/status` | Public | Non-sensitive service name/status/UTC timestamp |
+## Public and infrastructure
 
-`/health/db` returns HTTP 200 on success or HTTP 503 when connection settings are missing or the DB/schema check fails. It never returns passwords or raw SQL errors.
+| Method | Route | Purpose |
+| --- | --- | --- |
+| GET | `/health` | Process health |
+| GET | `/health/db` | PostgreSQL/nine-table/venue check |
+| GET | `/api/v1/system/status` | API process status |
+| GET | `/api/v1/venue` | Venue branding |
+| GET | `/api/v1/venue/hours` | Opening hours |
+| GET | `/api/v1/courts` | Active court list |
+| GET | `/api/v1/availability?date=YYYY-MM-DD[&courtId=1]` | Venue-local day, courts, slots, status and estimated prices |
+| GET | `/api/v1/pricing/quote?date=YYYY-MM-DD&courtId=1&startsAt=09:00` | One generated slot's current price and status |
 
-Unhandled exceptions use Problem Details. Staff/auth, court management, pricing, booking, payment and guest endpoints are planned for Phases 3–6, not exposed today.
+## Staff and admin
+
+| Method | Route | Role |
+| --- | --- | --- |
+| GET | `/api/v1/admin/auth/csrf` | Anonymous; issues CSRF |
+| POST | `/api/v1/admin/auth/login` | Anonymous, CSRF and throttling |
+| POST | `/api/v1/admin/auth/logout` | Any staff, CSRF |
+| POST | `/api/v1/admin/auth/change-password` | Any staff, CSRF |
+| GET | `/api/v1/admin/auth/me` | Any staff |
+| GET/POST | `/api/v1/admin/staff` | OWNER |
+| PATCH | `/api/v1/admin/staff/{id}/active` | OWNER, CSRF |
+| POST | `/api/v1/admin/staff/{id}/reset-password` | OWNER, CSRF |
+| GET/POST | `/api/v1/admin/courts` | GET any staff; POST OWNER/MANAGER CSRF |
+| GET/PUT | `/api/v1/admin/courts/{id}` | GET any staff; PUT OWNER/MANAGER CSRF |
+| GET/PUT | `/api/v1/admin/venue` | GET any staff; PUT OWNER CSRF |
+| GET/PUT | `/api/v1/admin/venue/hours` | GET any staff; PUT OWNER/MANAGER CSRF |
+| GET | `/api/v1/admin/pricing/rules` | Any staff |
+| POST | `/api/v1/admin/pricing/rules` | OWNER/MANAGER, CSRF |
+| PUT | `/api/v1/admin/pricing/rules/{id}` | OWNER/MANAGER, CSRF |
+| PATCH | `/api/v1/admin/pricing/rules/{id}/deactivate` | OWNER/MANAGER, CSRF |
+
+## Sample response fields
+
+`GET /api/v1/availability?date=2026-11-03` returns:
+- `date`, `timezone`, `currency`, `isClosed`, `slotMinutes`
+- `courts[]`: `courtId`, `courtName`, `slots[]`
+- `slots[]`: `startsAt`, `endsAt` (local time), `startsAtUtc`, `endsAtUtc`, `status`, `totalPrice` (estimated)
+
+Status values: `AVAILABLE`, `OCCUPIED`, `PENDING`, `ELAPSED`, `BLOCKED`, `UNAVAILABLE`. A closed day may have no slots. No personal data is returned.
+
+A quote returns `date`, `courtId`, `startsAt`, `endsAt`, `currency`, `totalPrice`, `availabilityStatus`. Neither endpoint reserves anything or guarantees the slot remains free. The Phase 5 booking API must recompute prices/availability under a transaction.
+
+[Detailed pricing/availability rules](../phase-4-availability-pricing.md) | [Phase 3 authentication](../phase-3-authentication.md).
+
+## Phase 5 — booking endpoints
+
+| Method | Route | Authorization |
+| --- | --- | --- |
+| POST | `/api/v1/bookings` | Guest, rate limited, UUID v4 idempotency key |
+| GET | `/api/v1/bookings/{bookingCode}` | Guest, `X-Booking-Token` bearer header, rate limited |
+| POST | `/api/v1/bookings/{bookingCode}/cancel` | Guest, `X-Booking-Token`, rate limited |
+| GET | `/api/v1/admin/bookings?date=YYYY-MM-DD` | Any staff |
+| POST | `/api/v1/admin/bookings/{bookingCode}/confirm` | OWNER or MANAGER, CSRF |
+| POST | `/api/v1/admin/bookings/{bookingCode}/cancel` | OWNER or MANAGER, CSRF |
+
+POST create accepts idempotencyKey (UUID v4), courtId, date, startsAt, endsAt, guestName, guestPhone or guestEmail, optional notes. It reserves 1–8 consecutive configured slots, server-recalculates price and returns 201 containing `booking` and **private** `accessToken`. Same intent + same UUID returns the original booking; overlapping or changed-intent requests return 409. 404 is returned for guest lookup/cancellation with invalid token or unknown code.
+
+The `/health/db` endpoint checks the nine-table SQL schema; the expiry worker processes timed-out holds through the existing SQL function. The API requires a persistent secret `Booking:SigningKey` (32+ bytes) from user-secrets/env for guest access. **No payment guarantee, customer frontend, or self-service confirmed-booking cancellation** exists in this phase.
+
+[Full Phase 5 guide](../phase-5-booking-engine.md).
+
+## Phase 6 — manual payments and staff operations
+
+| Method | Route | Permission |
+| --- | --- | --- |
+| POST | `/api/v1/bookings/{code}/payments` | Guest booking bearer token, rate limited, multipart proof |
+| GET | `/api/v1/bookings/{code}/payments` | Guest booking bearer token |
+| GET | `/api/v1/admin/payments/pending` | Any staff |
+| GET | `/api/v1/admin/payments/bookings/{code}` | Any staff |
+| GET | `/api/v1/admin/payments/{id}/proof` | Any staff; private image or PDF attachment |
+| POST | `/api/v1/admin/payments/bookings/{code}` | Any staff + CSRF; record external payment |
+| POST | `/api/v1/admin/payments/{id}/approve` | OWNER/MANAGER + CSRF |
+| POST | `/api/v1/admin/payments/{id}/reject` | OWNER/MANAGER + CSRF |
+| POST | `/api/v1/admin/payments/{id}/record-refund` | OWNER/MANAGER + CSRF; record external refund only |
+| POST | `/api/v1/admin/operations/manual-bookings` | Any staff + CSRF |
+| GET | `/api/v1/admin/operations/blocks?date=YYYY-MM-DD` | Any staff |
+| POST | `/api/v1/admin/operations/blocks` | OWNER/MANAGER + CSRF |
+| POST | `/api/v1/admin/operations/blocks/{id}/remove` | OWNER/MANAGER + CSRF |
+
+GCash/bank submissions require a transaction reference; duplicate verified references are rejected. Guest proof submission changes a live HELD booking to AWAITING_REVIEW. Manager verification can change it to CONFIRMED, rejection to EXPIRED. A payment claim's `SUBMITTED` status **does not verify any transfer**. Admins should preview the uploaded file, compare payment reference and amount to their external account and record approval/rejection. Proof files are never public.
+
+Staff manual bookings are immediately CONFIRMED but may have a nonzero balance due. The source channel is encoded in booking notes until a reviewed schema migration adds booking_source.
+
+See [Phase 6 detailed contract](../phase-6-payments-operations.md).
+
+## Phase 7 frontend gateway (Next.js, not new ASP.NET endpoints)
+
+The Next.js server-only catch-all route app/api/player/[...segments]/route.ts explicitly forwards allowed public venue/availability/booking/payment endpoints to the API. It does not forward staff admin endpoints, stores the guest HMAC token in an HttpOnly cookie and checks Origin for POST. Frontend URLs:
+
+- GET /api/player/venue and /api/player/availability?date=YYYY-MM-DD
+- POST /api/player/bookings (returns booking only; private token stored in cookie)
+- GET /api/player/bookings/{code}; POST /api/player/bookings/{code}/cancel
+- GET/POST /api/player/bookings/{code}/payments
+- POST /api/player/bookings/{code}/access (optional private venue-issued token to reestablish browser cookie)
+
+For production APP_ORIGIN must be configured to the browser-facing HTTPS origin. See [Phase 7 frontend guide](../phase-7-player-frontend.md). The backend's existing API is unchanged.
+
+
+## Phase 8 Next.js admin BFF (not new .NET endpoints)
+
+- GET/POST/DELETE /api/admin/session: profile, login, logout
+- All supported admin paths live in frontend/lib/admin-policy.ts and are proxied to /api/v1/admin with backend session cookie+antiforgery validation, plus exact Origin check for mutating calls.
+- GET /api/admin/payments/{id}/proof is a special authenticated binary response; image preview or PDF attachment. No public static proof URLs.
+- Session tokens reside only in HttpOnly, SameSite=Strict cookies scoped to /api/admin. Production APP_ORIGIN and HTTPS required.
+
+The user interface at /admin exposes bookings, payments, maintenance, courts, rate rules, venue hours/settings and team accounts based on .NET role definitions. Follow docs/phase-8-owner-staff-dashboard.md; API security and financial behavior remain in the existing backend.

@@ -14,7 +14,7 @@ Applies to player-facing booking pages and staff/owner admin screens for individ
 ## Design system
 
 1. Inspect implemented tokens, shared components, screens, and venue configurations before adding styles.
-2. On first frontend build, define a compact documented token system: color, typography, spacing, radii, states, focus outlines and responsive breakpoints. Keep token definitions in frontend source and link to them here. Phase 1 currently contains **temporary, neutral tokens** in [frontend/app/globals.css](../../frontend/app/globals.css); these are not an approved brand system.
+2. On first frontend build, define a compact documented token system: color, typography, spacing, radii, states, focus outlines and responsive breakpoints. Keep token definitions in frontend source and link to them here. Phase 7 establishes the **player design tokens** in [frontend/app/globals.css](../../frontend/app/globals.css) and per-venue contrast-aware CSS variables in [frontend/lib/player.ts](../../frontend/lib/player.ts). New screens must reuse them, not invent a second palette.
 3. Build a consistent base UI reusable across venues. Inject logo, brand colors, images, court names/counts and booking policy via config; use scoped, deliberate variations only when justified.
 4. Keep player booking, owner dashboard and marketing pages internally consistent. Brand colors must not reduce status clarity or accessibility.
 5. Prefer clear, functional and fast interfaces over decorative complexity. Avoid gratuitous animations and arbitrary style changes.
@@ -44,3 +44,30 @@ Applies to player-facing booking pages and staff/owner admin screens for individ
 - [ ] Update context wiki when behavior or durable design rules change.
 
 Document approved design-system paths here once frontend exists; do not duplicate source tokens in docs.
+
+## Phase 7 implemented design baseline
+
+- Sport-editorial typography and visual hierarchy; warm neutral surfaces, restrained CSS court illustration, no stock imagery or gratuitous motion.
+- Venue-approved primary/secondary colors are loaded from the public venue API, validated as hex and paired with light/dark foreground chosen for contrast. Status colors remain independent.
+- Court/time matrix has sticky time labels, horizontal scrolling on narrow screens and live backend statuses with accessible text (not color-only). Free cells support up to 8 contiguous slots.
+- Booking summary and contact form show estimated total, clearly identify a temporary hold and require server-side validation. Payment page never claims an uploaded receipt has been verified.
+- Private booking status and proof preview use a server-only gateway and HttpOnly guest token cookie. See [Phase 7 guide](../phase-7-player-frontend.md) for architecture and limitations.
+- **Pending UI audit:** actual viewport screenshots at 320/375/768/1024px, keyboard/screen-reader, WCAG contrast sampling, reduced-motion and failed requests. UI UX Pro Max and Impeccable global skill execution is a developer-local step; GitHub alone does not establish that they ran.
+
+
+## Phase 8 admin baseline
+
+- Reuse player-facing CSS theme variables and frontend/lib/player.ts color contrast; admin-specific scoped styles live in frontend/app/admin/admin.css.
+- Desktop sidebar with clear WORKSPACE / OPERATIONS / MANAGEMENT / ACCOUNT grouping; mobile slide-in menu with accessible scrim.
+- Task-oriented sections: date-filterable booking table, private payment proof beside amount and reference, separate approved/rejected actions, new manual booking, blocks and form-based court/rate/hours/venue/team management.
+- Preserve editable numbers as string inputs in new court/rule forms so a blank field does not force users to erase a leading 0.00. Keep submit/save next to fields and provide feedback inline.
+- Status indicators use text and semantic styling; roles affect visibility but never replace backend authorization.
+- **Pending:** browser screenshot and keyboard/a11y audit at 320/375/768/1024px, mobile scrolling, nested form validation and reduced motion. UI UX Pro Max/Impeccable run locally only, not through GitHub plugin.
+
+## Phase 9 executed audit — 2026-11-03
+
+UI UX Pro Max form-error guidance and Impeccable context/audit/craft guidance were used while preserving the existing design. Fixed native/React lint issues, mobile hidden-navigation tab access, keyboard focus trap/Escape/return, booking error-summary focus/links, receipt remove/reselect behavior, and measured small-text/brand contrast.
+
+Chrome headless Playwright executed 76 layout checks at 320/375/768/1024px plus three real booking/payment workflow checks (79 total). No page overflow or browser runtime errors in that run. Axe WCAG 2/2.1/2.2 AA rules at 375px reported zero violations in sampled player/lookup/login/form/booking/admin screens. Real three-court flows used the backend/disposable DB; 1/3/8/12-court and empty/closed/outage cases used intercepted read-only availability fixtures. Screenshots were viewed locally; synthetic data/screenshots and auth cookies are not committed.
+
+This is implemented-and-tested evidence for the stated environment, not physical-device or human screen-reader certification. Keep those acceptance checks open. Reproduce with `frontend/tests/e2e/browser-smoke.mjs` per the Phase 9 report.
