@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 570" role="img" aria-label="Pickleball paddle and yellow perforated ball">
+  <defs>
+    <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff5df"/><stop offset=".4" stop-color="#d4c1a5"/>
+      <stop offset=".78" stop-color="#eee8dd"/><stop offset="1" stop-color="#705b57"/>
+    </linearGradient>
+    <linearGradient id="face" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#67636a"/><stop offset=".45" stop-color="#343037"/>
+      <stop offset="1" stop-color="#16151b"/>
+    </linearGradient>
+    <linearGradient id="handle" x1="0" y1="0" x2=".8" y2="1">
+      <stop offset="0" stop-color="#151219"/><stop offset=".5" stop-color="#62565a"/>
+      <stop offset="1" stop-color="#121015"/>
+    </linearGradient>
+    <radialGradient id="ball" cx=".31" cy=".25" r=".8">
+      <stop offset="0" stop-color="#fffa82"/><stop offset=".28" stop-color="#ffe63b"/>
+      <stop offset=".67" stop-color="#ffc400"/><stop offset="1" stop-color="#e98a00"/>
+    </radialGradient>
+    <radialGradient id="ballshine" cx=".38" cy=".28" r=".78">
+      <stop offset="0" stop-color="#fff6aa" stop-opacity=".7"/>
+      <stop offset="1" stop-color="#fff6aa" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="weave" patternUnits="userSpaceOnUse" width="9" height="9" patternTransform="rotate(32)">
+      <path d="M0 0V9M4 0V9" stroke="#aaa0a3" stroke-width=".8" opacity=".26"/>
+    </pattern>
+    <filter id="shadow" x="-40%" y="-40%" width="180%" height="190%">
+      <feGaussianBlur stdDeviation="22"/>
+    </filter>
+    <filter id="shade" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="10" dy="18" stdDeviation="16" flood-color="#160b13" flood-opacity=".55"/>
+    </filter>
+  </defs>
+  <path d="M54 502L744 178" fill="none" stroke="#fff6e0" stroke-opacity=".32" stroke-width="9"/>
+  <path d="M180 550L820 247" fill="none" stroke="#fff6e0" stroke-opacity=".14" stroke-width="4"/>
+  <ellipse cx="494" cy="461" rx="225" ry="49" fill="#120911" opacity=".52" filter="url(#shadow)"/>
+  <g transform="translate(489 255) rotate(30)" filter="url(#shade)">
+    <rect x="-23" y="138" width="46" height="185" rx="12" fill="url(#handle)" stroke="#aa9b95" stroke-width="5"/>
+    <path d="M-23 182H23M-23 195H23M-23 207H23M-23 219H23M-23 232H23M-23 244H23M-23 257H23M-23 270H23M-23 283H23" stroke="#bbb3ad" stroke-opacity=".32" stroke-width="3"/>
+    <rect x="-28" y="298" width="56" height="15" rx="5" fill="#282329" stroke="#e2d0ba" stroke-width="3"/>
+    <rect x="-31" y="-195" width="62" height="393" rx="30" fill="url(#rim)"/>
+    <rect x="-185" y="-223" width="370" height="414" rx="153" fill="url(#rim)" stroke="#cfc0a8" stroke-width="6"/>
+    <rect x="-173" y="-212" width="346" height="390" rx="145" fill="url(#face)" stroke="#f8ebd9" stroke-width="3"/>
+    <rect x="-168" y="-208" width="336" height="383" rx="141" fill="url(#weave)"/>
+    <path d="M-123-174Q-174-80-146 45" stroke="#fff5e5" stroke-opacity=".22" stroke-width="8" fill="none"/>
+    <path d="M-90-199Q42-234 113-138" stroke="#e8d6c4" stroke-opacity=".1" stroke-width="4" fill="none"/>
+  </g>
+  <ellipse cx="310" cy="440" rx="105" ry="32" fill="#140710" opacity=".5" filter="url(#shadow)"/>
+  <g transform="translate(309 379)" filter="url(#shade)">
+    <circle r="89" fill="url(#ball)" stroke="#ffa500" stroke-width="2"/>
+    <circle r="89" fill="url(#ballshine)"/>
+    <g fill="#a25b0e" opacity=".83">
+      <ellipse cx="-41" cy="-40" rx="8" ry="12" transform="rotate(-28 -41 -40)"/>
+      <ellipse cx="2" cy="-60" rx="8" ry="12" transform="rotate(20 2 -60)"/>
+      <ellipse cx="47" cy="-38" rx="9" ry="12" transform="rotate(-19 47 -38)"/>
+      <ellipse cx="-65" cy="4" rx="8" ry="11" transform="rotate(22 -65 4)"/>
+      <ellipse cx="-30" cy="20" rx="9" ry="12" transform="rotate(30 -30 20)"/>
+      <ellipse cx="21" cy="-1" rx="8" ry="12" transform="rotate(20 21 -1)"/>
+      <ellipse cx="65" cy="20" rx="8" ry="11" transform="rotate(-19 65 20)"/>
+      <ellipse cx="-12" cy="64" rx="8" ry="11" transform="rotate(31 -12 64)"/>
+      <ellipse cx="36" cy="56" rx="8" ry="11" transform="rotate(-20 36 56)"/>
+    </g>
+    <path d="M-57-48Q-40-71-7-70" stroke="#fff9c6" stroke-opacity=".65" stroke-width="6" fill="none" stroke-linecap="round"/>
+  </g>
+</svg>
