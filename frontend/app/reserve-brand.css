@@ -276,3 +276,10 @@ body {
 .reserve-booking-progress b { color: #50434a; }
 .reserve-mobile-picker .reserve-time-choice:not(:disabled) small { color: #57434d; }
 .reserve-mobile-picker .reserve-time-choice.selected small { color: #fff2ed; }
+
+/* Selected mobile times retain a burgundy surface and high-contrast light captions.
+   This intentionally outranks the generic selected-slot background. */
+.app-shell .reserve-mobile-picker .reserve-time-choice.selected {
+  background:#80011f; color:#fff; border-color:#80011f; outline:0;
+}
+.app-shell .reserve-mobile-picker .reserve-time-choice.selected small { color:#fff7f2; }
