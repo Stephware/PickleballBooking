@@ -51,7 +51,6 @@ public sealed class VenueService(
         venue.SecondaryColor = input.SecondaryColor;
         venue.SlotMinutes = input.SlotMinutes;
         venue.HoldMinutes = input.HoldMinutes;
-        venue.ReviewTimeoutHours = input.ReviewTimeoutHours;
         venue.BookingAdvanceDays = input.BookingAdvanceDays;
         venue.MinimumNoticeMinutes = input.MinimumNoticeMinutes;
         await unit.SaveChangesAsync(ct);
@@ -100,6 +99,6 @@ public sealed class VenueService(
     private static VenueSettingsResponse Map(VenueSettings v) =>
         new(v.VenueName, v.VenueSlug, v.Timezone, v.Currency.Trim(),
             v.LogoUrl, v.PrimaryColor.Trim(), v.SecondaryColor.Trim(),
-            v.SlotMinutes, v.HoldMinutes, v.ReviewTimeoutHours,
+            v.SlotMinutes, v.HoldMinutes,
             v.BookingAdvanceDays, v.MinimumNoticeMinutes);
 }
