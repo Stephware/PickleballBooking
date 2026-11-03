@@ -72,6 +72,59 @@ public sealed class PaymentIntegrityTests
         Assert.Equal("history-123", refunded.TransactionReference);
     }
 
+    [Fact]
+    public async Task PaidProofUnderReview_DoesNotExpire_AndCanBeApprovedAfterGameStarts()
+    {
+        await using var fixture = await PaymentFixture.CreateAsync();
+        var ct = TestContext.Current.CancellationToken;
+        var payment = await fixture.AddPaymentAsync(0, PaymentStatuses.Submitted, "late-review-123");
+        var schedule = await fixture.Db.CourtScheduleEntries.SingleAsync(
+            s => s.Id == fixture.Bookings[0].ScheduleEntryId, ct);
+        schedule.Status = BookingStatuses.AwaitingReview;
+        schedule.StartsAt = DateTime.UtcNow.AddHours(-2);
+        schedule.EndsAt = DateTime.UtcNow.AddHours(-1);
+        schedule.ExpiresAt = null;
+        await fixture.Db.SaveChangesAsync(ct);
+
+        // No timer or concurrent hold cleanup can expire a submitted proof.
+        _ = await fixture.Db.Database.SqlQueryRaw<int>(
+            "SELECT expire_pending_schedule_entries() AS \"Value\"").SingleAsync(ct);
+        fixture.Db.ChangeTracker.Clear();
+        var afterSweep = await fixture.Db.CourtScheduleEntries.AsNoTracking()
+            .SingleAsync(s => s.Id == schedule.Id, ct);
+        Assert.Equal(BookingStatuses.AwaitingReview, afterSweep.Status);
+        Assert.Null(afterSweep.ExpiresAt);
+
+        var verified = await fixture.Service.ReviewAsync(payment.Id, true,
+            "Verified after game start", fixture.Staff.Id, ct);
+        Assert.Equal(PaymentStatuses.Verified, verified.Status);
+        fixture.Db.ChangeTracker.Clear();
+        Assert.Equal(BookingStatuses.Confirmed, (await fixture.Db.CourtScheduleEntries
+            .AsNoTracking().SingleAsync(s => s.Id == schedule.Id, ct)).Status);
+    }
+
+    [Fact]
+    public async Task StaffRejection_ReleasesProtectedPendingCourtExplicitly()
+    {
+        await using var fixture = await PaymentFixture.CreateAsync();
+        var ct = TestContext.Current.CancellationToken;
+        var payment = await fixture.AddPaymentAsync(0, PaymentStatuses.Submitted, "rejected-proof-123");
+        var schedule = await fixture.Db.CourtScheduleEntries.SingleAsync(
+            s => s.Id == fixture.Bookings[0].ScheduleEntryId, ct);
+        schedule.Status = BookingStatuses.AwaitingReview;
+        schedule.ExpiresAt = null;
+        await fixture.Db.SaveChangesAsync(ct);
+
+        var rejected = await fixture.Service.ReviewAsync(payment.Id, false,
+            "No matching external transfer", fixture.Staff.Id, ct);
+        Assert.Equal(PaymentStatuses.Rejected, rejected.Status);
+        fixture.Db.ChangeTracker.Clear();
+        var afterReview = await fixture.Db.CourtScheduleEntries.AsNoTracking()
+            .SingleAsync(s => s.Id == schedule.Id, ct);
+        Assert.Equal(BookingStatuses.Expired, afterReview.Status);
+        Assert.Null(afterReview.ExpiresAt);
+    }
+
     private sealed class PaymentFixture : IAsyncDisposable
     {
         public required PickleballDbContext Db { get; init; }
