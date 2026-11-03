@@ -32,9 +32,9 @@ This is stronger than a static checklist, but it is still synthetic and does **n
 
 | Gate | Automated evidence | Human/venue obligation | Status |
 | --- | --- | --- | --- |
-| .NET/Next.js build, unit and integration suites | Run both workflows successfully on the exact release SHA | Review changes after any subsequent merge | Pending current Phase 4 CI |
-| Database exclusion / no double booking, holds, cancellations | DB tests + production synthetic booking | Run a small owner-controlled real schedule walkthrough | Pending venue signoff |
-| Secure owner login, roles, CSRF, private guest tokens | Test auth/cookie/origin policies in both workflows | Keep bootstrap/recovery credentials private; confirm single OWNER access | Pending venue signoff |
+| .NET/Next.js build, unit and integration suites | Both CI workflows passed on `291e453` | Review changes after any subsequent merge | **Automated PASS; venue signoff pending** |
+| Database exclusion / no double booking, holds, cancellations | Disposable restored DB actively accepts adjacent and rejects overlapping active slots | Run an owner-controlled real schedule walkthrough | **Automated PASS; venue signoff pending** |
+| Secure owner login, roles, CSRF, private guest tokens | Production-image synthetic tests passed for cookies/CSRF/origin/private proofs and persistence after restart | Keep bootstrap/recovery credentials private; confirm single OWNER access | **Automated PASS; venue signoff pending** |
 | Public GCash/bank instructions | Config validator requires complete explicitly approved recipient fields | Verify real payee name, number and QR independently; set approval flag only afterward | **BLOCKED until venue supplies details** |
 | Manual receipt approval and actual refunds | Synthetic receipts, private PNG/PDF, manual verification status | Verify bank/GCash transactions out-of-band; handle refunds outside the app | **Not automatically verified** |
 | Untrusted uploaded files | MIME signature and 5 MiB limit tests; private proof storage | Provide **malware scanning/quarantine** and a retention/deletion policy | **BLOCKED** |
@@ -69,3 +69,25 @@ Before accepting an actual venue, record evidence for:
 5. Malware/quarantine and proof retention, trusted HTTPS ingress, encrypted off-host backups/restore, monitoring and rollout/rollback.
 
 Do not mark these items passed based on synthetic fixtures or screenshots. No production financial transaction, real customer account or venue database is touched by Phase 4.
+
+## Executed Phase 4 verification — November 3, 2026
+
+The final reviewed implementation commit `291e453303e4ee29a837fdd71718ca2a2cbe0895`
+passed **both** GitHub Actions workflows:
+
+- [Verify integrated venue application — run 41593785871](https://github.com/Stephware/PickleballBooking/actions/runs/41593785871): .NET 10 restore/build, **107 C# tests**, frontend lint/typecheck/**28 Node tests**, Next.js standalone production build, clean production-only dependency audit, **29 live API scenarios**, and Playwright/sampled Axe across 320/375/768/1024px with no browser runtime errors.
+- [Verify isolated production release — run 41593785968](https://github.com/Stephware/PickleballBooking/actions/runs/41593785968): production API/frontend images, isolated disposable PostgreSQL and least-privilege app account, **9 initial + 10 after-restart deployment scenarios** passed, signed session and private PNG/PDF proof persistence after container recreation, fresh PostgreSQL dump and restore (nine tables, four bookings, four payments, one GiST exclusion).
+- The restored database was **actively challenged** inside a rolled-back transaction: an adjacent half-open schedule entry was accepted, while an overlapping active entry raised PostgreSQL's `exclusion_violation`. Merely checking the presence of the constraint is not treated as enough.
+
+Earlier CI attempts surfaced and resolved the test SQL delimiter issue; only the successful
+**final** SHA is cited as verification. The CI deliberately used synthetic data and
+disposed of its own uniquely scoped containers/volumes. No real venue database
+was accessed or modified.
+
+**Release verdict: NO-GO for public venue deployment.** The automated implementation
+and regression gates passed, but venue/operator gates remain incomplete:
+actual verified GCash/bank/QR/phone/Facebook details and approved court media,
+malware scanning and retention for uploaded proofs, physical iOS/Android
+and screen-reader tests, real trusted HTTPS/DNS setup, encrypted off-site backup
+and recovery drill, and monitoring/incident/rollback signoff. These cannot be
+claimed complete from synthetic CI.
