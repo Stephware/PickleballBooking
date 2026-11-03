@@ -49,10 +49,21 @@ try {
     }
   }
   await page.setViewportSize({ width: 375, height: 900 });
-  await page.goto(origin);
+  await page.goto(origin + "/find-booking");
+  const tokenDisclosure = page.locator(".booking-access-details");
+  assert.equal(await tokenDisclosure.locator("input[type=password]").isVisible(), false);
+  await tokenDisclosure.locator("summary").click();
+  await tokenDisclosure.getByLabel("Private access token").waitFor();
+  assert.equal(await tokenDisclosure.locator("input[type=password]").isVisible(), true);
+  await page.getByRole("link", { name: "Back to courts" }).click();
+  await page.waitForURL(origin + "/");
+  evidence.push("player:progressive-private-token:top-back-control");
+
   await page.getByRole("button", { name: "Next day" }).click();
   await page.locator(".slot-cell.slot-available").first().click();
   await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByRole("heading", { name: "Save your time on court" }).waitFor();
+  await page.waitForFunction(() => document.activeElement?.id === "booking-title");
   await page.getByRole("textbox", { name: "Full name" }).fill("Browser Test Guest");
   await page.getByRole("button", { name: /Hold court/ }).click();
   await page.locator("#booking-error").waitFor();
@@ -240,6 +251,25 @@ try {
       }
       await page.screenshot({ path: `${output}/admin-account-${width}.png`, fullPage: true });
     }
+    const nav = page.getByRole("navigation", { name: "Staff navigation" });
+    await nav.getByRole("button", { name: "Today", exact: true }).click();
+    assert.equal(await page.locator(".admin-quick-actions").count(), 1);
+    const actionsTop = await page.locator(".admin-quick-actions").boundingBox();
+    const metricsTop = await page.locator(".admin-kpi-grid").boundingBox();
+    assert.ok(actionsTop && metricsTop && actionsTop.y < metricsTop.y,
+      "Daily quick actions are accessible before metrics");
+    await nav.getByRole("button", { name: "Payments", exact: true }).click();
+    const ledger = page.locator(".admin-ledger-disclosure");
+    assert.equal(await ledger.getAttribute("open"), null);
+    await ledger.locator("summary").click();
+    await ledger.getByRole("heading", { name: "Booking payment ledger" }).waitFor();
+    await ledger.locator("summary").click();
+    assert.equal(await ledger.getAttribute("open"), null);
+    await page.goBack();
+    assert.equal(await nav.getByRole("button", { name: "Today", exact: true })
+      .getAttribute("aria-current"), "page");
+    evidence.push("admin:quick-actions-first:advanced-ledger-disclosure:browser-back");
+
     const badOrigin = await context.request.post(origin + "/api/admin/courts", {
       headers: { Origin: "https://untrusted.example" }, data: {},
     });

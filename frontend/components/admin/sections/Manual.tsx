@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AdminSlotPicker, type StaffSelection } from "@/components/admin/AdminSlotPicker";
 import { Empty, Notice, SectionHeader } from "@/components/admin/AdminShared";
 import { adminRequest, apiTime, extractError, todayForVenue } from "@/lib/admin-client";
@@ -28,6 +28,16 @@ export function AdminManual({ venue }: { user: StaffProfile; venue: Venue }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState<ManualResponse | null>(null);
+
+  useEffect(() => {
+    if (stage === "slots") return;
+    const frame = window.requestAnimationFrame(() => {
+      const heading = document.getElementById("manual-guest-title");
+      heading?.focus({ preventScroll: true });
+      heading?.scrollIntoView({ block: "start", behavior: "auto" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [stage]);
 
   function changeChannel(next: Channel) {
     setChannel(next);
@@ -88,7 +98,7 @@ export function AdminManual({ venue }: { user: StaffProfile; venue: Venue }) {
         allowWalkInNow={channel === "WALK_IN"}/>
       {selection && selection.slots.length > 0 && <div className="admin-step-actions">
         <button className="button-primary" type="button" onClick={() => {
-          setError(""); setStage("details"); window.scrollTo({ top: 0, behavior: "smooth" });
+          setError(""); setStage("details"); 
         }}>Continue to guest details →</button>
         <button className="text-button" type="button" onClick={() => setSelection(null)}>
           Clear selection</button>
@@ -96,7 +106,7 @@ export function AdminManual({ venue }: { user: StaffProfile; venue: Venue }) {
     </> : selection ? <div className="admin-form-panel card-surface admin-booking-details">
       <button type="button" className="admin-detail-back"
         onClick={() => { setError(""); setStage("slots"); }}>← Back to court and time</button>
-      <h3>Guest details</h3>
+      <h3 id="manual-guest-title" tabIndex={-1}>Guest details</h3>
       <div className="admin-selected-recap">
         <div><small>Court</small><strong>{selection.courtName}</strong></div>
         <div><small>Date</small><strong>{prettyDate(selection.date)}</strong></div>

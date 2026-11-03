@@ -3,6 +3,7 @@
 import { AdminBookings } from "@/components/admin/sections/Bookings";
 import { AdminManual } from "@/components/admin/sections/Manual";
 import { AdminBlocks } from "@/components/admin/sections/Blocks";
+import { hasManagerRights } from "@/lib/admin-client";
 import type { StaffProfile } from "@/types/admin";
 import type { Venue } from "@/types/player";
 
@@ -26,9 +27,10 @@ export function AdminSchedule({ user, venue, mode, onModeChange }: {
       <button type="button" className={mode === "booking" ? "active" : ""}
         aria-current={mode === "booking" ? "page" : undefined}
         onClick={() => change("booking")}>+ Add Booking</button>
-      <button type="button" className={mode === "block" ? "active" : ""}
+      {hasManagerRights(user) && <button type="button"
+        className={mode === "block" ? "active" : ""}
         aria-current={mode === "block" ? "page" : undefined}
-        onClick={() => change("block")}>Block Court</button>
+        onClick={() => change("block")}>Block Court</button>}
     </nav>
     {mode === "list" && <AdminBookings user={user} venue={venue}/>}
     {mode === "booking" && <AdminManual user={user} venue={venue}/>}

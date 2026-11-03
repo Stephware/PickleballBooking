@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { adminRequest, extractError, todayForVenue } from "@/lib/admin-client";
+import { adminRequest, extractError, hasManagerRights, todayForVenue } from "@/lib/admin-client";
 import { instantLabel, money } from "@/lib/player";
 import type { AdminBooking, AdminSectionId, PendingPayment, StaffProfile } from "@/types/admin";
 import type { Venue } from "@/types/player";
@@ -39,8 +39,8 @@ export function AdminOverview({ user, venue, navigate }: {
           onClick={() => navigate("schedule", "booking")}>+ Add Booking</button>
         <button className="button-outline" type="button"
           onClick={() => navigate("payments")}>Review payments</button>
-        <button className="button-outline" type="button"
-          onClick={() => navigate("schedule", "block")}>Block Court</button>
+        {hasManagerRights(user) && <button className="button-outline" type="button"
+          onClick={() => navigate("schedule", "block")}>Block Court</button>}
       </div>
     </section>
     <div className="admin-kpi-grid">
