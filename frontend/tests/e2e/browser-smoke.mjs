@@ -270,6 +270,20 @@ try {
       .getAttribute("aria-current"), "page");
     evidence.push("admin:quick-actions-first:advanced-ledger-disclosure:browser-back");
 
+    // A network error must never show editable placeholder opening hours.
+    await page.route("**/api/admin/venue/hours", route =>
+      route.fulfill({ status: 503, json: { error: "Synthetic hours load failure." } }));
+    await nav.getByRole("button", { name: "Manage", exact: true }).click();
+    await page.getByRole("navigation", { name: "Manage venue operations" })
+      .getByRole("button", { name: "Opening Hours", exact: true }).click();
+    await page.getByRole("button", { name: "Try loading hours again" }).waitFor();
+    assert.equal(await page.getByRole("button", { name: "Save weekly hours" }).count(), 0,
+      "Missing server hours must never be editable");
+    await page.unroute("**/api/admin/venue/hours");
+    await page.getByRole("button", { name: "Try loading hours again" }).click();
+    await page.getByRole("button", { name: "Save weekly hours" }).waitFor();
+    evidence.push("admin:hours-load-failure:retry:no-unsafe-defaults");
+
     const badOrigin = await context.request.post(origin + "/api/admin/courts", {
       headers: { Origin: "https://untrusted.example" }, data: {},
     });

@@ -92,8 +92,8 @@ export function AdminPayments({ user }: { user: StaffProfile }) {
           : <>
             {error && <Notice>{error} <button type="button" className="inline-link"
               onClick={() => void select(selected)}>Try again</button></Notice>}
-            {!details && !error ? <Loading text="Loading payment details…" /> : details ?
-              <div className="admin-payment-detail">
+            {!details && !error && <Loading text="Loading payment details…" />}
+            {details && <div className="admin-payment-detail">
                 <dl className="admin-definition">
                   <div><dt>Guest</dt><dd>{selected.guestName}</dd></div>
                   <div><dt>Booking</dt><dd>{selected.bookingCode}</dd></div>
