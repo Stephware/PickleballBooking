@@ -13,6 +13,15 @@ namespace Pickleball.Api.Controllers.Admin;
 [Authorize(Roles = StaffRoles.AnyStaff)]
 public sealed class OperationsController(IOperationsService service) : ControllerBase
 {
+    [HttpGet("availability")]
+    public async Task<IActionResult> Availability([FromQuery] DateOnly date, CancellationToken ct)
+    {
+        Response.Headers.CacheControl = "no-store";
+        if (date == default) return BadRequest(new { error = "Choose a valid date." });
+        try { return Ok(await service.GetStaffAvailabilityAsync(date, ct)); }
+        catch (ArgumentOutOfRangeException) { return BadRequest(new { error = "Date is outside the booking window." }); }
+    }
+
     [HttpPost("manual-bookings")]
     public async Task<IActionResult> CreateManual(
         CreateManualBookingRequest request, CancellationToken ct)

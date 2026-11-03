@@ -1,17 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import { AdminSlotPicker, type StaffSelection } from "@/components/admin/AdminSlotPicker";
+import { AccessMessage, Empty, Notice, SectionHeader, useAdminResource } from "@/components/admin/AdminShared";
 import { adminRequest, apiTime, extractError, hasManagerRights, todayForVenue } from "@/lib/admin-client";
-import { instantLabel } from "@/lib/player";
+import { instantLabel, prettyDate, timeLabel } from "@/lib/player";
 import type { CourtAdmin, CourtBlockAdmin, StaffProfile } from "@/types/admin";
 import type { Venue } from "@/types/player";
-import { Empty, Notice, SectionHeader, useAdminResource } from "@/components/admin/AdminShared";
 
 export function AdminBlocks({ user, venue }: { user: StaffProfile; venue: Venue }) {
   const [date, setDate] = useState(() => todayForVenue(venue.timezone));
-  const [courtId, setCourtId] = useState("");
-  const [start, setStart] = useState("09:00");
-  const [end, setEnd] = useState("10:00");
+  const [selection, setSelection] = useState<StaffSelection | null>(null);
+  const [stage, setStage] = useState<"slots" | "reason">("slots");
+  const [reloadKey, setReloadKey] = useState(0);
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -20,66 +21,86 @@ export function AdminBlocks({ user, venue }: { user: StaffProfile; venue: Venue 
   const courts = useAdminResource<CourtAdmin[]>("/courts", []);
   const canManage = hasManagerRights(user);
 
+  function changeDate(value: string) {
+    setDate(value); setSelection(null); setStage("slots");
+  }
   async function create(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault(); if (!canManage || busy) return;
+    event.preventDefault();
+    if (!canManage || !selection || !selection.slots.length || busy) return;
+    if (reason.trim().length < 3) { setError("Enter a reason for closing the court."); return; }
     setBusy(true); setError(""); setSuccess("");
     try {
       await adminRequest("/operations/blocks", "POST", {
-        courtId: Number(courtId), date, startsAt: apiTime(start), endsAt: apiTime(end), reason: reason.trim(),
+        courtId: selection.courtId, date: selection.date,
+        startsAt: apiTime(selection.slots[0].startsAt),
+        endsAt: apiTime(selection.slots.at(-1)!.endsAt), reason: reason.trim(),
       });
-      setSuccess("Court block added."); setReason("");
-      await blocks.reload();
+      setSuccess("Court time blocked."); setReason(""); setSelection(null);
+      setStage("slots"); setReloadKey(v => v + 1); await blocks.reload();
     } catch (cause) { setError(extractError(cause)); }
     finally { setBusy(false); }
   }
   async function remove(id: number) {
-    if (!window.confirm("Remove this court block and release its time?")) return;
+    if (busy || !window.confirm("Remove this block and make the time available again?")) return;
     setBusy(true); setError(""); setSuccess("");
     try {
       await adminRequest("/operations/blocks/" + id + "/remove", "POST", {});
       setSuccess("Court block removed."); await blocks.reload();
+      setSelection(null); setReloadKey(v => v + 1);
     } catch (cause) { setError(extractError(cause)); }
     finally { setBusy(false); }
   }
-  return <>
-    <SectionHeader eyebrow="Court maintenance" title="Court blocks"
-      description="Keep maintenance or closures out of the bookable schedule." />
-    <div className="admin-toolbar"><label>Date<input type="date" value={date}
-      onChange={e => setDate(e.target.value)} /></label></div>
-    {(error || blocks.error) && <Notice>{error || blocks.error}</Notice>}
+  return <section aria-label="Court maintenance blocks">
+    <SectionHeader eyebrow="Schedule / Court closure" title="Block Court"
+      description="Select available court time, then enter the reason for maintenance or a closure.
+        Existing bookings are never replaced."/>
+    {error && <Notice>{error}</Notice>}
     {success && <Notice kind="success">{success}</Notice>}
-    {canManage && <div className="admin-form-panel card-surface">
-      <h3>Add a maintenance block</h3>
+    {!canManage && <AccessMessage need="MANAGER"/>}
+    {canManage && (stage === "slots" ? <>
+      <AdminSlotPicker venue={venue} date={date} onDateChange={changeDate}
+        selection={selection} onSelect={setSelection} reloadKey={reloadKey}/>
+      {selection && selection.slots.length > 0 && <div className="admin-step-actions">
+        <button type="button" className="button-primary" onClick={() => {
+          setError(""); setStage("reason"); window.scrollTo({ top: 0, behavior: "smooth" });
+        }}>Continue to reason →</button>
+        <button type="button" className="text-button" onClick={() => setSelection(null)}>Clear selection</button>
+      </div>}
+    </> : selection ? <div className="admin-form-panel card-surface admin-booking-details">
+      <button type="button" className="admin-detail-back"
+        onClick={() => { setError(""); setStage("slots"); }}>← Back to court and time</button>
+      <h3>Block these slots</h3>
+      <p><strong>{selection.courtName}</strong> · {prettyDate(selection.date)} · {
+        timeLabel(selection.slots[0].startsAt)} – {timeLabel(selection.slots.at(-1)!.endsAt)}</p>
       <form className="admin-form" onSubmit={create}>
-        <div className="admin-form-grid">
-          <label>Court<select required value={courtId} onChange={e => setCourtId(e.target.value)}>
-            <option value="">Select court</option>
-            {courts.data.filter(c => c.isActive).map(c => <option value={c.id} key={c.id}>{c.courtName}</option>)}
-          </select></label>
-          <label>Start time<input required type="time" value={start} onChange={e => setStart(e.target.value)} /></label>
-          <label>End time<input required type="time" value={end} onChange={e => setEnd(e.target.value)} /></label>
-          <label className="admin-full">Reason<input required minLength={3} maxLength={300}
-            placeholder="Maintenance or private event" value={reason}
-            onChange={e => setReason(e.target.value)} /></label>
-        </div>
-        <button className="button-primary" disabled={busy || !courtId || start >= end}
-          type="submit">{busy ? "Saving…" : "Block court time"}</button>
+        <label>Reason for closure
+          <input required minLength={3} maxLength={300}
+            placeholder="Maintenance, cleaning or private event"
+            value={reason} onChange={e => setReason(e.target.value)}/>
+        </label>
+        <p className="admin-hint">The block takes effect immediately and cannot overlap an active reservation.
+          Removing a block later will release these time slots.</p>
+        <button className="button-primary" type="submit" disabled={busy || reason.trim().length < 3}>
+          {busy ? "Saving…" : "Confirm court block"}</button>
       </form>
-      <p className="admin-hint">Use complete venue time slots and ensure the court is free.
-        Existing bookings cannot be overwritten.</p>
-    </div>}
+    </div> : <Empty text="Select court slots first." />)}
     <div className="admin-panel card-surface">
-      <h3>Blocks on selected date</h3>
-      {blocks.loading ? <p role="status">Loading blocks…</p>
-        : blocks.data.length === 0 ? <Empty text="No maintenance blocks on this date." />
+      <div className="admin-panel-heading"><h3>Blocks on selected date</h3>
+        <span className="micro-label">{date}</span></div>
+      {(blocks.error || courts.error) && <Notice>{blocks.error || courts.error}</Notice>}
+      {blocks.loading ? <p role="status">Loading court blocks…</p>
+        : blocks.data.length === 0 ? <Empty text="No court blocks for this date."/>
         : blocks.data.map(b => <div className="admin-list-row" key={b.id}>
           <div><strong>{courts.data.find(c => c.id === b.courtId)?.courtName || "Court " + b.courtId}</strong>
             <small>{instantLabel(b.startsAtUtc, venue.timezone)} – {instantLabel(b.endsAtUtc, venue.timezone)}</small>
             <small>{b.reason}</small></div>
-          <div className="admin-row-actions"><span className={"admin-status status-" + b.status.toLowerCase()}>{b.status}</span>
+          <div className="admin-row-actions">
+            <span className={"admin-status status-" + b.status.toLowerCase()}>
+              {b.status.replaceAll("_", " ")}</span>
             {canManage && b.status === "BLOCKED" && <button className="admin-danger-link"
-              type="button" disabled={busy} onClick={() => void remove(b.id)}>Remove</button>}</div>
+              type="button" disabled={busy} onClick={() => void remove(b.id)}>Remove</button>}
+          </div>
         </div>)}
     </div>
-  </>;
+  </section>;
 }

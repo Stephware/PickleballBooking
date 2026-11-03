@@ -68,8 +68,9 @@ export function AdminPricing({ user }: { user: StaffProfile }) {
     {message && <Notice kind="success">{message}</Notice>}
     {!canManage && <AccessMessage need="MANAGER" />}
     {open && canManage && <div className="admin-form-panel card-surface">
-      <div className="admin-panel-heading"><h3>{editingId === null ? "New rate rule" : "Edit rate rule"}</h3>
-        <button type="button" className="text-button" onClick={() => setOpen(false)}>Close</button></div>
+      <button type="button" className="admin-detail-back" onClick={() => setOpen(false)}>
+        ← Back to pricing</button>
+      <h3>{editingId === null ? "New rate rule" : "Edit rate rule"}</h3>
       <form className="admin-form" onSubmit={save}>
         <div className="admin-form-grid">
           <label>Rule name<input required minLength={1} maxLength={120} value={form.ruleName}

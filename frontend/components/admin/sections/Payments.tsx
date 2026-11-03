@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { adminRequest, extractError, hasManagerRights } from "@/lib/admin-client";
 import { instantLabel, money } from "@/lib/player";
 import { PaymentLedger } from "@/components/admin/sections/PaymentLedger";
@@ -11,6 +11,7 @@ export function AdminPayments({ user }: { user: StaffProfile }) {
   const { data: pending, loading, error: loadError, reload } =
     useAdminResource<PendingPayment[]>("/payments/pending", []);
   const [selected, setSelected] = useState<PendingPayment | null>(null);
+  const detailRef = useRef<HTMLElement>(null);
   const [details, setDetails] = useState<PaymentSummaryAdmin | null>(null);
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
@@ -23,6 +24,9 @@ export function AdminPayments({ user }: { user: StaffProfile }) {
     try { setDetails(await adminRequest<PaymentSummaryAdmin>(
       "/payments/bookings/" + payment.bookingCode)); }
     catch (cause) { setError(extractError(cause)); }
+    if (window.matchMedia("(max-width: 950px)").matches) {
+      detailRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   }
 
   async function review(decision: "approve" | "reject") {
@@ -63,7 +67,11 @@ export function AdminPayments({ user }: { user: StaffProfile }) {
             <strong>{money(p.amount, details?.currency || "PHP")}</strong>
           </button>)}
       </section>
-      <section className="admin-panel card-surface" aria-label="Payment review details">
+      <section ref={detailRef} className="admin-panel card-surface admin-review-detail"
+        aria-label="Payment review details">
+        {selected && <button type="button" className="admin-detail-back"
+          onClick={() => { setSelected(null); setDetails(null); setError(""); }}>
+          ← Back to payment queue</button>}
         <div className="admin-panel-heading"><h3>Review details</h3></div>
         {!selected ? <Empty text="Select a submitted payment to view its reference and proof." />
           : <>

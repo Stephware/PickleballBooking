@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { adminRequest, extractError, todayForVenue } from "@/lib/admin-client";
 import { instantLabel, money } from "@/lib/player";
-import type { AdminBooking, AdminSectionId, CourtAdmin, PendingPayment, StaffProfile } from "@/types/admin";
+import type { AdminBooking, AdminSectionId, PendingPayment, StaffProfile } from "@/types/admin";
 import type { Venue } from "@/types/player";
 import { Empty, Notice, SectionHeader } from "@/components/admin/AdminShared";
 
@@ -12,22 +12,19 @@ export function AdminOverview({ user, venue, navigate }: {
 }) {
   const today = todayForVenue(venue.timezone);
   const [bookings, setBookings] = useState<AdminBooking[]>([]);
-  const [courts, setCourts] = useState<CourtAdmin[]>([]);
   const [pending, setPending] = useState<PendingPayment[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const reload = useCallback(() => Promise.all([
         adminRequest<AdminBooking[]>("/bookings?date=" + today),
-        adminRequest<CourtAdmin[]>("/courts"),
         adminRequest<PendingPayment[]>("/payments/pending"),
-      ]).then(([b, c, p]) => {
-      setBookings(b); setCourts(c); setPending(p); setError("");
+      ]).then(([b, p]) => {
+      setBookings(b); setPending(p); setError("");
     }).catch(reason => { setError(extractError(reason)); })
     .finally(() => { setLoading(false); }), [today]);
   useEffect(() => { void reload(); }, [reload]);
   const confirmed = bookings.filter((b) => b.status === "CONFIRMED").length;
   const held = bookings.filter((b) => ["HELD", "AWAITING_REVIEW"].includes(b.status)).length;
-  const activeCourts = courts.filter((c) => c.isActive).length;
   return <>
     <SectionHeader eyebrow="Your venue at a glance" title={"Good day, " + user.fullName.split(" ")[0] + "."}
       description="A snapshot of today's reservations and pending reviews."
@@ -38,7 +35,6 @@ export function AdminOverview({ user, venue, navigate }: {
       {[
         { label: "Today's confirmed", value: confirmed, hint: "Court reservations" },
         { label: "Awaiting review", value: pending.length, hint: "Payment submissions" },
-        { label: "Active courts", value: activeCourts, hint: "Available to schedule" },
         { label: "Unconfirmed holds", value: held, hint: "Held / awaiting review" },
       ].map((kpi) => <article className="admin-kpi card-surface" key={kpi.label}>
         <span className="micro-label">{kpi.label}</span>

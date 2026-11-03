@@ -63,8 +63,9 @@ export function AdminCourts({ user, venue }: { user: StaffProfile; venue: Venue 
     {message && <Notice kind="success">{message}</Notice>}
     {!canManage && <AccessMessage need="MANAGER" />}
     {open && canManage && <div className="admin-form-panel card-surface">
-      <div className="admin-panel-heading"><h3>{editingId === null ? "New court" : "Edit court"}</h3>
-        <button type="button" className="text-button" onClick={() => setOpen(false)}>Close</button></div>
+      <button type="button" className="admin-detail-back" onClick={() => setOpen(false)}>
+        ← Back to courts</button>
+      <h3>{editingId === null ? "New court" : "Edit court"}</h3>
       <form className="admin-form" onSubmit={save}>
         <div className="admin-form-grid">
           <label>Court name<input required maxLength={100} value={form.courtName}

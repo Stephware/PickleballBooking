@@ -9,7 +9,7 @@ namespace Pickleball.Api.Controllers.Admin;
 [ApiController]
 [Route("api/v1/admin/venue")]
 [Authorize(Roles = StaffRoles.AnyStaff)]
-public sealed class VenueController(IVenueService service) : ControllerBase
+public sealed class VenueController(IVenueService service, IConfiguration configuration) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> Get(CancellationToken ct)
@@ -22,6 +22,12 @@ public sealed class VenueController(IVenueService service) : ControllerBase
     [Authorize(Roles = StaffRoles.Owner)]
     public async Task<IActionResult> Update(SaveVenueRequest request, CancellationToken ct)
     {
+        // Venue branding and global booking policy are developer-managed by default.
+        // A trusted deployer can temporarily opt in to this existing OWNER API
+        // via environment configuration; court/hours/pricing APIs are unchanged.
+        if (!configuration.GetValue<bool>("Developer:AllowVenueEdits"))
+            return StatusCode(StatusCodes.Status403Forbidden,
+                new { error = "Venue customization is managed by the system developer." });
         try
         {
             var saved = await service.UpdateAsync(request, ct);

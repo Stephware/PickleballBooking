@@ -22,7 +22,7 @@ async function handle(request: NextRequest, context: Context, method: string) {
   if (method !== "GET" && !csrf) return adminError("Sign in again to continue.", 401);
   const path = segments.join("/");
   let query = "";
-  if (method === "GET" && (path === "bookings" || path === "operations/blocks")) {
+  if (method === "GET" && (path === "bookings" || path === "operations/blocks" || path === "operations/availability")) {
     const date = request.nextUrl.searchParams.get("date");
     if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date))
       return adminError("Choose a valid date.", 400);

@@ -52,6 +52,7 @@ export function instantLabel(utc: string, timezone: string): string {
 }
 export const slotMeta: Record<SlotStatus, { label: string; short: string }> = {
   AVAILABLE: { label: "Available", short: "Open" },
+  WALK_IN_NOW: { label: "Staff walk-in now", short: "Walk-in now" },
   OCCUPIED: { label: "Reserved", short: "Booked" },
   PENDING: { label: "Pending payment", short: "Pending" },
   ELAPSED: { label: "Time passed", short: "Passed" },

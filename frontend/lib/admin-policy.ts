@@ -5,7 +5,7 @@ export function adminAllowed(method: string, segments: string[]): boolean {
   const code = "PB-[0-9A-F]{16}";
   const rules: Record<string, RegExp[]> = {
     GET: [
-      /^(courts|venue|venue\/hours|pricing\/rules|payments\/pending|staff|bookings|operations\/blocks)$/,
+      /^(courts|venue|venue\/hours|pricing\/rules|payments\/pending|staff|bookings|operations\/blocks|operations\/availability)$/,
       new RegExp("^courts/" + id + "$"),
       new RegExp("^payments/bookings/" + code + "$"),
       new RegExp("^payments/" + id + "/proof$"),

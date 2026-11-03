@@ -4,6 +4,8 @@ namespace Pickleball.Api.Models.Enums;
 public static class AvailabilityStatuses
 {
     public const string Available = "AVAILABLE";
+    // Staff-only display state, not persisted and never exposed by public availability.
+    public const string WalkInNow = "WALK_IN_NOW";
     public const string Occupied = "OCCUPIED";
     public const string Pending = "PENDING";
     public const string Elapsed = "ELAPSED";
