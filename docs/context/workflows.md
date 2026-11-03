@@ -54,3 +54,16 @@ Staff enters Messenger, phone, and walk-in reservations in the same schedule. St
 7. A venue-provided token may be entered for cross-device access, but online booking creation intentionally doesn't export tokens; verified cross-device recovery is deferred.
 
 The frontend is a UI over the backend rules. It cannot make an expired, blocked, booked or pending slot available by itself. API downtime disables booking.
+
+
+## Phase 8 staff workflows — Next.js admin source
+
+1. Owner creates staff via existing CLI/bootstrap or authorized admin Team accounts; staff logs in at /admin through the same .NET cookie/CSRF authentication.
+2. Staff views today's reservations, pending proof queue, active courts; can create future confirmed manual bookings, record externally received cash/transfer claims, view maintenance blocks and proof previews.
+3. Owner/Manager confirms eligible held bookings or cancels eligible reservations. They review pending payment amount, reference and private receipt next to controls and compare to **real external bank/GCash settlement** before approve/reject.
+4. Approved online proof may change AWAITING_REVIEW to CONFIRMED. Rejection expires the held slot; late/expired bookings may still need manual financial reconciliation.
+5. Owner/Manager can add/remove maintenance blocks, create/edit courts, edit peak pricing and operating hours. Owner can change venue brand/booking policies and manage staff accounts.
+6. Refund record requires previously completed external payment reversal. Neither the frontend nor API sends refunds.
+7. Account password change clears frontend cookies and requires reauthentication; logout clears staff session.
+
+All sensitive actions go through the allowlisted Next.js server-side admin gateway; .NET remains the authority for role/CSRF and PostgreSQL transaction safety. See [Phase 8 details](../phase-8-owner-staff-dashboard.md).

@@ -58,3 +58,16 @@ The canonical nine-table SQL bootstrap remains unchanged. A future reviewed migr
 Browser does not compute authoritative prices or confirm payment. File uploads remain server-validated in Phase 6. No cross-device recovery for online bookings: the returned token is intentionally never exposed to client JS or URL; venue-provided tokens can be entered through an optional private recovery form. See [Phase 7 runbook](../phase-7-player-frontend.md).
 
 The frontend is not a venue marketplace. Each deployment uses its own branding, API origin, data and secrets.
+
+
+## Phase 8 administration interface and BFF
+
+- /admin is a separate Next.js route with a client-side session gate, responsive left navigation and role-aware panels. It does not SSR private guest/staff data before session verification.
+- app/api/admin/session/route.ts performs ASP.NET Core login/CSRF handshake and stores three HttpOnly SameSite=Strict frontend cookies for backend session ticket, antiforgery cookie and per-identity request token.
+- app/api/admin/[...segments]/route.ts forwards **only** documented admin method/path combinations through lib/admin-policy.ts and lib/admin-proxy.ts. Production requires APP_ORIGIN and HTTPS. It validates Origin for unsafe methods, forwards backend CSRF and staff cookies, and never accepts arbitrary backend endpoints from users.
+- Backend ASP.NET Core still checks authorization, active account, role, password fingerprint and antiforgery per operation. UI hiding owner controls is only convenience.
+- Authenticated private payment proof preview enforces MIME and 5 MiB limit and does not write files to static/public assets; PDFs remain attachments.
+- components/admin/sections: Overview, Bookings, Payments, PaymentLedger, Manual, Blocks, Courts, Pricing, Hours, Venue, Staff, Account. Styling in app/admin/admin.css, inheriting Phase 7 brand tokens.
+- All data remains per-venue. No database migration or backend controllers changed in Phase 8.
+
+See [Phase 8 operations guide](../phase-8-owner-staff-dashboard.md). Runtime authentication, UI behavior and verification remain pending.

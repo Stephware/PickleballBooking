@@ -63,3 +63,15 @@ Prefer concise topic pages linking to canonical SQL/code. Update decisions.md wh
 - Online guest cross-device recovery remains unimplemented due to non-exportable HttpOnly tokens; the optional recovery input is only for venue-supplied tokens. Do not imply booking reference alone grants access.
 - UI UX Pro Max and Impeccable are installed globally on developer machine but not callable through GitHub connector. Conduct real browser/mobile/accessibility audit using them locally; never mark a rendered UI verification as passed without evidence. Run npm run check and npm run build locally.
 - AGENTS.md and docs/context/*.md MUST remain committed, never excluded by .gitignore.
+
+
+## Phase 8 admin frontend security and UX
+
+- Before editing admin routes, read docs/phase-8-owner-staff-dashboard.md, docs/context/ui-ux.md and the original backend Controllers/Admin and Security middleware. The API remains the authoritative role/CSRF boundary; never trust hidden UI buttons as access control.
+- Staff sign-in must use .NET anonymous antiforgery cookie+token → login (signed backend cookie) → **new authenticated antiforgery token**. Next.js backend staff/CSRF cookies live in HttpOnly, SameSite=Strict, production Secure cookies scoped to /api/admin; never expose those cookies or tokens to browser JS, localStorage, URLs, analytics or logs.
+- All admin mutations require Origin equality to APP_ORIGIN in production and backend X-CSRF-TOKEN + staff/antiforgery cookies. Do not expand the proxy into a generic URL tunnel. New admin actions must be explicitly added to frontend/lib/admin-policy.ts and its tests.
+- Keep payment proof previews private under authenticated admin BFF with no-store/nosniff and safe MIME; do not copy PDFs/images into public/static URLs. Refund buttons **record external refunds**, never disburse money.
+- Preserve role semantics: STAFF can view reservations and proof and create manual bookings/payment claims; MANAGER/OWNER manage court, pricing, hours, blocks and payment reviews; OWNER alone manages branding/venue policy and staff accounts.
+- Use the established Phase 7 theme tokens and scoped frontend/app/admin/admin.css. All status indicators need readable text, confirm dangerous financial/cancel actions, make forms keyboard/mobile accessible, and leave blank amount inputs blank rather than prefilled 0.00.
+- Phase 8 admin UI is **source-only** until npm check/build and browser/API security tests pass. The UI UX Pro Max and Impeccable skills are installed globally on developer machine but have not been executed from GitHub connector.
+- Backend SQL-first nine tables and existing Docker data must remain untouched; do not auto-apply EF migrations or reset database volumes.

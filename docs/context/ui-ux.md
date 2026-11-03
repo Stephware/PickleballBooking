@@ -53,3 +53,13 @@ Document approved design-system paths here once frontend exists; do not duplicat
 - Booking summary and contact form show estimated total, clearly identify a temporary hold and require server-side validation. Payment page never claims an uploaded receipt has been verified.
 - Private booking status and proof preview use a server-only gateway and HttpOnly guest token cookie. See [Phase 7 guide](../phase-7-player-frontend.md) for architecture and limitations.
 - **Pending UI audit:** actual viewport screenshots at 320/375/768/1024px, keyboard/screen-reader, WCAG contrast sampling, reduced-motion and failed requests. UI UX Pro Max and Impeccable global skill execution is a developer-local step; GitHub alone does not establish that they ran.
+
+
+## Phase 8 admin baseline
+
+- Reuse player-facing CSS theme variables and frontend/lib/player.ts color contrast; admin-specific scoped styles live in frontend/app/admin/admin.css.
+- Desktop sidebar with clear WORKSPACE / OPERATIONS / MANAGEMENT / ACCOUNT grouping; mobile slide-in menu with accessible scrim.
+- Task-oriented sections: date-filterable booking table, private payment proof beside amount and reference, separate approved/rejected actions, new manual booking, blocks and form-based court/rate/hours/venue/team management.
+- Preserve editable numbers as string inputs in new court/rule forms so a blank field does not force users to erase a leading 0.00. Keep submit/save next to fields and provide feedback inline.
+- Status indicators use text and semantic styling; roles affect visibility but never replace backend authorization.
+- **Pending:** browser screenshot and keyboard/a11y audit at 320/375/768/1024px, mobile scrolling, nested form validation and reduced motion. UI UX Pro Max/Impeccable run locally only, not through GitHub plugin.

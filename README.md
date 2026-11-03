@@ -10,9 +10,10 @@ Reusable, independently branded pickleball court booking systems: **one deployme
 - **Phase 4 (merged into Phase 3 feature branch):** Public availability/price quote APIs and admin pricing rules.
 - **Phase 5 (merged into parent feature branch):** Guest booking holds, idempotent retries, HMAC guest access, expiry worker.
 - **Phase 6 (PR #6, stacked on Phase 5):** GCash/bank proof submissions, manual payment review, private staff-only proof preview, walk-in/phone/Messenger bookings and maintenance blocks.
-- **Phase 7 (stacked on Phase 6):** Responsive branded Next.js player site, court/time availability grid, booking form, private booking status, receipt upload/preview and secured same-origin API gateway.
+- **Phase 7 (merged to parent Phase 6 feature branch):** Responsive branded Next.js player site, court grid, booking/payment proof/status and secure guest gateway.
+- **Phase 8 (stacked on Phase 7):** Separate /admin staff dashboard, protected .NET cookie/CSRF gateway, bookings, payment proof reviews/ledger, walk-ins, blocks, courts, pricing, hours, venue and staff accounts.
 
-**Not yet implemented:** automated payment settlement, venue-approved payment recipient configuration, native booking_source database column, owner/staff frontend, verified cross-device guest recovery and production deployment automation. Phases 3–7 still need integration into main. All source builds and DB flows still require local verification.
+**Not yet implemented:** automated bank/GCash settlement or refunds, approved recipient configuration, normalized booking_source column, secure cross-device guest recovery, and production deployment hardening. Phases 3–8 must still be integrated into main after local tests. All source builds and DB flows still require local verification.
 
 ## Local API
 
@@ -58,7 +59,7 @@ npm run build
 npm run dev
 ```
 
-Open http://localhost:3000 for venue branding, date/court grid and booking. The private /booking/{code} page supports proof upload/status. APP_ORIGIN must match the frontend public origin (required in production) and API_BASE_URL is server-only. Commit frontend/package-lock.json after the first actual local npm install. See [Phase 7 guide](docs/phase-7-player-frontend.md).
+Open http://localhost:3000 for venue branding, date/court grid and booking, and **http://localhost:3000/admin** for the Owner/Manager/Staff dashboard. The private /booking/{code} page supports proof upload/status. APP_ORIGIN must match the frontend public origin (required in production) and API_BASE_URL is server-only. Commit frontend/package-lock.json after the first actual local npm install. See [Phase 7 guide](docs/phase-7-player-frontend.md).
 
 ## Docs and safety
 
@@ -69,6 +70,7 @@ Open http://localhost:3000 for venue branding, date/court grid and booking. The 
 - [docs/phase-5-booking-engine.md](docs/phase-5-booking-engine.md) — bookings, holds, signed guest access and expiry
 - [docs/phase-6-payments-operations.md](docs/phase-6-payments-operations.md) — manual payments, proof storage, staff bookings and court blocks
 - [docs/phase-7-player-frontend.md](docs/phase-7-player-frontend.md) — player pages, server-only gateway, secure booking access and UI verification
+- [docs/phase-8-owner-staff-dashboard.md](docs/phase-8-owner-staff-dashboard.md) — staff sign-in, role-aware dashboard, payment proof and operations
 - [docs/phase-3-authentication.md](docs/phase-3-authentication.md) — staff auth and one-time owner bootstrap
 - [docs/database-migrations.md](docs/database-migrations.md) — SQL-first EF migration safeguards
 - [docs/development.md](docs/development.md) — local setup

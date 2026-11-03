@@ -3,39 +3,35 @@
 Last updated: 2026-11-03
 
 ## Branch state
-- [x] Phase 1–2 code present on main.
-- [x] PRs #3/#4/#5 were merged into parent *feature branches*, NOT all into main.
-- [x] Phase 6 source is in PR #6 targeting the Phase 5 branch; PR #6 open at Phase 7 start.
-- [x] Phase 7 branches from feature/phase-6-payments-operations and targets that branch in its own stacked PR.
-- [ ] After local verification, integrate the complete Phase 3–7 chain into main through an explicitly reviewed PR. Avoid mistaking earlier merged feature PRs for a merge to main.
+- [x] Phases 1–2 on main.
+- [x] PRs #3–#5 closed against their **parent feature branches**, not merged to main.
+- [x] PR #7 closed/merged against Phase 6 parent feature branch at Phase 8 start.
+- [x] Phase 8 code built on feature/phase-7-player-frontend as a stacked feature branch.
+- [ ] Integrate Phases 3–8 all the way into main **after** successful runtime tests and integrated code review.
 
-## Phase 7 — implemented in GitHub source
-- [x] Public Next.js venue-specific homepage with server-fetched venue name, logo, colors, currency/timezone, and offline/non-bookable fallback.
-- [x] Interactive grid with courts as columns, time slots as rows, dynamic court counts and horizontal scrolling on mobile.
-- [x] Text/color availability statuses: AVAILABLE, OCCUPIED, PENDING, ELAPSED, BLOCKED, UNAVAILABLE; disabled unavailable buttons.
-- [x] Native date navigation with server-defined slots/prices; one-to-eight consecutive slot selection and total.
-- [x] Contact/booking form with UUID v4 idempotency reuse for unchanged retries, server-authoritative validation and conflict/error feedback.
-- [x] Private /booking/{code} route with HELD/AWAITING_REVIEW/CONFIRMED/EXPIRED/CANCELLED/COMPLETED statuses, deadlines and eligible cancellation.
-- [x] GCash/bank-transfer proof uploader with local image preview, file metadata, 5 MiB client limit, server validation and manual review messaging.
-- [x] Payment history and verified total, separate /find-booking route with optional venue-provided token recovery.
-- [x] Server-only, explicit-allowlist Next.js API gateway; HttpOnly per-booking token cookie, CSRF Origin checks on mutating routes, no-store responses.
-- [x] Scoped player UI design tokens, contrast-aware venue brand colors, semantic independent status palette, keyboard/screen-reader labels and reduced-motion CSS.
-- [x] Node-based unit test source for pure date/slot/brand helpers; npm run check includes tests.
-- [x] README, AGENTS.md, docs/context, development guide and Phase 7 operator document updated.
-- [x] No SQL-first schema, Docker, .env credentials, user payment data, or backend migration modified.
+## Phase 8 source work
+- [x] New /admin page, staff login/logout and role-aware dashboard navigation.
+- [x] Server-side ASP.NET Core staff auth handshake: anonymous CSRF → login → authenticated CSRF.
+- [x] Admin HttpOnly + SameSite=Strict staff/antiforgery cookies, production Secure, origin checks and backend-forwarded CSRF on mutations.
+- [x] Explicit method/path admin allowlist; route-policy Node test source. No arbitrary admin path or public API proxy.
+- [x] Non-cacheable, authenticated private image-proof previews and PDF download path.
+- [x] Today's overview, bookings date/status list, owner/manager confirm/cancel.
+- [x] Pending payment reviews, amount/reference/proof side-by-side, approve/reject, review notes, record received payments, external refund references.
+- [x] Walk-in/phone/Messenger reservations, court blocks, courts CRUD, pricing rule CRUD/deactivation, operating hours, venue branding/policy and owner-only staff account management.
+- [x] Own-password change and sign-out, plus mobile/desktop admin CSS using Phase 7 visual tokens.
+- [x] docs/phase-8-owner-staff-dashboard.md, AGENTS.md, selective context wiki and frontend developer notes updated.
+- [x] No backend C#, SQL schema, Docker compose, data, secrets or upload files changed.
 
-## Not yet verified / launch blockers
-- [ ] Local npm install, npm run check, npm run build, browser responsive audit (320/375/768/1024px) and browser accessibility testing.
-- [ ] Full workflow against disposable local PostgreSQL: availability → hold → receipt → manual payment review → confirmation, cancel/expire, race/conflict handling.
-- [ ] Existing backend .NET build and local DB verification remain pending across prior phases.
-- [ ] Production HTTPS, APP_ORIGIN, stable Booking:SigningKey, durable private proof storage, anti-malware scanning and data backup.
-- [ ] No venue-approved payment recipient/instructions in API; **must obtain legitimate instructions before real customer launch**.
-- [ ] Online cross-device recovery not implemented; same-device HttpOnly cookie works, optional venue-provided bearer token entry exists.
-- [ ] frontend/package-lock.json still needs generation/commit after first real npm install (do not invent a lock file).
-- [ ] UI UX Pro Max / Impeccable global skills were not executed via GitHub connector; local skill-led final design/accessibility audit pending.
+## Known limitations / verification required
+- [ ] npm install / npm run check / npm run build and real Next.js smoke run.
+- [ ] ASP.NET Core .NET restore/build/test and disposable PostgreSQL E2E across Phases 3–8.
+- [ ] Real browser authentication/cookie/CSRF/role verification, origin failure, staff deactivation, authenticated proof preview.
+- [ ] Admin UI rendered responsiveness, keyboard, screen-reader and color contrast audit at 320/375/768/1024px; run globally installed UI UX Pro Max + Impeccable locally.
+- [ ] Confirm actual venue-approved payment instructions, official recipient, and safe production receipt storage before customer launch.
+- [ ] No automated bank/GCash settlement/refund, no guest verified cross-device recovery, and manual booking channel lacks normalized booking_source DB field.
+- [ ] frontend/package-lock.json must be generated and tracked after real npm install; never fabricate it.
 
-## Next phases
-- [ ] Phase 8 owner/staff dashboard: secure login, courts/hours/pricing, payment approval and preview, manual bookings and blocks.
-- [ ] Phase 9 full E2E/accessibility/security/performance checks and independent venue deployment.
+## Next
+- [ ] Phase 9: comprehensive builds, end-to-end concurrency/security/accessibility testing, backups, deployment hardening and independent venue deployment.
 
-**Phase 7 source implemented ≠ built/tested/deployed.** Do not touch initialized PostgreSQL volumes or run an unreviewed EF migration.
+**Source present ≠ runtime-verified.** Preserve the existing PostgreSQL data and Docker volume; no unreviewed migrations or resets.
