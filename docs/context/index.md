@@ -20,6 +20,7 @@ Read this index first, then only task-relevant pages. Current C# code and Postgr
 | [../database-migrations.md](../database-migrations.md) | Migration safeguards |
 | [../phase-9-final-verification.md](../phase-9-final-verification.md) | Original Phase 9 executed verification (historical baseline) |
 | [../improvements-phase-1-admin-usability.md](../improvements-phase-1-admin-usability.md) | Post-Phase-9 Phase 1 admin simplification, shared slot picker and walk-in rules |
+| [../improvements-phase-2-public-payment.md](../improvements-phase-2-public-payment.md) | Post-Phase-9 Phase 2 public gallery, venue contact, payment instructions and proof previews |
 | [../deployment.md](../deployment.md) | Independent venue containers, trusted ingress and recovery |
 | [../development.md](../development.md) | How to run and test |
 | [../api/README.md](../api/README.md) | Current endpoints |
@@ -36,3 +37,7 @@ Open only the relevant pages for the task to conserve agent context.
 ## Post-Phase-9 usability improvement
 
 A separate four-phase UX plan follows original Phase 9. The first phase now implements the five-section owner dashboard and a shared interactive schedule on `feature/phase-1-admin-usability`. Team Accounts/Venue Settings are hidden by default, branding updates require a developer-controlled server flag, and immediate staff-only walk-ins are constrained by a short grace period and database overlap checks. Runtime verification remains pending. See the improvement guide.
+
+## New usability Phase 2 (public/payment)
+
+The `feature/phase-2-public-payment-experience` branch adds a **config-driven** venue court photo carousel, phone/Facebook contacts, approved GCash/bank recipient details with optional QR, and full-size local guest/authenticated staff image proofs. No real venue photos, contact details, bank/GCash recipient or QR have been supplied. Unconfigured public details are intentionally hidden/flagged as unpublished. This phase requires fresh CI/browser verification before integration into main. See [Phase 2 guide](../improvements-phase-2-public-payment.md).

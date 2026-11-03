@@ -71,3 +71,9 @@ Visit `/admin`. The standard menu has Today, Schedule, Payments, Manage and My A
 Venue branding/global policy PUT is denied by default. A trusted developer controlling deployment config may temporarily enable `Developer__AllowVenueEdits=true` (maps to `Developer:AllowVenueEdits`) and use the existing OWNER-authenticated API, then disable it again. This does not grant anyone a new role or bypass CSRF.
 
 For authenticated staff current-slot walk-in checks, use `GET /api/v1/admin/operations/availability?date=YYYY-MM-DD` and test on a **disposable** `_test` database. Other channels and blocks require future AVAILABLE intervals; the public booking endpoint remains unchanged. Re-run the Phase 9 guarded API/browser harnesses as regression checks. New build/browser results are not yet established for this branch.
+
+## Public and payment UX — post-Phase-9 Phase 2
+
+`frontend/.env.example` documents optional **server-only developer-managed** venue presentation configuration: `VENUE_PHONE`, `VENUE_FACEBOOK_URL`, `VENUE_GALLERY_JSON` (array of actual `/venue/...` raster photos), and verified GCash/bank recipient details. The default `VENUE_PAYMENT_INSTRUCTIONS_APPROVED=false` intentionally hides payment destinations. Do **not** use sample accounts or real guest proof images. Place real operator-approved court photos and optional official QR files in `frontend/public/venue/`, optimized and with EXIF removed.
+
+Restart Next.js after editing local configuration. Keep the .NET API and PostgreSQL setup unchanged. Verify `npm ci && npm run check && npm run build`; then run existing disposable-venue Playwright smoke tests. Check navigation, gallery swipe/arrows, contact links, both payment methods, missing instructions, local image/PDF preview, staff protected image/modal and PDF attachment, and 320/375/768/1024px layouts. No new database migrations are required. See [Phase 2 guide](improvements-phase-2-public-payment.md).

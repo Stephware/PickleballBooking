@@ -16,6 +16,12 @@ The current improvement branch simplifies the owner dashboard to **Today / Sched
 
 See [Phase 1 admin usability guide](docs/improvements-phase-1-admin-usability.md). Runtime build/tests and real-browser usability checks for the new branch are still pending; historical Phase 9 verification counts are not proof for these changes.
 
+## Public website / payment UX improvements (post-Phase-9 Phase 2)
+
+The customer website now supports a **developer-managed court-photo carousel (max 6 real venue photos), click-to-call/Facebook contacts, and verified GCash/bank payment instructions with optional QR**. These fields use validated, per-deployment Next.js server environment configuration, not owner-facing design controls. Missing/unapproved details never display guessed contacts or account numbers. Guest/staff receipt images now support full-size previews, with authenticated staff images and protected PDF downloads.
+
+To configure: see [Phase 2 operator guide](docs/improvements-phase-2-public-payment.md) and [frontend/.env.example](frontend/.env.example). Actual court photography, contact details and payment recipients were **not provided**, so the gallery uses the existing illustration and payment instructions stay unpublished until official values and approval are supplied. This is not a payment gateway.
+
 ## Local API
 
 Connect to the *existing* local PostgreSQL 17 instance on port 5435. Configure connection credentials via local user-secrets, never Git:

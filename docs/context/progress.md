@@ -43,3 +43,20 @@ See [Phase 9 final verification](../phase-9-final-verification.md) for coverage/
 - [ ] Remaining agreed usability phases: public site/photos/payment instructions, payment UX refinements and final usability audit.
 
 Read [Phase 1 usability implementation](../improvements-phase-1-admin-usability.md). The earlier Phase 9 test counts above are historical and must not be reused as validation for this new branch.
+
+## Post-Phase-9 usability improvements — Phase 2 (new branch)
+
+- [x] Phase 1 approved changes merged into `main` through PR #11; current Phase 2 branches from that integration.
+- [x] Developer-curated photo carousel with swipe, scroll snap, previous/next controls and no autoplay; existing illustration when photos not configured.
+- [x] Optional validated phone and Facebook/Messenger contact links.
+- [x] Payment instructions gated by explicit operator approval and completeness; GCash, bank and optional QR, no invented accounts. Recipient details are public only when approved.
+- [x] Full-size guest image preview and local PDF open before submission; existing file validations preserved.
+- [x] Private staff image enlargement and protected PDF download fallback; existing role/CSRF/private proof gateway retained.
+- [x] Top back control on guest booking details and booking status, responsive styles.
+- [x] Pure validator tests, existing Playwright receipt preview assertions updated, operator docs and environment example.
+- [x] No backend C#, SQL-first schema, booking/payment status, or Docker volume changes.
+- [ ] **Actual real court photos, phone/Facebook handles, GCash/bank recipient/QR not supplied**; must come from the venue and be approved before production usage.
+- [ ] Actual phone, QR, PDF and photo carousel checks with real media and physical touch devices remain pending.
+- [ ] Branch-specific CI .NET/npm/browser verification status to be recorded after GitHub checks.
+
+Earlier Phase 9 and usability Phase 1 passing runs do not establish Phase 2 validation. See [Phase 2 guide](../improvements-phase-2-public-payment.md).

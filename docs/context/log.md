@@ -24,3 +24,7 @@ Remote GitHub Actions run 41561368392 passed all steps for implementation 784cb5
 ## 2026-11-03 — Post-Phase-9 admin usability improvements, Phase 1
 
 Introduced five-item owner navigation, hidden Team/Venue UI, default-off developer venue edit gate, one shared interactive availability picker for manual bookings and maintenance blocks, staff-only immediate walk-in grace with overlap safety, improved mobile reservation and payment-detail layouts, top back buttons, tests and docs. Originated from main. No SQL schema, payment logic, secrets or Docker volume changes. New branch build/live verification pending.
+
+## 2026-11-03 — Post-Phase-9 usability Phase 2
+
+Added real-asset-only, developer-configured court photo slider, optional venue phone/Facebook links, approved GCash/bank recipient/QR instructions with fail-closed unconfigured state, enlarged guest/staff proof image previews and local pre-upload PDF inspection. Added top back controls, styling, pure config tests and browser harness updates; no SQL/backend/Compose/credentials modified. Real venue media and production recipient details remain operator-provided; CI/run verification must be recorded separately.
