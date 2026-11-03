@@ -29,6 +29,8 @@ Introduced five-item owner navigation, hidden Team/Venue UI, default-off develop
 
 Added real-asset-only, developer-configured court photo slider, optional venue phone/Facebook links, approved GCash/bank recipient/QR instructions with fail-closed unconfigured state, enlarged guest/staff proof image previews and local pre-upload PDF inspection. Added top back controls, styling, pure config tests and browser harness updates; no SQL/backend/Compose/credentials modified. Real venue media and production recipient details remain operator-provided; CI/run verification must be recorded separately.
 
+- **Phase 2 CI (historical):** [Run 41584555464](https://github.com/Stephware/PickleballBooking/actions/runs/41584555464) passed 107 .NET, 28 frontend, 29 HTTP scenarios and sampled browser/Axe checks. Operator/venue acceptance remained outstanding.
+
 ## 2026-11-03 — Post-Phase-9 usability Phase 3
 
 Refined existing customer/admin flows: front-loaded Today quick actions, proper per-booking cancellation reason and explicit destructive confirmation, collapsed advanced payment ledger, race-safe async loading and payment selection, retry-only hours on failed load, role-aware actions, admin Back/Forward history, progressive guest access token, keyboard-focused guided forms, top Back and mobile styles. Added browser smoke regression coverage. No backend/SQL schema/proof storage/Compose changes. CI and physical-device verification are separate.
