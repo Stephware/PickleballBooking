@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- approved venue logo */
 "use client";
 
 import Link from "next/link";
@@ -32,12 +33,12 @@ function AdminNavIcon({ section }: { section: AdminSectionId }) {
   </svg>;
 }
 
-const navigation: { section: AdminSectionId; title: string; group: string }[] = [
-  { section: "overview", title: "Today", group: "YOUR WORKSPACE" },
-  { section: "schedule", title: "Schedule", group: "YOUR WORKSPACE" },
-  { section: "payments", title: "Payments", group: "YOUR WORKSPACE" },
-  { section: "manage", title: "Manage", group: "SETTINGS" },
-  { section: "account", title: "My Account", group: "ACCOUNT" },
+const navigation: { section: AdminSectionId; title: string; group: string; icon: string }[] = [
+  { section: "overview", title: "Today", group: "YOUR WORKSPACE", icon: "⌂" },
+  { section: "schedule", title: "Schedule", group: "YOUR WORKSPACE", icon: "▦" },
+  { section: "payments", title: "Payments", group: "YOUR WORKSPACE", icon: "▤" },
+  { section: "manage", title: "Manage", group: "SETTINGS", icon: "⚙" },
+  { section: "account", title: "My Account", group: "ACCOUNT", icon: "◉" },
 ];
 
 function currentSection(): AdminSectionId {

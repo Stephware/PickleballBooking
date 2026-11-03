@@ -7,7 +7,14 @@ export function getVenuePublicDetails() {
   const result = parseVenuePublicDetails({
     VENUE_PHONE: process.env.VENUE_PHONE,
     VENUE_FACEBOOK_URL: process.env.VENUE_FACEBOOK_URL,
-    VENUE_GALLERY_JSON: process.env.VENUE_GALLERY_JSON,
+    // Bundled real photos are enabled for the Pickleball Reserve release by default.
+    // VENUE_GALLERY_JSON=[] explicitly opts out for deployments without approval.
+    VENUE_GALLERY_JSON: process.env.VENUE_GALLERY_JSON ?? JSON.stringify([
+      { src: "/venue/court-2.jpg", alt: "Pickleball Reserve indoor courts and red playing surface" },
+      { src: "/venue/court-1.jpg", alt: "Central walkway and surrounding indoor pickleball courts" },
+      { src: "/venue/court-3.jpg", alt: "Indoor pickleball venue court view" },
+      { src: "/venue/court-4.jpg", alt: "Another view of the Pickleball Reserve playing courts" },
+    ]),
     VENUE_PAYMENT_INSTRUCTIONS_APPROVED: process.env.VENUE_PAYMENT_INSTRUCTIONS_APPROVED,
     VENUE_GCASH_NAME: process.env.VENUE_GCASH_NAME,
     VENUE_GCASH_NUMBER: process.env.VENUE_GCASH_NUMBER,

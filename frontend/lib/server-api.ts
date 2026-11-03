@@ -1,11 +1,18 @@
 import "server-only";
 import { FALLBACK_VENUE, safeBrandColor } from "@/lib/player";
 import type { Venue } from "@/types/player";
+import { resolvePresentationBrand } from "@/lib/venue-brand";
 
 export function apiOrigin(): string {
   return process.env.API_BASE_URL ?? "http://localhost:5090";
 }
 export async function getServerVenue(): Promise<{ venue: Venue; connected: boolean }> {
+  const decorate = (venue: Venue) => resolvePresentationBrand(venue, {
+    mode: process.env.VENUE_BRAND_MODE,
+    primary: process.env.VENUE_BRAND_PRIMARY,
+    secondary: process.env.VENUE_BRAND_SECONDARY,
+    logoPath: process.env.VENUE_LOGO_PATH,
+  });
   try {
     const response = await fetch(new URL("/api/v1/venue", apiOrigin()), {
       cache: "no-store", signal: AbortSignal.timeout(4000),
@@ -17,7 +24,7 @@ export async function getServerVenue(): Promise<{ venue: Venue; connected: boole
         typeof v?.currency !== "string") throw new Error("Malformed venue");
     return {
       connected: true,
-      venue: {
+      venue: decorate({
         ...FALLBACK_VENUE, venueName: v.venueName,
         venueSlug: v.venueSlug ?? FALLBACK_VENUE.venueSlug,
         timezone: v.timezone, currency: v.currency,
@@ -25,7 +32,7 @@ export async function getServerVenue(): Promise<{ venue: Venue; connected: boole
           ? v.logoUrl : null,
         primaryColor: safeBrandColor(v.primaryColor, FALLBACK_VENUE.primaryColor),
         secondaryColor: safeBrandColor(v.secondaryColor, FALLBACK_VENUE.secondaryColor),
-      },
+      }),
     };
-  } catch { return { venue: FALLBACK_VENUE, connected: false }; }
+  } catch { return { venue: decorate(FALLBACK_VENUE), connected: false }; }
 }
