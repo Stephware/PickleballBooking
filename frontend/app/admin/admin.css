@@ -479,3 +479,245 @@
   .admin-quick-actions .admin-action-row button { width: 100%; }
   .admin-ledger-disclosure > summary { padding: 16px; }
 }
+
+
+/* ==========================================================================
+   Reserve Owner dashboard — maroon sidebar, cream surfaces, mobile tab bar.
+   This rebrands the existing 5-section admin without changing its permissions.
+   ========================================================================== */
+.reserve-admin {
+  background: #fbf7f4; color: #2d2025;
+  --admin-panel: #ffffff; --admin-edge: #eadce0; --admin-muted: #806b73;
+}
+.reserve-admin .card-surface {
+  background: #fff; border-color: #eadfe0; border-radius: 15px;
+  box-shadow: 0 5px 20px #4f162408;
+}
+.reserve-admin .button-primary {
+  background: #80011f; color: #fff; border-color: #80011f;
+  border-radius: 10px; box-shadow: 0 4px 10px #80011f18;
+}
+.reserve-admin .button-primary:hover:not(:disabled) { background: #69011a; }
+.reserve-admin .button-outline {
+  background: #fff; color: #6d1230; border-color: #e6d3d7;
+}
+.reserve-admin .button-outline:hover:not(:disabled) {
+  background: #fff1ef; border-color: #d2a8b4;
+}
+.reserve-admin .text-button,.reserve-admin .inline-link {
+  color: #80011f; text-underline-offset: 4px;
+}
+.reserve-admin .micro-label { color: #9b6b7a; }
+.reserve-admin .admin-layout { grid-template-columns: 248px minmax(0,1fr); }
+.reserve-admin .admin-sidebar {
+  background: linear-gradient(180deg, #80011f 0%, #670d27 55%, #570b22 100%);
+  color: #fffcf4; border: 0; padding: 26px 16px 24px;
+}
+.reserve-admin .admin-logo {
+  padding: 0 9px 23px; gap: 11px;
+  border-bottom: 1px solid #ffffff37;
+}
+.reserve-admin .admin-logo-mark {
+  width: 41px; height: 41px; border-radius: 11px;
+  background: #80011f; border: 1px solid #ffe1d634;
+  overflow: hidden;
+}
+.reserve-admin .reserve-logo img { display: block; object-fit: cover; }
+.reserve-admin .admin-logo strong { color: #fffaf1; font-size: .85rem; font-weight: 850; }
+.reserve-admin .admin-logo small { color: #f6cad7; font-size: .66rem; }
+.reserve-admin .admin-nav { padding-top: 12px; }
+.reserve-admin .admin-nav-group { color: #efc3d0; font-size: .59rem; padding: 16px 12px 8px; }
+.reserve-admin .admin-nav-item {
+  justify-content: flex-start; gap: 12px; color: #f6e5e8;
+  min-height: 47px; padding: 12px 13px; border-radius: 10px;
+  font-size: .85rem; margin-block: 3px;
+}
+.reserve-admin .admin-nav-item > svg { flex: none; opacity: .92; }
+.reserve-admin .admin-nav-item:hover { background: #ffffff16; color: #fff; }
+.reserve-admin .admin-nav-item.active {
+  background: #ffffff27; color: #fff; font-weight: 830;
+  box-shadow: inset 3px 0 0 #fff1df;
+}
+.reserve-admin .admin-sidebar-bottom { border-color: #ffffff3d; }
+.reserve-admin .admin-sidebar-bottom .admin-back-link {
+  color: #fbe4e7; text-decoration: none;
+}
+.reserve-admin .admin-sidebar-bottom .admin-back-link:hover { color: #fff; text-decoration: underline; }
+.reserve-admin .admin-signout { color: #fff0ed; font-weight: 750; }
+.reserve-admin .admin-main { background: #fbf8f5; }
+.reserve-admin .admin-topbar {
+  background: #fffdfa; border-bottom-color: #eee2e2;
+  min-height: 81px; padding: 16px clamp(21px,3vw,43px);
+}
+.reserve-admin .admin-page-intro strong { font-size: .99rem; color: #2e2125; }
+.reserve-admin .admin-page-intro .micro-label { color: #a27b85; }
+.reserve-admin .admin-user-name { color: #39252d; }
+.reserve-admin .admin-role-badge { background: #ffedf0; color: #80011f; }
+.reserve-admin .admin-content { padding: clamp(20px, 3vw, 43px); max-width: 1500px; }
+.reserve-admin .admin-section-header { margin-bottom: 20px; }
+.reserve-admin .admin-section-header h2 {
+  font-size: clamp(1.95rem, 3.4vw, 2.8rem); color: #301c26;
+  margin: 5px 0 7px; font-weight: 850;
+}
+.reserve-admin .admin-section-header .muted { color: #75646d; }
+.reserve-admin .admin-quick-actions {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 19px; padding: 15px 19px; margin: 0 0 22px;
+  background: #fff; border: 1px solid #ecdcdd;
+  border-radius: 14px; box-shadow: 0 5px 22px #5b0a2407;
+}
+.reserve-admin .admin-quick-actions h3 { font-size: 1.04rem; color: #32202a; margin: 0; }
+.reserve-admin .admin-action-row { justify-content: flex-end; gap: 8px; }
+.reserve-admin .admin-action-row button {
+  min-height: 43px; padding: 10px 16px; font-size: .83rem;
+}
+.reserve-admin .admin-kpi-grid {
+  grid-template-columns: repeat(4,minmax(0,1fr)); gap: 13px; margin-bottom: 25px;
+}
+.reserve-admin .admin-kpi {
+  padding: clamp(15px,2.1vw,23px); border-radius: 13px;
+  border: 1px solid #ecdfe2; box-shadow: 0 6px 17px #500e2309;
+}
+.reserve-admin .admin-kpi > strong {
+  color: #801b38; font-size: clamp(2rem, 2.85vw, 2.75rem);
+  margin: 8px 0 2px; line-height: 1.06;
+}
+.reserve-admin .admin-kpi .micro-label {
+  color: #715d66; font-size: .68rem; font-weight: 800;
+  letter-spacing: .06em; text-transform: none;
+}
+.reserve-admin .admin-kpi small { color: #86737a; }
+.reserve-admin .admin-two-column {
+  grid-template-columns: minmax(0,1.4fr) minmax(0,1fr); gap: 18px;
+}
+.reserve-admin .admin-panel,.reserve-admin .admin-form-panel,.reserve-admin .admin-ledger {
+  border-color: #eadfe1; border-radius: 14px;
+}
+.reserve-admin .admin-panel-heading { border-color: #f0e4e5; }
+.reserve-admin .admin-list-row { border-color: #f2e8e9; }
+.reserve-admin .admin-list-row strong { color: #35232a; }
+.reserve-admin .admin-list-row small { color: #856f79; }
+.reserve-admin .admin-workflow-tabs { border-bottom-color: #e9dadd; }
+.reserve-admin .admin-workflow-tabs button,
+.reserve-admin .admin-channel-buttons button,
+.reserve-admin .admin-court-tabs button {
+  color: #703348; border-color: #e4ccd3; border-radius: 10px;
+}
+.reserve-admin .admin-workflow-tabs button:hover,
+.reserve-admin .admin-channel-buttons button:hover,
+.reserve-admin .admin-court-tabs button:hover { background: #fff0ec; }
+.reserve-admin .admin-workflow-tabs button.active,
+.reserve-admin .admin-channel-buttons button.active,
+.reserve-admin .admin-court-tabs button.active {
+  background: #fde9eb; border-color: #80011f; color: #80011f;
+  box-shadow: inset 0 0 0 1px #80011f;
+}
+.reserve-admin .admin-channel-picker { border-color: #eedde1; }
+.reserve-admin .admin-picker-date input,
+.reserve-admin .admin-picker-arrow { border-color: #e2d4d7; color: #72233c; }
+.reserve-admin .admin-slot-heading { background: #fcf1f3; border-color: #eedfe2; }
+.reserve-admin .admin-slot-hour { background: #fffafb; border-color: #f2e5e7; }
+.reserve-admin .admin-slot-cell.admin-slot-available { background: #fff3f2; color: #76263b; }
+.reserve-admin .admin-slot-cell.admin-slot-available:hover { background: #fbe3e5; }
+.reserve-admin .admin-slot-cell.admin-slot-selected {
+  background: #f5d1db; outline-color: #80011f; color: #721832;
+}
+.reserve-admin .admin-picked-summary { background: #fff1f2; border-color: #dfb6c3; }
+.reserve-admin .admin-detail-back { color: #80011f; }
+.reserve-admin .admin-form input,.reserve-admin .admin-form select,.reserve-admin .admin-form textarea,
+.reserve-admin .admin-toolbar input,.reserve-admin .admin-toolbar select {
+  border-color: #e2d3d7; color: #32202a;
+}
+.reserve-admin .admin-form input:focus-visible,.reserve-admin .admin-form select:focus-visible {
+  border-color: #80011f;
+}
+.reserve-admin .admin-back-link:hover { color: #80011f; }
+.reserve-admin .admin-auth-cover {
+  background: radial-gradient(circle at 77% 12%, #e9bdc6, transparent 41%),
+    linear-gradient(140deg,#fff7f0,#faece8);
+}
+.reserve-admin .admin-auth-card {
+  border-color: #e9d2d8; box-shadow: 0 25px 75px #67112718;
+}
+.reserve-admin .admin-auth-mark {
+  width: 57px; height: 57px; background: #80011f; padding: 0;
+  overflow: hidden; border-radius: 15px;
+}
+.reserve-admin .admin-auth-mark .reserve-logo { width: 100%; height: 100%; border-radius: 0; }
+.reserve-admin .admin-auth-card h1 { color: #38212d; }
+.reserve-admin .admin-auth-card .muted { color: #806c76; }
+.reserve-admin .admin-auth-card .admin-back-link { color: #80011f; }
+.reserve-admin .admin-ledger-disclosure { border-color: #e7d7de; }
+.reserve-admin .admin-ledger-disclosure > summary { color: #5c2037; }
+.reserve-admin .admin-ledger-disclosure > summary:hover { background: #fff3f2; }
+.reserve-admin .admin-mobile-mark,.reserve-admin .admin-bottom-nav { display: none; }
+.reserve-admin .admin-menu-button { border-color: #dfcbd1; background: #fff3f2; color: #80011f; }
+.reserve-admin .admin-menu-scrim { background: #280c20a8; }
+@media (max-width: 1100px) {
+  .reserve-admin .admin-kpi-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .reserve-admin .admin-two-column { grid-template-columns: 1fr; }
+  .reserve-admin .admin-quick-actions { align-items: flex-start; flex-direction: column; }
+  .reserve-admin .admin-action-row { justify-content: flex-start; }
+}
+@media (max-width: 950px) {
+  .reserve-admin .admin-layout { display: block; }
+  .reserve-admin .admin-sidebar {
+    width: 272px; box-shadow: 19px 0 39px #430f2480;
+    background: linear-gradient(180deg,#80011f,#560b22);
+  }
+}
+@media (max-width: 700px) {
+  .reserve-admin .admin-topbar {
+    position: sticky; top: 0; z-index: 8;
+    padding: 12px 15px; min-height: 67px; gap: 11px;
+  }
+  .reserve-admin .admin-mobile-mark {
+    display: inline-grid; width: 39px; height: 39px;
+    border-radius: 10px; border: 1px solid #eacbd3;
+  }
+  .reserve-admin .admin-page-intro { margin-right: auto; gap: 8px; }
+  .reserve-admin .admin-page-intro strong { font-size: .91rem; }
+  .reserve-admin .admin-page-intro .micro-label { font-size: .55rem; }
+  .reserve-admin .admin-menu-button { width: 38px; height: 38px; }
+  .reserve-admin .admin-content { padding: 22px 15px 118px; }
+  .reserve-admin .admin-section-header { margin-bottom: 16px; }
+  .reserve-admin .admin-section-header h2 { font-size: 2.02rem; }
+  .reserve-admin .admin-quick-actions { padding: 16px; gap: 12px; margin-bottom: 16px; }
+  .reserve-admin .admin-quick-actions .admin-action-row {
+    display: grid; width: 100%; grid-template-columns: 1fr;
+  }
+  .reserve-admin .admin-action-row button { width: 100%; min-height: 45px; }
+  .reserve-admin .admin-kpi-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+  .reserve-admin .admin-kpi { padding: 15px 12px; }
+  .reserve-admin .admin-kpi > strong { font-size: 2.05rem; }
+  .reserve-admin .admin-kpi .micro-label { font-size: .66rem; }
+  .reserve-admin .admin-two-column { grid-template-columns: 1fr; }
+  .reserve-admin .admin-bottom-nav {
+    position: fixed; inset: auto 0 0 0; z-index: 8;
+    display: grid; grid-template-columns: repeat(4,minmax(0,1fr));
+    min-height: 76px; padding: 6px 7px max(6px, env(safe-area-inset-bottom));
+    border-top: 1px solid #ebd9de; background: #fffdfa;
+    box-shadow: 0 -7px 25px #56192c10;
+  }
+  .reserve-admin .admin-bottom-nav button {
+    border: 0; background: transparent; border-radius: 9px;
+    min-width: 0; padding: 7px 3px; min-height: 57px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px; font-size: .66rem; font-weight: 780; color: #85757c;
+  }
+  .reserve-admin .admin-bottom-nav button.active {
+    background: #ffedf1; color: #80011f;
+  }
+  .reserve-admin .admin-bottom-nav button svg { width: 21px; height: 21px; }
+  .reserve-admin .admin-nav-item { min-height: 48px; }
+  .reserve-admin .admin-sidebar-bottom .admin-back-link { color: #fce3e9; }
+  .reserve-admin .admin-topbar .admin-user-name { display: none; }
+}
+@media (max-width: 365px) {
+  .reserve-admin .admin-mobile-mark { display: none; }
+  .reserve-admin .admin-kpi .micro-label { font-size: .6rem; }
+  .reserve-admin .admin-bottom-nav button { font-size: .61rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reserve-admin * { scroll-behavior: auto !important; }
+}

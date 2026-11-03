@@ -26,8 +26,9 @@ export function AdminOverview({ user, venue, navigate }: {
   const confirmed = bookings.filter((b) => b.status === "CONFIRMED").length;
   const held = bookings.filter((b) => ["HELD", "AWAITING_REVIEW"].includes(b.status)).length;
   return <>
-    <SectionHeader eyebrow="Your venue at a glance" title={"Good day, " + user.fullName.split(" ")[0] + "."}
-      description="A snapshot of today's reservations and pending reviews."
+    <SectionHeader eyebrow={"VENUE OPERATIONS · " + venue.venueName} title="Today"
+      description={"Your court activity for " + new Intl.DateTimeFormat("en-PH",
+        { dateStyle: "full", timeZone: "UTC" }).format(new Date(today + "T12:00:00Z")) + "."}
       action={<button className="button-outline" type="button" disabled={loading}
         onClick={() => { setLoading(true); setError(""); void reload(); }}>↻ Refresh</button>} />
     {error && <Notice>{error} <button className="inline-link" type="button"
@@ -45,8 +46,9 @@ export function AdminOverview({ user, venue, navigate }: {
     </section>
     <div className="admin-kpi-grid">
       {[
-        { label: "Today's confirmed", value: confirmed, hint: "Court reservations" },
-        { label: "Awaiting review", value: pending.length, hint: "Payment submissions" },
+        { label: "Today's bookings", value: bookings.length, hint: "Total reservations" },
+        { label: "Pending payments", value: pending.length, hint: "Proofs to review" },
+        { label: "Confirmed", value: confirmed, hint: "Ready to play" },
         { label: "Unconfirmed holds", value: held, hint: "Held / awaiting review" },
       ].map((kpi) => <article className="admin-kpi card-surface" key={kpi.label}>
         <span className="micro-label">{kpi.label}</span>
@@ -61,7 +63,7 @@ export function AdminOverview({ user, venue, navigate }: {
             onClick={() => navigate("schedule")}>View all</button></div>
         {loading ? <p role="status">Loading reservations…</p>
           : bookings.length === 0 ? <Empty text="No bookings for today." />
-          : bookings.slice(0, 6).map((b) => <div className="admin-list-row" key={b.bookingCode}>
+          : bookings.slice().sort((a,b) => a.startsAtUtc.localeCompare(b.startsAtUtc)).slice(0, 6).map((b) => <div className="admin-list-row" key={b.bookingCode}>
             <div><strong>{b.guestName}</strong>
               <small>{instantLabel(b.startsAtUtc, venue.timezone)} · Court {b.courtId}</small></div>
             <span className={"admin-status status-" + b.status.toLowerCase()}>{b.status.replaceAll("_", " ")}</span>

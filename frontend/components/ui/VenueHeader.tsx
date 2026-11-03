@@ -1,21 +1,24 @@
-/* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import type { Venue } from "@/types/player";
+import { ReserveMark } from "@/components/ui/ReserveMark";
 
-export function VenueHeader({ venue }: { venue: Venue }) {
-  return (
-    <header className="site-header">
-      <Link className="wordmark" href="/" aria-label={venue.venueName + " home"}>
-        <span className="brand-mark" aria-hidden="true">
-          {venue.logoUrl
-            ? <img src={venue.logoUrl} alt="" width={44} height={44} />
-            : <span>{venue.venueName.trim().slice(0, 1).toUpperCase()}</span>}
-        </span>
-        <span className="brand-text"><strong>{venue.venueName}</strong><small>Court reservations</small></span>
-      </Link>
-      <nav aria-label="Primary navigation">
-        <Link className="nav-link" href="/find-booking">Find my booking <span aria-hidden="true">↗</span></Link>
-      </nav>
-    </header>
-  );
+export function VenueHeader({ venue, hasContact = false }: {
+  venue: Venue; hasContact?: boolean;
+}) {
+  return <header className="site-header reserve-header">
+    <Link className="wordmark" href="/" aria-label={venue.venueName + " home"}>
+      <ReserveMark className="brand-mark"/>
+      <span className="brand-text">
+        <strong>{venue.venueName}</strong>
+        <small>COURT RESERVATION SYSTEM</small>
+      </span>
+    </Link>
+    <nav className="reserve-header-nav" aria-label="Primary navigation">
+      <Link className="header-nav-home" href="/">Home</Link>
+      <Link className="header-nav-how" href="/#how-it-works">How It Works</Link>
+      {hasContact && <Link className="header-nav-contact" href="/#contact">Contact</Link>}
+      <Link className="nav-link header-find-booking" href="/find-booking">Find my booking</Link>
+      <Link className="header-book-now" href="/#availability-title">Book Now</Link>
+    </nav>
+  </header>;
 }

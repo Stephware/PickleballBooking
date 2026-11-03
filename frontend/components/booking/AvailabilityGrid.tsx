@@ -21,6 +21,7 @@ export function AvailabilityGrid({ venue, connected }: {
   const [refresh, setRefresh] = useState(0);
   const [selection, setSelection] = useState<SelectedRange | null>(null);
   const [formVisible, setFormVisible] = useState(false);
+  const [mobileCourtId, setMobileCourtId] = useState<number | null>(null);
 
   const reload = useCallback(() => {
     setSelection(null);
@@ -85,6 +86,7 @@ export function AvailabilityGrid({ venue, connected }: {
   const courtList = day?.courts ?? [];
   const firstCourt = courtList[0];
   const rows = firstCourt?.slots ?? [];
+  const mobileCourt = courtList.find(c => c.courtId === mobileCourtId) ?? firstCourt;
   const selectedPrice = selection?.slots.reduce((sum, slot) => sum + slot.totalPrice, 0) ?? 0;
 
   return (
@@ -101,6 +103,15 @@ export function AvailabilityGrid({ venue, connected }: {
         </button>
       </div>
 
+      <div className="reserve-booking-progress" aria-label="Booking steps">
+        <span className={!formVisible ? "current" : "complete"}>
+          <b>1</b> Select
+        </span>
+        <span className={formVisible ? "current" : ""}>
+          <b>2</b> Details
+        </span>
+        <span><b>3</b> Payment</span>
+      </div>
       <div className="date-toolbar card-surface">
         <div className="date-control">
           <button type="button" aria-label="Previous day" className="icon-button"
@@ -147,6 +158,45 @@ export function AvailabilityGrid({ venue, connected }: {
       {!loading && !error && day && !day.isClosed && courtList.length > 0 && rows.length === 0 &&
         <div className="empty-card"><h3>No bookable sessions for this date</h3>
           <p>Choose another date or check the venue&apos;s operating hours.</p></div>}
+      {!loading && !error && day && !day.isClosed && rows.length > 0 && mobileCourt && (
+        <div className="reserve-mobile-picker" aria-label="Choose a court and time">
+          <div className="reserve-mobile-label">Select Court</div>
+          <div className="reserve-court-choices" role="group" aria-label="Choose a court">
+            {courtList.map(court => <button key={court.courtId} type="button"
+              className={"reserve-court-choice" +
+                (mobileCourt.courtId === court.courtId ? " chosen" : "")}
+              aria-pressed={mobileCourt.courtId === court.courtId}
+              onClick={() => {
+                setMobileCourtId(court.courtId);
+                setFormVisible(false);
+                if (selection?.courtId !== court.courtId) setSelection(null);
+              }}>
+              <strong>{court.courtName}</strong>
+              <small>{mobileCourt.courtId === court.courtId ? "Selected" : "View times"}</small>
+            </button>)}
+          </div>
+          <div className="reserve-mobile-label">Select Time</div>
+          <div className="reserve-time-choices">
+            {mobileCourt.slots.map(slot => {
+              const selected = selection?.courtId === mobileCourt.courtId &&
+                selection.slots.some(s => s.startsAtUtc === slot.startsAtUtc);
+              return <button key={slot.startsAtUtc} type="button"
+                className={"slot-cell reserve-time-choice slot-" + slot.status.toLowerCase() +
+                  (selected ? " selected" : "")}
+                disabled={slot.status !== "AVAILABLE"} aria-pressed={Boolean(selected)}
+                aria-label={mobileCourt.courtName + ", " + timeLabel(slot.startsAt) +
+                  " to " + timeLabel(slot.endsAt) + ", " + slotMeta[slot.status].label +
+                  (slot.status === "AVAILABLE" ? ", " + money(slot.totalPrice, day.currency) : "")}
+                onClick={() => choose(mobileCourt.courtId, mobileCourt.courtName, slot)}>
+                <span className="slot-state">{timeLabel(slot.startsAt)}</span>
+                <small>{selected ? "Selected" : slotMeta[slot.status].short}</small>
+              </button>;
+            })}
+          </div>
+          <p className="reserve-time-hint">Select one or more consecutive open times.
+            Your total appears below.</p>
+        </div>
+      )}
       {!loading && !error && day && !day.isClosed && rows.length > 0 && (
         <div className="schedule-wrap card-surface" role="region" aria-label="Court and time schedule"
           tabIndex={0}>

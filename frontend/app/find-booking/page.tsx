@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { FindBookingForm } from "@/components/booking/FindBookingForm";
 import { VenueHeader } from "@/components/ui/VenueHeader";
 import { getServerVenue } from "@/lib/server-api";
-import { brandStyle } from "@/lib/player";
+import { reserveBrandStyle } from "@/lib/reserve-brand";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default async function FindBookingPage() {
   const { venue } = await getServerVenue();
-  const style = brandStyle(venue);
+  const style = reserveBrandStyle(venue);
   return (
     <div className="app-shell" style={style}>
       <div className="page-shell">
