@@ -21,6 +21,8 @@ Read this index first, then only task-relevant pages. Current C# code and Postgr
 | [../phase-9-final-verification.md](../phase-9-final-verification.md) | Original Phase 9 executed verification (historical baseline) |
 | [../improvements-phase-1-admin-usability.md](../improvements-phase-1-admin-usability.md) | Post-Phase-9 Phase 1 admin simplification, shared slot picker and walk-in rules |
 | [../improvements-phase-2-public-payment.md](../improvements-phase-2-public-payment.md) | Post-Phase-9 Phase 2 public gallery, venue contact, payment instructions and proof previews |
+| [../improvements-phase-3-workflow-refinement.md](../improvements-phase-3-workflow-refinement.md) | Post-Phase-9 Phase 3 usability refinement and safety checks |
+| [../improvements-phase-4-final-verification.md](../improvements-phase-4-final-verification.md) | Post-Phase-9 Phase 4 production-style CI and launch acceptance gates |
 | [../deployment.md](../deployment.md) | Independent venue containers, trusted ingress and recovery |
 | [../development.md](../development.md) | How to run and test |
 | [../api/README.md](../api/README.md) | Current endpoints |
@@ -41,3 +43,11 @@ A separate four-phase UX plan follows original Phase 9. The first phase now impl
 ## New usability Phase 2 (public/payment)
 
 The `feature/phase-2-public-payment-experience` branch adds a **config-driven** venue court photo carousel, phone/Facebook contacts, approved GCash/bank recipient details with optional QR, and full-size local guest/authenticated staff image proofs. No real venue photos, contact details, bank/GCash recipient or QR have been supplied. Unconfigured public details are intentionally hidden/flagged as unpublished. This phase requires fresh CI/browser verification before integration into main. See [Phase 2 guide](../improvements-phase-2-public-payment.md).
+
+## Post-Phase-9 usability Phase 3
+
+Task-oriented polish for the existing player and owner interfaces: Today quick actions first; a booking-specific inline cancellation confirmation; collapsed payment ledger; race-safe admin loading/retries and no editable opening-hour placeholders on failed load; progressive private-token input, focused booking steps and browser Back/Forward. Read [Phase 3 guide](../improvements-phase-3-workflow-refinement.md). This branch requires its own runtime verification, separate from earlier passing runs.
+
+## Post-Phase-9 usability Phase 4 — release verification
+
+A separate, guarded GitHub Actions workflow now verifies production-image Compose behavior on an isolated `_test` database/project: container recreation preserves private receipts/session access, and PostgreSQL backup restores into another disposable DB. It is **not** a real production deployment or permission to launch. Both standard CI and release CI are required, plus human acceptance of venue assets, verified payment recipients, security scanning, TLS, backups and physical device accessibility. See the [Phase 4 release guide](../improvements-phase-4-final-verification.md).

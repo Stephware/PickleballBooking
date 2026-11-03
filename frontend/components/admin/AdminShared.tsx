@@ -1,21 +1,52 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { adminRequest, extractError } from "@/lib/admin-client";
 import type { StaffProfile } from "@/types/admin";
 
 export function useAdminResource<T>(url: string, fallback: T) {
   const [data, setData] = useState<T>(fallback);
-  const [loading, setLoading] = useState(true);
+  const [loadedUrl, setLoadedUrl] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
-  const reload = useCallback(() => adminRequest<T>(url)
-    .then(value => { setData(value); setError(""); })
-    .catch(cause => { setError(extractError(cause)); })
-    .finally(() => { setLoading(false); }), [url]);
-  useEffect(() => { void reload(); }, [reload]);
-  return { data, setData, loading, error, setError, reload: () => {
-    setLoading(true); setError(""); return reload();
-  } };
+  const requestVersion = useRef(0);
+
+  // An old date/tab response must never overwrite the current selection.
+  // This function doesn't synchronously set React state: the first fetch is
+  // safely started by an effect, while explicit refresh is a user action.
+  const fetchData = useCallback(() => {
+    const version = ++requestVersion.current;
+    return adminRequest<T>(url)
+      .then(value => {
+        if (version === requestVersion.current) {
+          setData(value); setError("");
+        }
+      })
+      .catch(cause => {
+        if (version === requestVersion.current) setError(extractError(cause));
+      })
+      .finally(() => {
+        if (version === requestVersion.current) {
+          setLoadedUrl(url); setRefreshing(false);
+        }
+      });
+  }, [url]);
+
+  const invalidate = useCallback(() => { ++requestVersion.current; }, []);
+  useEffect(() => {
+    void fetchData();
+    return invalidate;
+  }, [fetchData, invalidate]);
+
+  const reload = useCallback(() => {
+    setRefreshing(true); setError("");
+    return fetchData();
+  }, [fetchData]);
+
+  // A URL change is immediately considered loading, even before the effect
+  // starts the new fetch. Old errors/data aren't presented as current.
+  return { data, setData, loading: loadedUrl !== url || refreshing,
+    error: loadedUrl === url ? error : "", setError, reload };
 }
 
 export function SectionHeader({ eyebrow, title, description, action }: {

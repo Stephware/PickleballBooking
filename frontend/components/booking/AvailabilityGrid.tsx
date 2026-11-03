@@ -49,6 +49,20 @@ export function AvailabilityGrid({ venue, connected }: {
     return () => controller.abort();
   }, [connected, date, refresh]);
 
+  // Focus the newly opened form, not a timer-dependent point on the page.
+  useEffect(() => {
+    if (!formVisible) return;
+    const frame = window.requestAnimationFrame(() => {
+      const heading = document.getElementById("booking-title");
+      heading?.focus({ preventScroll: true });
+      document.getElementById("booking-details")?.scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto" : "smooth", block: "start",
+      });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [formVisible]);
+
   function moveDate(value: string) {
     setDate(value);
     setSelection(null);
@@ -78,7 +92,7 @@ export function AvailabilityGrid({ venue, connected }: {
       <div className="section-top">
         <div>
           <p className="eyebrow">Find your next game</p>
-          <h2 id="availability-title">Choose your court.</h2>
+          <h2 id="availability-title" tabIndex={-1}>Choose your court.</h2>
           <p className="muted">Live availability from the venue · times in {venue.timezone.replace("_", " ")}</p>
         </div>
         <button className="button-outline refresh-button" type="button"
@@ -191,15 +205,17 @@ export function AvailabilityGrid({ venue, connected }: {
             <div className="selection-actions">
               <strong className="selection-total">{money(selectedPrice, selection.currency)}</strong>
               <button type="button" className="button-primary"
-                onClick={() => { setFormVisible(true); window.setTimeout(() =>
-                  document.getElementById("booking-details")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50); }}>
+                onClick={() => setFormVisible(true)}>
                 Continue <span aria-hidden="true">→</span>
               </button>
             </div>
           </div>
           {formVisible && <BookingForm key={selection.courtId + ":" +
             selection.slots.map((s) => s.startsAtUtc).join(",")} selection={selection}
-              onBack={() => setFormVisible(false)} />}
+              onBack={() => {
+                setFormVisible(false);
+                document.getElementById("availability-title")?.focus();
+              }} />}
         </div>
       )}
     </section>

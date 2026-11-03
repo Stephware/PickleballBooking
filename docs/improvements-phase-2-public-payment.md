@@ -118,3 +118,6 @@ GitHub Actions [41584555464](https://github.com/Stephware/PickleballBooking/acti
 .NET restore/build and 107 database-backed tests passed; frontend lint/types, 28 Node tests and Webpack production build passed. 29 synthetic HTTP API scenarios passed against an isolated PostgreSQL database. Existing Playwright and sampled Axe browser checks (320px, 375px, 768px, 1024px, guest/staff receipt workflow) passed with zero page runtime errors. The runtime dependency audit reported zero vulnerabilities; there remain 16 moderate advisories among development tooling dependencies.
 
 This confirms the existing player/admin booking and receipt flow with Phase 2 preview changes. **It does not mean real court photographs, account numbers, QR scans, real PDF files, physical phones or real transfers were verified.** Those require approved venue input and a final physical-device audit; no production deployment was performed.
+
+
+*Historical note:* This verification preceded the November 3 Pickleball Reserve branding update; court photographs were supplied in a later PR. See the current venue branding record for asset status.

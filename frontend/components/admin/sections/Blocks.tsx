@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AdminSlotPicker, type StaffSelection } from "@/components/admin/AdminSlotPicker";
 import { AccessMessage, Empty, Notice, SectionHeader, useAdminResource } from "@/components/admin/AdminShared";
 import { adminRequest, apiTime, extractError, hasManagerRights, todayForVenue } from "@/lib/admin-client";
@@ -20,6 +20,16 @@ export function AdminBlocks({ user, venue }: { user: StaffProfile; venue: Venue 
   const blocks = useAdminResource<CourtBlockAdmin[]>("/operations/blocks?date=" + date, []);
   const courts = useAdminResource<CourtAdmin[]>("/courts", []);
   const canManage = hasManagerRights(user);
+
+  useEffect(() => {
+    if (stage === "slots") return;
+    const frame = window.requestAnimationFrame(() => {
+      const heading = document.getElementById("block-reason-title");
+      heading?.focus({ preventScroll: true });
+      heading?.scrollIntoView({ block: "start", behavior: "auto" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [stage]);
 
   function changeDate(value: string) {
     setDate(value); setSelection(null); setStage("slots");
@@ -62,14 +72,14 @@ export function AdminBlocks({ user, venue }: { user: StaffProfile; venue: Venue 
         selection={selection} onSelect={setSelection} reloadKey={reloadKey}/>
       {selection && selection.slots.length > 0 && <div className="admin-step-actions">
         <button type="button" className="button-primary" onClick={() => {
-          setError(""); setStage("reason"); window.scrollTo({ top: 0, behavior: "smooth" });
+          setError(""); setStage("reason"); 
         }}>Continue to reason →</button>
         <button type="button" className="text-button" onClick={() => setSelection(null)}>Clear selection</button>
       </div>}
     </> : selection ? <div className="admin-form-panel card-surface admin-booking-details">
       <button type="button" className="admin-detail-back"
         onClick={() => { setError(""); setStage("slots"); }}>← Back to court and time</button>
-      <h3>Block these slots</h3>
+      <h3 id="block-reason-title" tabIndex={-1}>Block these slots</h3>
       <p><strong>{selection.courtName}</strong> · {prettyDate(selection.date)} · {
         timeLabel(selection.slots[0].startsAt)} – {timeLabel(selection.slots.at(-1)!.endsAt)}</p>
       <form className="admin-form" onSubmit={create}>

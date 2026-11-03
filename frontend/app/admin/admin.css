@@ -433,3 +433,49 @@
   display: block; width: 100%; max-width: 100%;
   max-height: calc(94dvh - 102px); object-fit: contain;
 }
+
+/* Post-Phase-9 usability Phase 3 — task-first, safer, clearer workflows. */
+.admin-quick-actions { margin: 0 0 24px; }
+.admin-quick-actions h3 { margin-bottom: 12px; }
+.admin-inline-cancel {
+  display: grid; gap: 9px; padding: 13px; margin: 4px 0;
+  min-width: min(275px, 100%); max-width: 420px;
+  border: 1px solid #d4b7af; border-radius: 12px; background: #fff8f5;
+}
+.admin-inline-cancel > strong { font-size: .9rem; }
+.admin-inline-cancel p { font-size: .8rem; color: #81513e; margin: 0; }
+.admin-inline-cancel label {
+  display: grid; gap: 5px; font-size: .78rem; font-weight: 700;
+}
+.admin-inline-cancel input {
+  min-height: 44px; width: 100%; min-width: 0; border: 1px solid #d9bdb6;
+  border-radius: 8px; padding: 10px; background: white; color: #27372c;
+}
+.admin-inline-cancel-actions { display: flex; flex-wrap: wrap; gap: 7px; }
+.admin-inline-cancel-actions button { flex: 1 1 100px; white-space: normal; min-height: 44px; padding: 9px; }
+.admin-empty-with-action { display: grid; justify-items: center; gap: 12px; }
+.admin-empty-with-action > button { margin-bottom: 14px; }
+.admin-ledger-disclosure {
+  margin-top: 25px; border: 1px solid var(--admin-edge);
+  background: #fff; border-radius: 14px; overflow: hidden;
+}
+.admin-ledger-disclosure > summary {
+  padding: 20px; display: flex; align-items: flex-start; flex-direction: column;
+  gap: 4px; min-height: 70px; cursor: pointer;
+  list-style: revert; color: #244934;
+}
+.admin-ledger-disclosure > summary:hover { background: #f4f8f3; }
+.admin-ledger-disclosure > summary:focus-visible { outline: 3px solid #1269a1; outline-offset: -3px; }
+.admin-ledger-disclosure > summary > span { color: var(--admin-muted); font-size: .84rem; }
+.admin-ledger-disclosure[open] > summary { border-bottom: 1px solid var(--admin-edge); }
+.admin-ledger-disclosure .admin-ledger { border: 0; border-radius: 0; margin: 0; box-shadow: none; }
+.admin-booking-table td[data-label="Actions"] .admin-inline-cancel { white-space: normal; }
+.admin-booking-details h3[tabindex="-1"] { scroll-margin-top: 90px; }
+@media (max-width: 700px) {
+  .admin-inline-cancel { width: 100%; max-width: none; flex: 1 0 100%; min-width: 0; }
+  .admin-inline-cancel-actions { flex-direction: column; }
+  .admin-inline-cancel-actions button { width: 100%; }
+  .admin-quick-actions .admin-action-row { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  .admin-quick-actions .admin-action-row button { width: 100%; }
+  .admin-ledger-disclosure > summary { padding: 16px; }
+}

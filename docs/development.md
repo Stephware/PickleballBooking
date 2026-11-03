@@ -77,3 +77,19 @@ For authenticated staff current-slot walk-in checks, use `GET /api/v1/admin/oper
 `frontend/.env.example` documents optional **server-only developer-managed** venue presentation configuration: `VENUE_PHONE`, `VENUE_FACEBOOK_URL`, `VENUE_GALLERY_JSON` (array of actual `/venue/...` raster photos), and verified GCash/bank recipient details. The default `VENUE_PAYMENT_INSTRUCTIONS_APPROVED=false` intentionally hides payment destinations. Do **not** use sample accounts or real guest proof images. Place real operator-approved court photos and optional official QR files in `frontend/public/venue/`, optimized and with EXIF removed.
 
 Restart Next.js after editing local configuration. Keep the .NET API and PostgreSQL setup unchanged. Verify `npm ci && npm run check && npm run build`; then run existing disposable-venue Playwright smoke tests. Check navigation, gallery swipe/arrows, contact links, both payment methods, missing instructions, local image/PDF preview, staff protected image/modal and PDF attachment, and 320/375/768/1024px layouts. No new database migrations are required. See [Phase 2 guide](improvements-phase-2-public-payment.md).
+
+## Post-Phase-9 Phase 3 workflow regression
+
+Pull `feature/phase-3-workflow-refinement` (or the reviewed main merge once approved). Use the existing private development database only for read-only exploration; use the CI/disposable PostgreSQL test database for booking, payment or cancellation mutations.
+
+```sh
+dotnet restore PickleballBooking.slnx
+dotnet build PickleballBooking.slnx
+dotnet test PickleballBooking.slnx
+cd frontend
+npm ci
+npm run check
+npm run build
+```
+
+The existing `frontend/tests/e2e/browser-smoke.mjs` verifies 320/375/768/1024px, progressively revealed booking token, focused booking form, ordered Today quick actions, accessible advanced payment ledger, browser Back to Today, and synthetic hours loading failure/recovery. Manual checks still needed: fast date/filter changes, slow payment selection races, inline booking cancellation including the *Keep booking* escape, a real physical phone, genuine operator payment reconciliation and the Phase 4 final security/deployment gates. See [Phase 3 guide](improvements-phase-3-workflow-refinement.md).

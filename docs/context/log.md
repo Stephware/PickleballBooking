@@ -29,4 +29,14 @@ Introduced five-item owner navigation, hidden Team/Venue UI, default-off develop
 
 Added real-asset-only, developer-configured court photo slider, optional venue phone/Facebook links, approved GCash/bank recipient/QR instructions with fail-closed unconfigured state, enlarged guest/staff proof image previews and local pre-upload PDF inspection. Added top back controls, styling, pure config tests and browser harness updates; no SQL/backend/Compose/credentials modified. Real venue media and production recipient details remain operator-provided; CI/run verification must be recorded separately.
 
-- **2026-11-03 — Phase 2 CI:** GitHub Actions run 41584555464 PASSED (107 .NET tests, 28 frontend tests, 29 API scenarios, browser/Axe and production build). No actual venue photos/recipient/account/QR were present; production media, transfer and physical-device verification remain blocked.
+- **Phase 2 CI (historical):** [Run 41584555464](https://github.com/Stephware/PickleballBooking/actions/runs/41584555464) passed 107 .NET, 28 frontend, 29 HTTP scenarios and sampled browser/Axe checks. Operator/venue acceptance remained outstanding.
+
+## 2026-11-03 — Post-Phase-9 usability Phase 3
+
+Refined existing customer/admin flows: front-loaded Today quick actions, proper per-booking cancellation reason and explicit destructive confirmation, collapsed advanced payment ledger, race-safe async loading and payment selection, retry-only hours on failed load, role-aware actions, admin Back/Forward history, progressive guest access token, keyboard-focused guided forms, top Back and mobile styles. Added browser smoke regression coverage. No backend/SQL schema/proof storage/Compose changes. CI and physical-device verification are separate.
+
+## 2026-11-03 — Post-Phase-9 usability Phase 4
+
+Added isolated production-image Compose CI (test-only override and guarded runner script), persistence tests for staff/guest tickets and private PNG/PDF receipts across container replacement, database dump/restore to separate synthetic database, and developer venue customization gate checks. Production launch blocked pending physical-device, real payment, malware scanning, TLS/ingress and encrypted off-site recovery acceptance. No production database, real credentials, live deployment or migrations were changed. Results require GitHub CI execution.
+
+- **2026-11-03 — Phase 4 final CI:** Runs [41593785871](https://github.com/Stephware/PickleballBooking/actions/runs/41593785871) and [41593785968](https://github.com/Stephware/PickleballBooking/actions/runs/41593785968) passed on commit `291e453`. 107 .NET tests, 28 Node tests, 29 API scenarios, Playwright/Axe; isolated production containers survived recreate with cookies/proofs intact and restored PostgreSQL accepted adjacent/rejected overlapping active intervals. Public launch remains NO-GO pending human operator gates.

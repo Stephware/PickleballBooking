@@ -16,6 +16,7 @@ export function AdminPayments({ user }: { user: StaffProfile }) {
   const [proofReady, setProofReady] = useState(false);
   const [enlarged, setEnlarged] = useState(false);
   const detailRef = useRef<HTMLElement>(null);
+  const detailVersion = useRef(0);
   const [details, setDetails] = useState<PaymentSummaryAdmin | null>(null);
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
@@ -24,11 +25,16 @@ export function AdminPayments({ user }: { user: StaffProfile }) {
   const canManage = hasManagerRights(user);
 
   async function select(payment: PendingPayment) {
+    const version = ++detailVersion.current;
     setSelected(payment); setDetails(null); setNotes(""); setError(""); setMessage("");
     setProofError(false); setProofReady(false); setEnlarged(false);
-    try { setDetails(await adminRequest<PaymentSummaryAdmin>(
-      "/payments/bookings/" + payment.bookingCode)); }
-    catch (cause) { setError(extractError(cause)); }
+    try {
+      const result = await adminRequest<PaymentSummaryAdmin>(
+        "/payments/bookings/" + payment.bookingCode);
+      if (version === detailVersion.current) setDetails(result);
+    } catch (cause) {
+      if (version === detailVersion.current) setError(extractError(cause));
+    }
     if (window.matchMedia("(max-width: 950px)").matches) {
       detailRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
@@ -46,6 +52,7 @@ export function AdminPayments({ user }: { user: StaffProfile }) {
       setMessage(decision === "approve"
         ? "Payment marked verified after review."
         : "Payment rejected. Review any transferred funds separately.");
+      ++detailVersion.current;
       setSelected(null); setDetails(null); setNotes(""); setEnlarged(false);
       await reload();
     } catch (cause) { setError(extractError(cause)); }
@@ -60,9 +67,11 @@ export function AdminPayments({ user }: { user: StaffProfile }) {
     <div className="admin-review-layout">
       <section className="admin-panel card-surface" aria-label="Pending payment queue">
         <div className="admin-panel-heading"><h3>Awaiting verification</h3>
-          <span className="admin-count">{pending.length}</span></div>
-        {loadError && <Notice>{loadError}</Notice>}
-        {loading ? <Loading /> : pending.length === 0
+          <span className="admin-count">{loading || loadError ? "—" : pending.length}</span></div>
+        {loadError && <Notice>{loadError} <button type="button"
+          className="inline-link" onClick={() => void reload()}>Try again</button></Notice>}
+        {loading ? <Loading /> : loadError ? <Empty text="Payment queue could not be loaded." /> :
+          pending.length === 0
           ? <Empty text="No payment submissions are waiting for review." />
           : pending.map((p) => <button type="button" key={p.paymentId}
             className={"admin-queue-item" + (selected?.paymentId === p.paymentId ? " selected" : "")}
@@ -75,15 +84,16 @@ export function AdminPayments({ user }: { user: StaffProfile }) {
       <section ref={detailRef} className="admin-panel card-surface admin-review-detail"
         aria-label="Payment review details">
         {selected && <button type="button" className="admin-detail-back"
-          onClick={() => { setSelected(null); setDetails(null); setError("");
+          onClick={() => { ++detailVersion.current; setSelected(null); setDetails(null); setError("");
             setEnlarged(false); }}>
           ← Back to payment queue</button>}
         <div className="admin-panel-heading"><h3>Review details</h3></div>
         {!selected ? <Empty text="Select a submitted payment to view its reference and proof." />
           : <>
-            {error && <Notice>{error}</Notice>}
-            {!details ? <Loading text="Loading payment details…" /> :
-              <div className="admin-payment-detail">
+            {error && <Notice>{error} <button type="button" className="inline-link"
+              onClick={() => void select(selected)}>Try again</button></Notice>}
+            {!details && !error && <Loading text="Loading payment details…" />}
+            {details && <div className="admin-payment-detail">
                 <dl className="admin-definition">
                   <div><dt>Guest</dt><dd>{selected.guestName}</dd></div>
                   <div><dt>Booking</dt><dd>{selected.bookingCode}</dd></div>
@@ -138,7 +148,11 @@ export function AdminPayments({ user }: { user: StaffProfile }) {
       </section>
     </div>
     {message && <Notice kind="success">{message}</Notice>}
-    <PaymentLedger user={user} />
+    <details className="admin-ledger-disclosure">
+      <summary><strong>Other payment actions</strong>
+        <span>Find a booking, record an external payment or a completed refund</span></summary>
+      <PaymentLedger user={user} />
+    </details>
     <p className="admin-hint">Approving a receipt is a manual financial attestation, not an
       automatic bank verification. Expired bookings may need separate reconciliation.</p>
   </>;
