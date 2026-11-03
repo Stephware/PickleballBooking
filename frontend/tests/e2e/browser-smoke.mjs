@@ -171,7 +171,7 @@ try {
     if (proofBookingUrl) {
       const code = new URL(proofBookingUrl).pathname.split("/").at(-1);
       await page.getByRole("navigation", { name: "Staff navigation" })
-        .getByRole("button", { name: "Payment reviews", exact: false }).click();
+        .getByRole("button", { name: "Payments", exact: true }).click();
       await page.locator(".admin-queue-item").filter({ hasText: code }).click();
       await page.getByRole("button", { name: "Approve verified payment" }).waitFor();
       const image = page.getByRole("img", { name: "Submitted payment proof; compare against actual transfer records" });
@@ -205,13 +205,32 @@ try {
         assert.equal(await page.getByRole("button", { name: "Open navigation" })
           .evaluate(el => el === document.activeElement), true);
       }
-      for (const title of ["Overview", "Reservations", "Payment reviews", "New staff booking", "Court blocks",
-        "Courts", "Pricing rules", "Opening hours", "Venue settings", "Team accounts", "My account"]) {
+      const mainNav = page.getByRole("navigation", { name: "Staff navigation" });
+      assert.equal(await mainNav.getByRole("button", { name: "Team accounts" }).count(), 0);
+      assert.equal(await mainNav.getByRole("button", { name: "Venue settings" }).count(), 0);
+      for (const title of ["Today", "Schedule", "Payments", "Manage", "My Account"]) {
         if (width <= 950) await page.getByRole("button", { name: "Open navigation" }).click();
-        await page.getByRole("navigation", { name: "Staff navigation" })
-          .getByRole("button", { name: title, exact: false }).click();
+        await mainNav.getByRole("button", { name: title, exact: true }).click();
         await page.waitForLoadState("networkidle");
         await checkLayout(title, width);
+        if (title === "Schedule") {
+          const tabs = page.getByRole("navigation", { name: "Schedule actions" });
+          await tabs.getByRole("button", { name: "Add Booking", exact: false }).click();
+          await page.getByRole("heading", { name: "Add Booking" }).waitFor();
+          await checkLayout("Add Booking", width);
+          await tabs.getByRole("button", { name: "Block Court" }).click();
+          await page.getByRole("heading", { name: "Block Court" }).waitFor();
+          await checkLayout("Block Court", width);
+          await tabs.getByRole("button", { name: "Reservations" }).click();
+        }
+        if (title === "Manage") {
+          const tabs = page.getByRole("navigation", { name: "Manage venue operations" });
+          for (const tab of ["Pricing", "Opening Hours", "Courts"]) {
+            await tabs.getByRole("button", { name: tab, exact: true }).click();
+            await page.waitForLoadState("networkidle");
+            await checkLayout("Manage " + tab, width);
+          }
+        }
       }
       await page.screenshot({ path: `${output}/admin-account-${width}.png`, fullPage: true });
     }

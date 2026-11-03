@@ -6,7 +6,7 @@ const valid = {
   GET: [
     "courts", "courts/15", "venue", "venue/hours", "pricing/rules",
     "bookings", "payments/pending", "payments/bookings/PB-ABCDEF0123456789",
-    "payments/4/proof", "operations/blocks", "staff",
+    "payments/4/proof", "operations/blocks", "operations/availability", "staff",
   ],
   POST: [
     "courts", "pricing/rules", "staff", "operations/manual-bookings",
