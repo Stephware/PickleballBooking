@@ -89,18 +89,18 @@ export function PaymentProofForm({ booking, venue, publicDetails, onSuccess }: {
           <legend>Payment method</legend>
           <label className={method === "GCASH" ? "method selected-method" : "method"}>
             <input type="radio" name="method" checked={method === "GCASH"}
-              onChange={() => setMethod("GCASH")} /> GCash
+              onChange={() => { setMethod("GCASH"); setCopyStatus(""); }} /> GCash
           </label>
           <label className={method === "BANK_TRANSFER" ? "method selected-method" : "method"}>
             <input type="radio" name="method" checked={method === "BANK_TRANSFER"}
-              onChange={() => setMethod("BANK_TRANSFER")} /> Bank transfer
+              onChange={() => { setMethod("BANK_TRANSFER"); setCopyStatus(""); }} /> Bank transfer
           </label>
         </fieldset>
         <div className="venue-payment-instructions" aria-live="polite">
           {instructions ? <>
             <p className="eyebrow">Official venue payment recipient</p>
-            {method === "BANK_TRANSFER" && "bankName" in instructions &&
-              <div><span>Bank</span><strong>{instructions.bankName}</strong></div>}
+            {method === "BANK_TRANSFER" && publicDetails.payments.bank &&
+              <div><span>Bank</span><strong>{publicDetails.payments.bank.bankName}</strong></div>}
             <div><span>Account holder</span><strong>{instructions.accountName}</strong></div>
             <div><span>Account number</span><strong className="venue-account-number">
               {instructions.accountNumber}</strong></div>
