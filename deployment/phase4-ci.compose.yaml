@@ -1,0 +1,14 @@
+# TEST-ONLY overlay for the disposable Phase 4 CI project.
+# Never combine this with a real venue's Compose project or data volumes.
+services:
+  database:
+    environment:
+      POSTGRES_DB: ${PHASE4_TEST_DATABASE:?Set a disposable _test database}
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U pickleball_admin -d ${PHASE4_TEST_DATABASE:?Set disposable DB}']
+      interval: 10s
+      timeout: 5s
+      retries: 6
+  api:
+    environment:
+      ConnectionStrings__Pickleball: Host=database;Database=${PHASE4_TEST_DATABASE:?Set disposable DB};Username=pickleball_app;Password=${DB_APP_PASSWORD:?Set synthetic app password}

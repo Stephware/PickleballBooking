@@ -80,3 +80,7 @@ Documentation records decisions, not proof of a passing local build.
 | D-063 | Booking cancellation reason/confirmation belongs to the particular booking row; refunds remain external | Safety / usability Phase 3 |
 | D-064 | Reject stale admin resource/payment-selection responses; failed hours/queue loads must not appear as valid defaults | Safety / usability Phase 3 |
 | D-065 | Browser history for admin top-level sections, focus newly opened steps, hide guest access token unless needed | Accessibility / usability Phase 3 |
+
+| D-066 | A separate CI-only production-image Compose job verifies container recreation, private session/proof persistence and isolated PostgreSQL dump/restore | Final usability Phase 4 |
+| D-067 | Release test must refuse reused volumes, non-_test data and non-synthetic origin/project/credentials; CI cleanup affects only its unique disposable resources | Data safety Phase 4 |
+| D-068 | Public go-live requires both passing CI workflows and explicit venue acceptance of real payment, malware, TLS, backups, physical accessibility and monitoring | Launch governance Phase 4 |

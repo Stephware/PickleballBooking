@@ -25,6 +25,15 @@ if(sessionFile&&existsSync(sessionFile)) await check('persisted staff ticket sur
  const saved=JSON.parse(await readFile(sessionFile,'utf8'));assert.equal((await call('/api/admin/session',{cookie:saved.cookie})).status,200);
  assert.equal((await call('/api/player/bookings/'+saved.code,{cookie:saved.guestCookie})).status,200);
  const proof=await call('/api/admin/payments/'+saved.paymentId+'/proof',{cookie:saved.cookie});assert.equal(proof.status,200);assert.equal(proof.headers.get('Content-Type'),'image/png');
+ if(saved.pdfId){
+  const pdf=await call('/api/admin/payments/'+saved.pdfId+'/proof',{cookie:saved.cookie});
+  assert.equal(pdf.status,200);assert.equal(pdf.headers.get('Content-Type'),'application/pdf');
+  assert.match(pdf.headers.get('content-disposition')||'',/attachment/i);
+ }
+});
+await check('staff schedule is private even when a valid date is known',async()=>{
+ const date=new Date(Date.now()+3*86400000).toLocaleDateString('en-CA',{timeZone:'Asia/Manila'});
+ assert.equal((await call('/api/admin/operations/availability?date='+date)).status,401);
 });
 await check('wrong modifying Origin rejected at production gateway',async()=>{
  assert.equal((await call('/api/admin/session',{method:'POST',body:{email,password},requestOrigin:'https://untrusted.example.test'})).status,403);
@@ -41,11 +50,19 @@ await check('another client logs in over trusted HTTPS forwarding on the interna
  assert.ok(set.every(x=>/; Secure/i.test(x)&&/; HttpOnly/i.test(x)&&/; SameSite=Strict/i.test(x)));
  cookie=set.map(x=>x.split(';')[0]).join('; ');
 });
+await check('venue customization is disabled for ordinary owner by default',async()=>{
+ const current=await call('/api/admin/venue',{cookie});
+ assert.equal(current.status,200,JSON.stringify(current.data));
+ const edit=await call('/api/admin/venue',{method:'PUT',cookie,body:current.data});
+ assert.equal(edit.status,403,'Developer feature gate must remain off even for OWNER');
+ const after=await call('/api/admin/venue',{cookie});
+ assert.deepEqual(after.data,current.data);
+});
 await check('authenticated gateway mutation completes real backend CSRF',async()=>{
  const r=await call('/api/admin/courts',{method:'POST',cookie,body:{courtName:'Container Smoke '+crypto.randomUUID(),baseHourlyRate:250,displayOrder:99,isActive:true}});
  assert.equal(r.status,201,JSON.stringify(r.data));courtId=r.data.id;
 });
-let code, guestCookie, paymentId;
+let code, guestCookie, paymentId, pdfId;
 await check('production guest cookie hides bearer token and proof uses private storage',async()=>{
  const date=new Date(Date.now()+3*86400000).toLocaleDateString('en-CA',{timeZone:'Asia/Manila'});
  const held=await call('/api/player/bookings',{method:'POST',body:{idempotencyKey:crypto.randomUUID(),courtId,date,startsAt:'08:00:00',endsAt:'09:00:00',guestName:'Container Synthetic Guest',guestEmail:'container@phase9.example.test'}});
@@ -59,5 +76,31 @@ await check('production guest cookie hides bearer token and proof uses private s
  const proof=await call('/api/admin/payments/'+paymentId+'/proof',{cookie});assert.equal(proof.status,200);assert.equal(proof.headers.get('Content-Type'),'image/png');
  assert.equal((await call('/api/admin/payments/'+paymentId+'/proof')).status,401);
 });
-if(sessionFile)await writeFile(sessionFile,JSON.stringify({cookie,code,guestCookie,paymentId}),{mode:0o600});
+await check('PDF receipt remains staff-only and forces attachment download',async()=>{
+ const date=new Date(Date.now()+3*86400000).toLocaleDateString('en-CA',{timeZone:'Asia/Manila'});
+ const held=await call('/api/player/bookings',{method:'POST',body:{
+   idempotencyKey:crypto.randomUUID(),courtId,date,startsAt:'09:00:00',endsAt:'10:00:00',
+   guestName:'Synthetic PDF Guest',guestEmail:'pdf@phase4.example.test',
+ }});
+ assert.equal(held.status,201,JSON.stringify(held.data));
+ const pdfCode=held.data.booking.bookingCode;
+ const pdfCookie=held.headers.getSetCookie().map(x=>x.split(';')[0]).join('; ');
+ const payload=new FormData();
+ payload.set('PaymentMethod','GCASH');payload.set('Amount','250');
+ payload.set('TransactionReference','PDF-'+crypto.randomUUID());
+ payload.set('Proof',new Blob(['%PDF-1.4\\n1 0 obj\\n<<>>\\nendobj\\n%%EOF'],{
+   type:'application/pdf',
+ }),'receipt.pdf');
+ const payment=await call('/api/player/bookings/'+pdfCode+'/payments',{
+   method:'POST',cookie:pdfCookie,body:payload,
+ });
+ assert.equal(payment.status,201,JSON.stringify(payment.data));pdfId=payment.data.id;
+ const proof=await call('/api/admin/payments/'+pdfId+'/proof',{cookie});
+ assert.equal(proof.status,200);
+ assert.equal(proof.headers.get('Content-Type'),'application/pdf');
+ assert.match(proof.headers.get('content-disposition')||'',/attachment/i);
+ assert.match(proof.headers.get('Cache-Control')||'',/no-store/i);
+ assert.equal((await call('/api/admin/payments/'+pdfId+'/proof')).status,401);
+});
+if(sessionFile)await writeFile(sessionFile,JSON.stringify({cookie,code,guestCookie,paymentId,pdfId}),{mode:0o600});
 console.log(`Deployment scenarios: ${passed} passed, 0 failed`);
