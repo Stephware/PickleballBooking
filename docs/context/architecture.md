@@ -92,3 +92,7 @@ Normal owners can still edit courts, prices, hours and payments. Venue brand/glo
 ## Post-Phase-9 Phase 2 presentation data
 
 `frontend/lib/venue-public-server.ts` reads per-deployment server runtime variables, then passes only public, validated fields through `venue-public.ts` to server-rendered home/booking components. Allowlisted `/venue/...` images are developer-curated static assets, not uploads; no external image schemes or private proofs. The GCash/bank recipient is displayed only after an explicit approval flag and complete fields. `VenueGallery` scrolls natively; `VenueContact` exposes only safe phone/Facebook destinations. Staff proof enlargement reuses authenticated Next.js BFF GET and existing backend no-store/private storage; guest local object URLs exist only in that visitor's browser before upload. SQL-first schema and backend payment state machine are unchanged.
+
+## Usability Phase 3 — UI-only guardrails
+
+The shared `frontend/components/admin/AdminShared.tsx` request hook maintains a monotonic request version so an older URL refresh cannot replace a later date/tab result; selected payment details have their own version guard. The public and admin pages are otherwise unchanged architecturally. Opening Hours exposes no mutable fallback when its GET fails. Browser history is supported in `AdminPortal` for the five allowed sections; hash aliases map legacy pages only to Schedule/Manage. No new backend API, schema or financial state transition exists in Phase 3.

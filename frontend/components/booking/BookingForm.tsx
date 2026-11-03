@@ -71,8 +71,8 @@ export function BookingForm({ selection, onBack }: {
       </button>
       <div className="panel-heading">
         <div>
-          <p className="eyebrow">Step 2 of 2 · Your reservation</p>
-          <h2 id="booking-title">Save your time on court</h2>
+          <p className="eyebrow">Step 2 · Booking details</p>
+          <h2 id="booking-title" tabIndex={-1}>Save your time on court</h2>
         </div>
       </div>
       <div className="reservation-recap" aria-label="Selected court details">

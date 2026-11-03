@@ -22,6 +22,12 @@ The customer website now supports a **developer-managed court-photo carousel (ma
 
 To configure: see [Phase 2 operator guide](docs/improvements-phase-2-public-payment.md) and [frontend/.env.example](frontend/.env.example). Actual court photography, contact details and payment recipients were **not provided**, so the gallery uses the existing illustration and payment instructions stay unpublished until official values and approval are supplied. This is not a payment gateway.
 
+## Usability refinement — post-Phase-9 Phase 3
+
+The latest task-focused improvements keep the existing five-section owner layout and focus on fewer everyday steps: Today's quick actions first, booking-specific cancellation confirmation, an expandable advanced payment ledger, race-safe date/payment loading, explicit retry states, and blocked opening-hour editing if loading fails. The player site uses progressive private-token access, correct booking-step labels and keyboard-focused forms. Top-level admin browser Back/Forward now works.
+
+See [Phase 3 workflow guide](docs/improvements-phase-3-workflow-refinement.md). This is an interface/refinement phase, **not** a new booking/payment backend or database migration. Full CI and real-device verification status are tracked in [progress](docs/context/progress.md).
+
 ## Local API
 
 Connect to the *existing* local PostgreSQL 17 instance on port 5435. Configure connection credentials via local user-secrets, never Git:

@@ -93,3 +93,12 @@ The original Phase 9 test summary predates this change. See [updated Phase 1 gui
 5. Staff reviews a private, authenticated receipt image at full size or downloads a protected PDF and verifies independently against actual external records. Existing approval/rejection, balance, CSRF and role restrictions remain unchanged.
 
 No new payment provider, confirmation shortcut, public receipt URL, photo database or admin customization is introduced.
+
+## Post-Phase-9 usability Phase 3 — focused daily flows
+
+- On Today, operators use Add Booking / Review Payments before scanning analytics. Block Court is visible to Owner/Manager, but backend authorization remains authoritative.
+- On Schedule, reservations are filtered by date/status; empty filters can be cleared. A cancellation starts on the chosen booking row, shows that booking reference and optional reason, then requires an explicit final irreversible action. An external refund remains a separate record.
+- On Payments, the pending review queue is primary; the ledger is expandable only when needed. Quickly switching selected proofs ignores out-of-order responses. Errors show retry rather than implying no pending payments.
+- On Manage, failure to load opening hours locks out editing until a successful read, avoiding accidental saves of fallback defaults.
+- On the player booking flow, heading focus follows opening a details form (no timed scroll); private booking lookup asks only for a code unless cross-device private token access is requested. Backend hold, token, confirmation and payment rules are unchanged.
+- Admin top-level section changes enter browser history; Back/Forward restores safe five-section navigation. Legacy hashes cannot expose Team Accounts or Venue Settings UI.

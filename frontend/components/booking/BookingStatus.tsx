@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { PaymentProofForm } from "@/components/booking/PaymentProofForm";
 import { VenueContactLinks } from "@/components/ui/VenueContact";
 import type { VenuePublicDetails } from "@/lib/venue-public";
@@ -45,7 +44,6 @@ const statusInfo: Record<string, { title: string; description: string; badge: st
 export function BookingStatus({ code, venue, publicDetails }: {
   code: string; venue: Venue; publicDetails: VenuePublicDetails;
 }) {
-  const router = useRouter();
   const [booking, setBooking] = useState<Booking | null>(null);
   const [payments, setPayments] = useState<PaymentSummary | null>(null);
   const [loading, setLoading] = useState(true);
@@ -229,9 +227,6 @@ export function BookingStatus({ code, venue, publicDetails }: {
       )}
       <div className="status-navigation">
         <VenueContactLinks contact={publicDetails.contact} compact />
-        <button type="button" className="text-button" onClick={() => router.refresh()}>
-          Reload page
-        </button>
       </div>
     </div>
   );

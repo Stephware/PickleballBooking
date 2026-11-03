@@ -57,6 +57,23 @@ Read [Phase 1 usability implementation](../improvements-phase-1-admin-usability.
 - [x] No backend C#, SQL-first schema, booking/payment status, or Docker volume changes.
 - [ ] **Actual real court photos, phone/Facebook handles, GCash/bank recipient/QR not supplied**; must come from the venue and be approved before production usage.
 - [ ] Actual phone, QR, PDF and photo carousel checks with real media and physical touch devices remain pending.
-- [ ] Branch-specific CI .NET/npm/browser verification status to be recorded after GitHub checks.
+- [x] Phase 2 GitHub Actions [run 41584555464](https://github.com/Stephware/PickleballBooking/actions/runs/41584555464) passed: 107 .NET tests, 28 frontend Node tests, 29 live API scenarios, production build and browser/Axe checks. Phase 2 merged into main via PR #12.
 
 Earlier Phase 9 and usability Phase 1 passing runs do not establish Phase 2 validation. See [Phase 2 guide](../improvements-phase-2-public-payment.md).
+
+## Post-Phase-9 usability Phase 3 — workflow refinement (feature branch)
+
+- [x] Today quick actions moved above KPIs; unauthorized staff don't see Block Court quick action.
+- [x] Booking-specific inline cancellation editor (reason attached to the correct booking), deliberate final confirmation; status-filter empty state can be cleared in one tap.
+- [x] Payment ledger/history collapsed by default; selected proof-detail race protection and retryable queue errors.
+- [x] Admin resource request-hook ignores stale results, with consistent loading/retry messages.
+- [x] Opening Hours cannot save fabricated fallback days when GET fails.
+- [x] Player booking details receive reliable heading focus, no timer-dependent scroll; correct step label.
+- [x] Optional cross-device booking token behind accessible disclosure; top back control and removed redundant reload.
+- [x] Admin browser Back/Forward works for five top-level sections; staff-only actions remain role-restricted.
+- [x] Responsive inline cancellation and advanced ledger styling; browser smoke assertions updated.
+- [ ] Run this branch's GitHub CI (.NET, Node, Next.js, disposable PostgreSQL API, Playwright/Axe).
+- [ ] Physical-phone, real screen reader, flaky network and rapid payment selection manual checks; final UX Phase 4.
+- [x] No backend/database schema, Docker, secret or payment state-machine changes.
+
+Detailed design and validation: [Phase 3 guide](../improvements-phase-3-workflow-refinement.md).

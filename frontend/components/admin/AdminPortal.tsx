@@ -72,17 +72,22 @@ export function AdminPortal({ venue }: { venue: Venue }) {
   }, [menuOpen]);
 
   useEffect(() => {
-    const onHash = () => setSection(currentSection());
+    const onHash = () => {
+      setSection(currentSection());
+      setScheduleMode("list");
+    };
     const onExpired = () => {
       setUser(null);
       setNotice("Your staff session has expired. Please sign in again.");
     };
     window.addEventListener("hashchange", onHash);
+    window.addEventListener("popstate", onHash);
     window.addEventListener("pb-admin-session-expired", onExpired);
     adminRequest<StaffProfile>("/session").then(setUser)
       .catch(() => setUser(null)).finally(() => setLoading(false));
     return () => {
       window.removeEventListener("hashchange", onHash);
+      window.removeEventListener("popstate", onHash);
       window.removeEventListener("pb-admin-session-expired", onExpired);
     };
   }, []);
@@ -115,7 +120,9 @@ export function AdminPortal({ venue }: { venue: Venue }) {
   function navigate(id: AdminSectionId, mode?: "booking" | "block") {
     setSection(id); setMenuOpen(false); setNotice("");
     if (id === "schedule") setScheduleMode(mode ?? "list");
-    window.history.replaceState(null, "", "/admin#" + id);
+    // New top-level screens participate in browser Back/Forward.
+    if (window.location.hash !== "#" + id)
+      window.history.pushState(null, "", "/admin#" + id);
   }
   const title = navigation.find((n) => n.section === section)?.title ?? "Today";
 

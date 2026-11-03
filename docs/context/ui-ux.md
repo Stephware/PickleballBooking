@@ -85,3 +85,11 @@ Use progressive disclosure: choose court/time first, then only guest details or 
 - Payment: method selection reveals approved recipient name/number and optionally verified QR; do not suggest sending a transfer until genuine instructions are configured and confirmed offline. Distinguish receipt SUBMITTED/AWAITING_REVIEW from VERIFIED/CONFIRMED in both language and color.
 - Proof previews: users can expand the *local selected file* without server exposure; staff can inspect full-size private image only through authenticated proxy. PDFs remain safe local open (guest) and protected attachment (staff), never publicly embedded.
 - Keep back controls at the top of multi-step pages; test phone sizes 320/375, tablet 768 and desktop 1024+, touch/swipe, keyboard/ESC dialog, responsive contact, missing media/error states, real screen readers and reduced motion.
+
+## Post-Phase-9 Phase 3 visual and interaction polish
+
+Use the same typography, spacing, status colors and brand tokens instead of a visual redesign. Prioritize owner **quick actions above KPI summaries**, keep advanced payment ledger collapsed until requested, and make cancellation a booking-specific inline confirmation with reversible "Keep booking" and distinct "Confirm cancellation". Destructive flows require intent but not duplicate confirmations.
+
+For asynchronous views, distinguish loading, genuine empty, and fetch failure; provide a retry button and never display editable dummy opening hours after an error. Ignore stale results when switching dates/payments quickly. Focus the newly revealed form title with `tabIndex=-1`; native `details/summary` hides optional guest token for same-device lookup. Browser Back/Forward should work for admin top-level sections without exposing hidden routes.
+
+Inspect 320/375/768/1024px, screen reader, keyboard Tab/Escape, no horizontal overflow, readable long names, error/retry flows and minimum 44px controls. UI UX Pro Max/Impeccable on the local developer machine can audit further; do not claim execution without evidence.

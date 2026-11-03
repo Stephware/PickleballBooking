@@ -75,3 +75,8 @@ Documentation records decisions, not proof of a passing local build.
 | D-059 | Publish GCash/bank destination only on explicit developer-verified approval gate and complete account fields; no sample recipients | Security / usability Phase 2 |
 | D-060 | Guest local receipt image may enlarge with modal; locally opened PDF before upload; no public proof storage | Phase 2 |
 | D-061 | Staff receipt remains private authenticated preview with larger modal; PDF still attachment, not inline | Phase 2 |
+
+| D-062 | Daily operator quick actions precede dashboards; advanced payment ledger stays progressively disclosed | Usability Phase 3 |
+| D-063 | Booking cancellation reason/confirmation belongs to the particular booking row; refunds remain external | Safety / usability Phase 3 |
+| D-064 | Reject stale admin resource/payment-selection responses; failed hours/queue loads must not appear as valid defaults | Safety / usability Phase 3 |
+| D-065 | Browser history for admin top-level sections, focus newly opened steps, hide guest access token unless needed | Accessibility / usability Phase 3 |

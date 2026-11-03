@@ -480,3 +480,21 @@ strong { font-weight: 700; }
 @media (prefers-reduced-motion: reduce) {
   .venue-gallery-track { scroll-behavior: auto; }
 }
+
+/* Phase 3: readable progressive access and reliable mobile booking focus. */
+.booking-panel h2[tabindex="-1"] { scroll-margin-top: 85px; }
+.booking-access-details {
+  border: 1px solid #cfddd2; border-radius: 11px;
+  padding: 0 15px; background: #f9fcf9;
+}
+.booking-access-details > summary {
+  cursor: pointer; min-height: 48px; padding: 12px 0;
+  font-size: .88rem; font-weight: 750; color: #235b40;
+}
+.booking-access-details[open] > summary { margin-bottom: 12px; border-bottom: 1px solid #e0e9e0; }
+.booking-access-details .field { margin-bottom: 13px; }
+.booking-access-details .form-hint { margin: 0 0 15px; }
+@media (max-width: 680px) {
+  .booking-form .button-primary[type="submit"] { min-height: 50px; }
+  .booking-access-details > summary { min-height: 48px; }
+}
