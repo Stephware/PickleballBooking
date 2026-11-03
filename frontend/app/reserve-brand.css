@@ -269,3 +269,10 @@ body {
 .reserve-theme .slot-cell.slot-occupied,.app-shell .slot-cell.slot-occupied { background:#fff1ee; color:#8f3d35; }
 .reserve-theme .slot-cell.slot-pending,.app-shell .slot-cell.slot-pending { background:#fff7df; color:#805817; }
 .reserve-theme .slot-cell.selected,.app-shell .slot-cell.selected { background:#d8eee0; color:#155637; outline-color:#80011f; }
+
+/* Axe WCAG AA: inactive step captions and unselected mobile time labels require
+   readable contrast on white/soft-cream, even before a court is selected. */
+.reserve-booking-progress span:not(.current) { color: #55434c; }
+.reserve-booking-progress b { color: #50434a; }
+.reserve-mobile-picker .reserve-time-choice:not(:disabled) small { color: #57434d; }
+.reserve-mobile-picker .reserve-time-choice.selected small { color: #fff2ed; }
