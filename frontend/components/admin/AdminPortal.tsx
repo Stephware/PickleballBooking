@@ -2,40 +2,31 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { adminRequest, extractError, hasOwnerRights } from "@/lib/admin-client";
+import { adminRequest, extractError } from "@/lib/admin-client";
 import { brandStyle } from "@/lib/player";
 import type { AdminSectionId, StaffProfile } from "@/types/admin";
 import type { Venue } from "@/types/player";
 import { AdminOverview } from "@/components/admin/sections/Overview";
-import { AdminBookings } from "@/components/admin/sections/Bookings";
+import { AdminSchedule } from "@/components/admin/sections/Schedule";
 import { AdminPayments } from "@/components/admin/sections/Payments";
-import { AdminManual } from "@/components/admin/sections/Manual";
-import { AdminBlocks } from "@/components/admin/sections/Blocks";
-import { AdminCourts } from "@/components/admin/sections/Courts";
-import { AdminPricing } from "@/components/admin/sections/Pricing";
-import { AdminHours } from "@/components/admin/sections/Hours";
-import { AdminVenue } from "@/components/admin/sections/Venue";
-import { AdminStaff } from "@/components/admin/sections/Staff";
+import { AdminManage } from "@/components/admin/sections/Manage";
 import { AdminAccount } from "@/components/admin/sections/Account";
 import { Notice, StaffBadge } from "@/components/admin/AdminShared";
 
 const navigation: { section: AdminSectionId; title: string; group: string }[] = [
-  { section: "overview", title: "Overview", group: "WORKSPACE" },
-  { section: "bookings", title: "Reservations", group: "WORKSPACE" },
-  { section: "payments", title: "Payment reviews", group: "WORKSPACE" },
-  { section: "manual", title: "New staff booking", group: "OPERATIONS" },
-  { section: "blocks", title: "Court blocks", group: "OPERATIONS" },
-  { section: "courts", title: "Courts", group: "MANAGEMENT" },
-  { section: "pricing", title: "Pricing rules", group: "MANAGEMENT" },
-  { section: "hours", title: "Opening hours", group: "MANAGEMENT" },
-  { section: "venue", title: "Venue settings", group: "MANAGEMENT" },
-  { section: "staff", title: "Team accounts", group: "MANAGEMENT" },
-  { section: "account", title: "My account", group: "ACCOUNT" },
+  { section: "overview", title: "Today", group: "YOUR WORKSPACE" },
+  { section: "schedule", title: "Schedule", group: "YOUR WORKSPACE" },
+  { section: "payments", title: "Payments", group: "YOUR WORKSPACE" },
+  { section: "manage", title: "Manage", group: "SETTINGS" },
+  { section: "account", title: "My Account", group: "ACCOUNT" },
 ];
 
 function currentSection(): AdminSectionId {
   if (typeof window === "undefined") return "overview";
   const id = window.location.hash.replace("#", "");
+  // Preserve old bookmarks without exposing hidden venue/team administration.
+  if (["bookings", "manual", "blocks"].includes(id)) return "schedule";
+  if (["courts", "pricing", "hours"].includes(id)) return "manage";
   return navigation.find((n) => n.section === id)?.section ?? "overview";
 }
 
@@ -43,6 +34,7 @@ export function AdminPortal({ venue }: { venue: Venue }) {
   const [user, setUser] = useState<StaffProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [section, setSection] = useState<AdminSectionId>(() => currentSection());
+  const [scheduleMode, setScheduleMode] = useState<"list" | "booking" | "block">("list");
   const [notice, setNotice] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -120,13 +112,12 @@ export function AdminPortal({ venue }: { venue: Venue }) {
     finally { setBusy(false); }
   }
 
-  function navigate(id: AdminSectionId) {
+  function navigate(id: AdminSectionId, mode?: "booking" | "block") {
     setSection(id); setMenuOpen(false); setNotice("");
+    if (id === "schedule") setScheduleMode(mode ?? "list");
     window.history.replaceState(null, "", "/admin#" + id);
   }
-  const isOwner = user ? hasOwnerRights(user) : false;
-  const visible = navigation.filter((n) => n.section !== "staff" || isOwner);
-  const title = navigation.find((n) => n.section === section)?.title ?? "Overview";
+  const title = navigation.find((n) => n.section === section)?.title ?? "Today";
 
   return <div className="admin-app" style={brandStyle(venue)}>
     {loading ? <main className="admin-auth-cover"><p role="status">Checking staff access…</p></main>
@@ -135,7 +126,7 @@ export function AdminPortal({ venue }: { venue: Venue }) {
           <div className="admin-auth-mark">P</div>
           <p className="eyebrow">Staff workspace</p>
           <h1>Welcome back.</h1>
-          <p className="muted">Sign in with the staff account issued by your venue owner.</p>
+          <p className="muted">Sign in with your venue Owner account.</p>
           <form className="admin-form" onSubmit={login}>
             <label>Email address<input type="email" required autoComplete="username"
               value={email} maxLength={254} placeholder="you@venue.com"
@@ -159,8 +150,8 @@ export function AdminPortal({ venue }: { venue: Venue }) {
             <div><strong>{venue.venueName}</strong><small>Venue operations</small></div>
           </div>
           <nav aria-label="Staff navigation" className="admin-nav">
-            {visible.map((item, i) => <div key={item.section}>
-              {(i === 0 || visible[i - 1].group !== item.group) &&
+            {navigation.map((item, i) => <div key={item.section}>
+              {(i === 0 || navigation[i - 1].group !== item.group) &&
                 <p className="admin-nav-group">{item.group}</p>}
               <button type="button" className={"admin-nav-item" +
                 (section === item.section ? " active" : "")}
@@ -194,15 +185,10 @@ export function AdminPortal({ venue }: { venue: Venue }) {
           <main className="admin-content" id="admin-main">
             {notice && <Notice>{notice}</Notice>}
             {section === "overview" && <AdminOverview user={user} venue={venue} navigate={navigate} />}
-            {section === "bookings" && <AdminBookings user={user} venue={venue} />}
+            {section === "schedule" && <AdminSchedule user={user} venue={venue}
+              mode={scheduleMode} onModeChange={setScheduleMode} />}
             {section === "payments" && <AdminPayments user={user} />}
-            {section === "manual" && <AdminManual user={user} venue={venue} />}
-            {section === "blocks" && <AdminBlocks user={user} venue={venue} />}
-            {section === "courts" && <AdminCourts user={user} venue={venue} />}
-            {section === "pricing" && <AdminPricing user={user} />}
-            {section === "hours" && <AdminHours user={user} />}
-            {section === "venue" && <AdminVenue user={user} />}
-            {section === "staff" && isOwner && <AdminStaff />}
+            {section === "manage" && <AdminManage user={user} venue={venue} />}
             {section === "account" && <AdminAccount onPasswordChanged={() => {
               setUser(null); setNotice("Password changed. Sign in with your new password.");
             }} />}

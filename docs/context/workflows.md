@@ -30,7 +30,7 @@ Guest tokens and deterministic codes require a durable per-venue signing secret;
 2. While HELD and unexpired, backend stores receipt and changes status to AWAITING_REVIEW until min(now + venue review_timeout_hours, booking start). Payment row starts SUBMITTED, not VERIFIED.
 3. Owner/Manager compares receipt against actual funds; approval atomically marks payment VERIFIED and schedule CONFIRMED. Rejection marks payment REJECTED and pending schedule EXPIRED. Late proofs require manual reconciliation, never automatic financial claims.
 4. Guest cancellation is refused while a payment is pending or verified. Staff can cancel eligible confirmed reservations; verified payments remain in the ledger until an **external** refund is recorded.
-5. Staff may create confirmed future bookings via WALK_IN, PHONE or MESSENGER, all passing the same availability/pricing rules, with no overlap. Payment can be recorded later as a claim awaiting manager verification.
+5. Staff can create confirmed WALK_IN, PHONE or MESSENGER bookings with the shared visual schedule. PHONE/MESSENGER require future AVAILABLE slots; immediate WALK_IN may select the current started slot within min(half duration,30m) when no persisted active overlap exists. Payment can be recorded later as a claim awaiting manager verification.
 6. Staff can view blocks; Owner/Manager can add/remove future maintenance blocks in the same GiST-protected schedule. Source channel prefix in booking notes is a documented schema limitation.
 
 See [Phase 6 guide](../phase-6-payments-operations.md) for authentication, proof previews, size limits, pending payments, and refund caveats.
@@ -75,3 +75,11 @@ Real API/browser checks executed guest selection → HELD → receipt SUBMITTED/
 Production-image checks exercise the anonymous→authenticated CSRF handshake across the trusted internal HTTP hop, per-client rate buckets and persistent staff/guest/proof access after application-container recreation. Refund references cannot be recycled into another verified payment. A refund remains an external action recorded by staff, not a transfer performed by this application.
 
 Actual test counts, skipped tests, browser fixture boundaries and remaining launch gates are recorded in [Phase 9](../phase-9-final-verification.md).
+
+## Post-Phase-9 operator usability — Phase 1
+
+Today provides prioritized reservations and payment actions. Schedule offers three views: Reservations, Add Booking and Block Court. The latter two share a picker with live date/court/slot status and a clear back button, then only their relevant details form. Manage offers Courts, Pricing and Opening Hours. My Account handles signout/password; the normal UI does not expose Team Accounts or Venue Settings. One OWNER account per venue is the default; underlying multi-account APIs remain available.
+
+For WALK_IN, staff read-only availability can show WALK_IN_NOW for the currently started slot, **only** within half its configured duration (maximum 30 minutes) and after checking no persisted active overlap. Booking creation checks that state again inside the transaction, then GiST exclusion prevents races. PHONE, MESSENGER, player booking and maintenance blocks cannot use that exception. Booking remains confirmed but not necessarily paid.
+
+The original Phase 9 test summary predates this change. See [updated Phase 1 guide](../improvements-phase-1-admin-usability.md) for new validation requirements.

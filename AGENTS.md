@@ -85,3 +85,13 @@ Prefer concise topic pages linking to canonical SQL/code. Update decisions.md wh
 - Refunded transfer references remain consumed; refund metadata appends history without replacing the original verification actor/time/reference.
 - Private proof signature/size checks are not malware scanning. Official payment instructions, malware controls, real TLS ingress, backup/restore and monitoring acceptance remain public-launch gates.
 - Do not deploy production or merge main without explicit authorization. Preserve all context pages and this file in Git.
+
+## Usability improvements — Phase 1 (post Phase 9)
+
+- Read [docs/improvements-phase-1-admin-usability.md](docs/improvements-phase-1-admin-usability.md) before editing admin navigation, manual booking, blocks or staff availability.
+- Default operator experience is **one OWNER per venue**. Show only Today, Schedule, Payments, Manage and My Account in the normal admin UI. Preserve the existing staff/auth APIs/roles for future expanded venues, but do not reintroduce Team Accounts or Venue Settings menus without approval.
+- Venue branding and global booking policy are developer-managed by default: `PUT /api/v1/admin/venue` requires OWNER **and** the trusted server config `Developer:AllowVenueEdits=true`. This toggle must default OFF; courts, rates and hours remain manageable.
+- Shared admin schedule picker: `components/admin/AdminSlotPicker.tsx`. Always derive courts, dates, statuses and prices from the backend; never make frontend status authoritative. Up to 8 complete consecutive slots on one court. Block creation and PHONE/MESSENGER must use future AVAILABLE slots only.
+- Immediate WALK_IN is the only exception: a current ELAPSED slot can be marked `WALK_IN_NOW` through authenticated staff `operations/availability` within min(half slot, 30 minutes) **if no active persisted schedule entry overlaps**. Creation rechecks in a transaction, with PostgreSQL GiST constraint as the final conflict safeguard. Never expose this status in public availability.
+- Keep top-positioned back controls for detail steps; ensure 320px+ usability and safe keyboard/mobile interaction. Existing private staff cookie/CSRF/rate limit and payment proof protections must be preserved.
+- The improvements are *source implementation* until a fresh `dotnet build/test`, `npm run check/build`, live disposable DB and browser tests pass. Previous Phase 9 passed counts are historical and do not certify this branch.

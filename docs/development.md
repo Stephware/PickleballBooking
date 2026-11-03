@@ -50,3 +50,24 @@ node frontend/tests/e2e/browser-smoke.mjs
 Install Playwright Chromium or supply E2E_CHROME to an installed Chrome executable. By default, public layout/error checks run against the explicitly labelled disposable venue. Add `E2E_MUTATIONS=true`, `E2E_STAFF_EMAIL` and `E2E_STAFF_PASSWORD` for real synthetic booking/payment/staff workflows. Module paths, credentials and evidence output are environment settings. Keep screenshots/session cookies/private proofs outside Git. Browser checks include 320/375/768/1024px layouts, mobile keyboard navigation, token/cookie boundaries, upload review and automated Axe rules. They do not certify physical touch devices or human screen-reader use.
 
 GitHub Actions defines disposable-DB .NET tests, frontend checks/build/audit and real HTTP/browser jobs. Remote CI outcome is separate from local execution evidence; see phase-9-final-verification.md. Production launch/backup/rollback procedures are in deployment.md.
+
+## Post-Phase-9 usability Phase 1 — development branch
+
+```bash
+git fetch origin
+git switch --track origin/feature/phase-1-admin-usability
+dotnet restore PickleballBooking.slnx
+dotnet build PickleballBooking.slnx
+dotnet test PickleballBooking.slnx
+cd frontend
+npm ci
+npm run check
+npm run build
+npm run dev
+```
+
+Visit `/admin`. The standard menu has Today, Schedule, Payments, Manage and My Account. Schedule contains **Add Booking** (Walk-in / Phone / Messenger), court blocks and the reservation list; Manage contains Courts, Pricing and Opening Hours. Team Accounts / Venue Settings are hidden but backend multi-user role support is preserved.
+
+Venue branding/global policy PUT is denied by default. A trusted developer controlling deployment config may temporarily enable `Developer__AllowVenueEdits=true` (maps to `Developer:AllowVenueEdits`) and use the existing OWNER-authenticated API, then disable it again. This does not grant anyone a new role or bypass CSRF.
+
+For authenticated staff current-slot walk-in checks, use `GET /api/v1/admin/operations/availability?date=YYYY-MM-DD` and test on a **disposable** `_test` database. Other channels and blocks require future AVAILABLE intervals; the public booking endpoint remains unchanged. Re-run the Phase 9 guarded API/browser harnesses as regression checks. New build/browser results are not yet established for this branch.

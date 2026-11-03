@@ -10,6 +10,12 @@ See [Phase 9 verification](docs/phase-9-final-verification.md) for actual test c
 
 Main integration requires review/approval. Public launch still needs official venue payment instructions, malware controls, real TLS ingress and operator backup/monitoring acceptance. Automated settlement/refund transfers, verified cross-device guest recovery and normalized booking-source reporting remain deferred.
 
+## Admin usability improvements (post-Phase-9 Phase 1)
+
+The current improvement branch simplifies the owner dashboard to **Today / Schedule / Payments / Manage / My Account**, combines Add Booking and Block Court around one visual slot picker, and improves mobile operations. A controlled current-slot WALK_IN exception is available to authenticated staff and is rechecked before reservation. Team Accounts and Venue Settings are hidden from everyday navigation; underlying multi-staff support remains, and venue branding edits are developer-configuration-gated. Main is unaffected until this PR is reviewed and merged.
+
+See [Phase 1 admin usability guide](docs/improvements-phase-1-admin-usability.md). Runtime build/tests and real-browser usability checks for the new branch are still pending; historical Phase 9 verification counts are not proof for these changes.
+
 ## Local API
 
 Connect to the *existing* local PostgreSQL 17 instance on port 5435. Configure connection credentials via local user-secrets, never Git:

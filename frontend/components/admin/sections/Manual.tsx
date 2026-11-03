@@ -1,26 +1,26 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { adminRequest, extractError, todayForVenue, apiTime } from "@/lib/admin-client";
-import { money, timeLabel } from "@/lib/player";
-import type { CourtAdmin, StaffProfile } from "@/types/admin";
-import type { AvailabilityDay, Slot, Venue } from "@/types/player";
-import { Empty, Notice, SectionHeader, useAdminResource } from "@/components/admin/AdminShared";
+import { useState } from "react";
+import { AdminSlotPicker, type StaffSelection } from "@/components/admin/AdminSlotPicker";
+import { Empty, Notice, SectionHeader } from "@/components/admin/AdminShared";
+import { adminRequest, apiTime, extractError, todayForVenue } from "@/lib/admin-client";
+import { selectionAmount } from "@/lib/admin-schedule";
+import { money, prettyDate, timeLabel } from "@/lib/player";
+import type { StaffProfile } from "@/types/admin";
+import type { Venue } from "@/types/player";
 
 type ManualResponse = {
   booking: { bookingCode: string; totalAmount: number; status: string; currency: string };
   accessToken: string;
 };
+type Channel = "WALK_IN" | "PHONE" | "MESSENGER";
 
 export function AdminManual({ venue }: { user: StaffProfile; venue: Venue }) {
   const [date, setDate] = useState(() => todayForVenue(venue.timezone));
-  const courts = useAdminResource<CourtAdmin[]>("/courts", []);
-  const [courtId, setCourtId] = useState("");
-  const [availability, setAvailability] = useState<AvailabilityDay | null>(null);
-  const [availabilityVersion, setAvailabilityVersion] = useState(0);
-  const [start, setStart] = useState("");
-  const [end, setEnd] = useState("");
-  const [channel, setChannel] = useState("WALK_IN");
+  const [selection, setSelection] = useState<StaffSelection | null>(null);
+  const [stage, setStage] = useState<"slots" | "details">("slots");
+  const [reloadKey, setReloadKey] = useState(0);
+  const [channel, setChannel] = useState<Channel>("WALK_IN");
   const [guestName, setGuestName] = useState("");
   const [guestPhone, setGuestPhone] = useState("");
   const [guestEmail, setGuestEmail] = useState("");
@@ -29,116 +29,102 @@ export function AdminManual({ venue }: { user: StaffProfile; venue: Venue }) {
   const [error, setError] = useState("");
   const [saved, setSaved] = useState<ManualResponse | null>(null);
 
-  useEffect(() => {
-    if (!courtId) return;
-    const controller = new AbortController();
-    fetch("/api/player/availability?date=" + date + "&courtId=" + courtId,
-      { cache: "no-store", signal: controller.signal })
-      .then(async response => {
-        const body = await response.json() as AvailabilityDay & { error?: string };
-        if (!response.ok) throw new Error(body.error || "No availability found.");
-        return body;
-      })
-      .then(data => { if (!controller.signal.aborted) setAvailability(data); })
-      .catch(cause => { if (!controller.signal.aborted) setError(extractError(cause)); });
-    return () => controller.abort();
-  }, [courtId, date, availabilityVersion]);
-
-  const slots = useMemo(() => availability?.courts[0]?.slots ?? [], [availability]);
-  const endOptions = useMemo(() => {
-    const i = slots.findIndex(slot => slot.startsAt === start);
-    if (i < 0) return [];
-    const values: Slot[] = [];
-    for (let k = i; k < Math.min(i + 8, slots.length); k++) {
-      const s = slots[k];
-      if (s.status !== "AVAILABLE" || (k > i && slots[k - 1].endsAtUtc !== s.startsAtUtc))
-        break;
-      values.push(s);
-    }
-    return values;
-  }, [slots, start]);
-  const selected = endOptions.filter(s => s.endsAt <= end);
-  const total = selected.reduce((sum, s) => sum + s.totalPrice, 0);
-  const ready = Boolean(start && end && selected.length > 0 &&
-    selected[selected.length - 1].endsAt === end);
+  function changeChannel(next: Channel) {
+    setChannel(next);
+    setSelection(null); setStage("slots"); setError("");
+  }
 
   async function create(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!ready || !courtId || busy) return;
+    if (!selection || !selection.slots.length || busy) return;
+    if (!guestName.trim() || (!guestPhone.trim() && !guestEmail.trim())) {
+      setError("Enter the guest's name and a phone number or email."); return;
+    }
     setBusy(true); setError(""); setSaved(null);
     try {
       const result = await adminRequest<ManualResponse>("/operations/manual-bookings", "POST", {
-        courtId: Number(courtId), date, startsAt: apiTime(start), endsAt: apiTime(end),
+        courtId: selection.courtId, date: selection.date,
+        startsAt: apiTime(selection.slots[0].startsAt),
+        endsAt: apiTime(selection.slots.at(-1)!.endsAt),
         guestName: guestName.trim(), guestPhone: guestPhone.trim() || null,
-        guestEmail: guestEmail.trim() || null, notes: notes.trim() || null, channel,
+        guestEmail: guestEmail.trim() || null, notes: notes.trim() || null,
+        channel,
       });
       setSaved(result); setGuestName(""); setGuestPhone(""); setGuestEmail(""); setNotes("");
-      setStart(""); setEnd(""); setAvailability(null); setAvailabilityVersion(v => v + 1);
+      setSelection(null); setStage("slots"); setReloadKey(v => v + 1);
     } catch (cause) { setError(extractError(cause)); }
     finally { setBusy(false); }
   }
-  return <>
-    <SectionHeader eyebrow="Front desk" title="New staff booking"
-      description="Record walk-ins, phone calls and Messenger reservations in the shared court schedule." />
+
+  return <section aria-label="Create a staff reservation">
+    <SectionHeader eyebrow="Schedule / New reservation" title="Add Booking"
+      description="Choose the court and time first, then enter guest details. New staff bookings are confirmed immediately; payment can be recorded separately." />
     {error && <Notice>{error}</Notice>}
-    <div className="admin-form-panel card-surface">
+    {saved && <div className="admin-panel card-surface" role="status">
+      <Notice kind="success">Booking <strong>{saved.booking.bookingCode}</strong> created and confirmed.</Notice>
+      <p className="admin-hint">Keep the private guest token secure. Share it privately only if the guest needs access from another browser.</p>
+      <div className="admin-secret-row">
+        <input readOnly type="password" aria-label="New booking guest access token"
+          value={saved.accessToken}/>
+        <button type="button" className="button-outline"
+          onClick={() => void navigator.clipboard.writeText(saved.accessToken)}>
+          Copy private token</button>
+      </div>
+    </div>}
+    {stage === "slots" ? <>
+      <div className="admin-channel-picker">
+        <span className="micro-label">How did this booking come in?</span>
+        <div className="admin-channel-buttons" role="group" aria-label="Booking source">
+          {([{ id: "WALK_IN", label: "Walk-in" }, { id: "PHONE", label: "Phone" },
+            { id: "MESSENGER", label: "Messenger" }] as const).map(item =>
+            <button type="button" key={item.id}
+              className={channel === item.id ? "active" : ""}
+              aria-pressed={channel === item.id} onClick={() => changeChannel(item.id)}>
+              {item.label}</button>)}
+        </div>
+      </div>
+      <AdminSlotPicker venue={venue} date={date} onDateChange={setDate}
+        selection={selection} onSelect={setSelection} reloadKey={reloadKey}
+        allowWalkInNow={channel === "WALK_IN"}/>
+      {selection && selection.slots.length > 0 && <div className="admin-step-actions">
+        <button className="button-primary" type="button" onClick={() => {
+          setError(""); setStage("details"); window.scrollTo({ top: 0, behavior: "smooth" });
+        }}>Continue to guest details →</button>
+        <button className="text-button" type="button" onClick={() => setSelection(null)}>
+          Clear selection</button>
+      </div>}
+    </> : selection ? <div className="admin-form-panel card-surface admin-booking-details">
+      <button type="button" className="admin-detail-back"
+        onClick={() => { setError(""); setStage("slots"); }}>← Back to court and time</button>
+      <h3>Guest details</h3>
+      <div className="admin-selected-recap">
+        <div><small>Court</small><strong>{selection.courtName}</strong></div>
+        <div><small>Date</small><strong>{prettyDate(selection.date)}</strong></div>
+        <div><small>Time</small><strong>{timeLabel(selection.slots[0].startsAt)} – {
+          timeLabel(selection.slots.at(-1)!.endsAt)}</strong></div>
+        <div><small>Total</small><strong>{money(selectionAmount(selection.slots), selection.currency)}</strong></div>
+      </div>
       <form className="admin-form" onSubmit={create}>
         <div className="admin-form-grid">
-          <label>Booking channel<select value={channel} onChange={e => setChannel(e.target.value)}>
-            <option value="WALK_IN">Walk-in</option><option value="PHONE">Phone</option>
-            <option value="MESSENGER">Messenger</option>
-          </select></label>
-          <label>Date<input type="date" required min={todayForVenue(venue.timezone)}
-            value={date} onChange={e => { setDate(e.target.value); setError("");
-              setAvailability(null); setStart(""); setEnd(""); }} /></label>
-          <label>Court<select required value={courtId}
-            onChange={e => { setCourtId(e.target.value); setError("");
-              setAvailability(null); setStart(""); setEnd(""); }}>
-            <option value="">Select a court</option>
-            {courts.data.filter(c => c.isActive).map(c =>
-              <option value={c.id} key={c.id}>{c.courtName}</option>)}
-          </select></label>
-          <label>Start time<select required value={start}
-            onChange={e => { setStart(e.target.value); setEnd(""); }}>
-            <option value="">Choose available start</option>
-            {slots.filter(s => s.status === "AVAILABLE").map(s =>
-              <option key={s.startsAtUtc} value={s.startsAt}>{timeLabel(s.startsAt)}</option>)}
-          </select></label>
-          <label>End time<select required value={end} disabled={!start}
-            onChange={e => setEnd(e.target.value)}>
-            <option value="">Choose end time</option>
-            {endOptions.map(s =>
-              <option key={s.endsAtUtc} value={s.endsAt}>{timeLabel(s.endsAt)}</option>)}
-          </select></label>
-          <label>Full name<input required maxLength={150} value={guestName}
-            onChange={e => setGuestName(e.target.value)} placeholder="Player name" /></label>
-          <label>Phone<input type="tel" maxLength={32} value={guestPhone}
-            onChange={e => setGuestPhone(e.target.value)} placeholder="Mobile number" /></label>
-          <label>Email<input type="email" maxLength={254} value={guestEmail}
-            onChange={e => setGuestEmail(e.target.value)} placeholder="Email address" /></label>
-          <label className="admin-full">Notes (optional)<textarea rows={3} maxLength={500}
-            value={notes} onChange={e => setNotes(e.target.value)} /></label>
+          <label>Full name <input required maxLength={150} autoComplete="off"
+            placeholder="Guest name" value={guestName}
+            onChange={e => setGuestName(e.target.value)}/></label>
+          <label>Phone <input type="tel" maxLength={32} autoComplete="off"
+            placeholder="09xx xxx xxxx" value={guestPhone}
+            onChange={e => setGuestPhone(e.target.value)}/></label>
+          <label>Email <input type="email" maxLength={254} autoComplete="off"
+            placeholder="name@example.com" value={guestEmail}
+            onChange={e => setGuestEmail(e.target.value)}/></label>
+          <label className="admin-full">Notes (optional)
+            <textarea rows={2} maxLength={500} value={notes}
+              onChange={e => setNotes(e.target.value)}/></label>
         </div>
-        {!slots.length && courtId && <Empty text="No scheduled times. Select another day or court." />}
-        <div className="admin-form-footer">
-          <div><span className="micro-label">Estimated booking total</span>
-            <strong>{money(total, availability?.currency || venue.currency)}</strong>
-            <small>Confirmed reservation, payment may still be outstanding.</small></div>
-          <button className="button-primary" type="submit"
-            disabled={!ready || busy || (!guestPhone.trim() && !guestEmail.trim())}>
-            {busy ? "Creating…" : "Create confirmed booking"}</button>
-        </div>
+        <p className="admin-hint">Provide phone or email. This saves a confirmed booking, not a verified payment.
+          The backend checks availability again before saving.</p>
+        <button type="submit" className="button-primary"
+          disabled={busy || !guestName.trim() || (!guestPhone.trim() && !guestEmail.trim())}>
+          {busy ? "Creating…" : "Confirm booking"}</button>
       </form>
-    </div>
-    {saved && <div className="admin-form-panel card-surface" role="status">
-      <Notice kind="success">Reservation created: <strong>{saved.booking.bookingCode}</strong>
-        · {saved.booking.status}.</Notice>
-      <p className="admin-hint">The private guest access token appears only here.
-        Share it securely with the guest if they need cross-device access.</p>
-      <div className="admin-secret-row"><input readOnly type="password"
-        aria-label="Guest booking access token" value={saved.accessToken} />
-        <button type="button" className="button-outline" onClick={() =>
-          void navigator.clipboard.writeText(saved.accessToken)}>Copy guest token</button></div>
-    </div>}
-  </>;
+    </div> : <Empty text="Choose a court and time to begin."/>}
+  </section>;
 }

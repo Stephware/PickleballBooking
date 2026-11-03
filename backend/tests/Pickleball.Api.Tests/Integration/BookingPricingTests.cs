@@ -61,7 +61,8 @@ public sealed class BookingPricingTests
             var start = new TimeOnly(8, 0);
             var end = start.AddMinutes(slotCount * 30);
             var created = manual
-                ? await new OperationsService(db, unit, venue, availability, tokens, TimeProvider.System)
+                ? await new OperationsService(db, unit, venue, availability, new ScheduleRepository(db),
+                        tokens, TimeProvider.System)
                     .CreateManualAsync(new CreateManualBookingRequest { CourtId = court.Id, Date = date,
                         StartsAt = start, EndsAt = end, Channel = "WALK_IN",
                         GuestName = "Synthetic guest", GuestPhone = "test-only" }, staff.Id, ct)

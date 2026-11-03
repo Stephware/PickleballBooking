@@ -45,6 +45,4 @@ export type CourtBlockAdmin = {
   id: number; courtId: number; startsAtUtc: string; endsAtUtc: string;
   status: string; reason: string; createdByStaffId: number | null;
 };
-export type AdminSectionId =
-  "overview" | "bookings" | "payments" | "manual" | "blocks" |
-  "courts" | "pricing" | "hours" | "venue" | "staff" | "account";
+export type AdminSectionId = "overview" | "schedule" | "payments" | "manage" | "account";

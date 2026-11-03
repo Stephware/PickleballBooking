@@ -1,10 +1,12 @@
 using Pickleball.Api.DTOs.Bookings;
+using Pickleball.Api.DTOs.Availability;
 using Pickleball.Api.DTOs.Operations;
 
 namespace Pickleball.Api.Services.Operations;
 
 public interface IOperationsService
 {
+    Task<AvailabilityDayResponse> GetStaffAvailabilityAsync(DateOnly date, CancellationToken ct);
     Task<CreatedBookingResponse> CreateManualAsync(
         CreateManualBookingRequest input, long staffId, CancellationToken ct);
     Task<CourtBlockResponse> BlockAsync(

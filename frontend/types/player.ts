@@ -1,5 +1,5 @@
 export type SlotStatus =
-  | "AVAILABLE" | "OCCUPIED" | "PENDING" | "ELAPSED" | "BLOCKED" | "UNAVAILABLE";
+  | "AVAILABLE" | "OCCUPIED" | "PENDING" | "ELAPSED" | "BLOCKED" | "UNAVAILABLE" | "WALK_IN_NOW";
 
 export interface Venue {
   venueName: string; venueSlug: string; timezone: string; currency: string;

@@ -8,6 +8,7 @@ using Pickleball.Api.Models.Entities;
 using Pickleball.Api.Models.Enums;
 using Pickleball.Api.Repositories;
 using Pickleball.Api.Repositories.Settings;
+using Pickleball.Api.Repositories.Scheduling;
 using Pickleball.Api.Security;
 using Pickleball.Api.Services.Availability;
 using Pickleball.Api.Services.Bookings;
@@ -18,9 +19,48 @@ namespace Pickleball.Api.Services.Operations;
 /// <summary>Staff manual bookings and maintenance blocks share the same GiST schedule.</summary>
 public sealed class OperationsService(
     PickleballDbContext db, IUnitOfWork unit, IVenueRepository venues,
-    IAvailabilityService availability, GuestBookingTokens tokens,
+    IAvailabilityService availability, IScheduleRepository schedules, GuestBookingTokens tokens,
     TimeProvider clock) : IOperationsService
 {
+    /// <summary>
+    /// Staff-only schedule view. Exactly one current, unoccupied slot per court
+    /// may be available for an immediate walk-in during a short grace window.
+    /// The public availability endpoint stays strict and never exposes it.
+    /// </summary>
+    public async Task<AvailabilityDayResponse> GetStaffAvailabilityAsync(
+        DateOnly date, CancellationToken ct)
+    {
+        var day = await availability.GetDayAsync(date, null, ct);
+        var now = clock.GetUtcNow().UtcDateTime;
+        var candidates = day.Courts.SelectMany(c => c.Slots
+            .Where(s => WalkInPolicy.IsWithinGrace(s, now, day.SlotMinutes))
+            .Select(s => new { c.CourtId, Slot = s })).ToArray();
+        if (candidates.Length == 0) return day;
+
+        // One batched query across all courts. Stale HELD records still block
+        // until their persisted status changes to EXPIRED.
+        var active = await schedules.ListActiveInRangeAsync(
+            candidates.Min(x => x.Slot.StartsAtUtc.UtcDateTime),
+            candidates.Max(x => x.Slot.EndsAtUtc.UtcDateTime), ct);
+        var available = candidates.Where(x => !active.Any(e =>
+            e.CourtId == x.CourtId &&
+            e.StartsAt < x.Slot.EndsAtUtc.UtcDateTime &&
+            e.EndsAt > x.Slot.StartsAtUtc.UtcDateTime))
+            .Select(x => (x.CourtId, x.Slot.StartsAtUtc))
+            .ToHashSet();
+
+        return day with
+        {
+            Courts = day.Courts.Select(c => c with
+            {
+                Slots = c.Slots.Select(s =>
+                    available.Contains((c.CourtId, s.StartsAtUtc))
+                        ? s with { Status = AvailabilityStatuses.WalkInNow }
+                        : s).ToArray()
+            }).ToArray()
+        };
+    }
+
     public async Task<CreatedBookingResponse> CreateManualAsync(
         CreateManualBookingRequest input, long staffId, CancellationToken ct)
     {
@@ -36,7 +76,7 @@ public sealed class OperationsService(
         await using var tx = await unit.BeginTransactionAsync(ct);
         await ExpireAsync(ct);
         var (slots, currency) = await SelectAvailableAsync(input.Date, input.CourtId,
-            input.StartsAt, input.EndsAt, ct);
+            input.StartsAt, input.EndsAt, ct, input.Channel == "WALK_IN");
         var total = PricingCalculator.RoundTotal(slots.Sum(x => x.UnroundedTotalPrice));
         if (total is < 0m or > 99999999.99m) throw Invalid("Price is outside booking limit.");
 
@@ -147,12 +187,18 @@ public sealed class OperationsService(
     }
 
     private async Task<(AvailabilitySlotResponse[] Slots, string Currency)> SelectAvailableAsync(
-        DateOnly date, long courtId, TimeOnly start, TimeOnly end, CancellationToken ct)
+        DateOnly date, long courtId, TimeOnly start, TimeOnly end,
+        CancellationToken ct, bool allowCurrentWalkIn = false)
     {
         if (date == default || courtId <= 0 || start >= end)
             throw Invalid("Invalid court, date or time range.");
         AvailabilityDayResponse day;
-        try { day = await availability.GetDayAsync(date, courtId, ct); }
+        try
+        {
+            day = allowCurrentWalkIn
+                ? await GetStaffAvailabilityAsync(date, ct)
+                : await availability.GetDayAsync(date, courtId, ct);
+        }
         catch (ArgumentOutOfRangeException) { throw Invalid("Booking is outside allowed date range."); }
         catch (KeyNotFoundException) { throw Missing(); }
 
@@ -164,10 +210,13 @@ public sealed class OperationsService(
             selected.Zip(selected.Skip(1)).Any(p => p.First.EndsAt != p.Second.StartsAt))
             throw Invalid("Choose 1–8 complete consecutive venue slots.");
 
-        if (selected.Any(s => s.Status != AvailabilityStatuses.Available))
+        var isLiveWalkIn = allowCurrentWalkIn &&
+            selected[0].Status == AvailabilityStatuses.WalkInNow;
+        if (selected.Where((s, i) => s.Status != AvailabilityStatuses.Available &&
+                !(i == 0 && isLiveWalkIn)).Any())
             throw Conflict("One or more requested slots are not available.");
 
-        if (selected[0].StartsAtUtc.UtcDateTime <= clock.GetUtcNow().UtcDateTime)
+        if (!isLiveWalkIn && selected[0].StartsAtUtc.UtcDateTime <= clock.GetUtcNow().UtcDateTime)
             throw Conflict("The selected start time has passed.");
         return (selected, day.Currency);
     }

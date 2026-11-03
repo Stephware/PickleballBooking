@@ -53,17 +53,17 @@ export function AdminBookings({ user, venue }: { user: StaffProfile; venue: Venu
     {loading ? <Loading text="Loading reservations…" />
       : items.length === 0 ? <Empty text="No reservations match the selected day and status." />
       : <div className="admin-table-wrap card-surface">
-        <table className="admin-table"><thead><tr><th>Booking</th><th>When</th>
+        <table className="admin-table admin-booking-table"><thead><tr><th>Booking</th><th>When</th>
           <th>Court</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
           <tbody>{items.map((b) => <tr key={b.bookingCode}>
-            <td><strong>{b.guestName}</strong><small>{b.bookingCode}</small>
+            <td data-label="Guest"><strong>{b.guestName}</strong><small>{b.bookingCode}</small>
               <small>{b.guestPhone || b.guestEmail || "No contact"}</small></td>
-            <td>{instantLabel(b.startsAtUtc, venue.timezone)}
+            <td data-label="Time">{instantLabel(b.startsAtUtc, venue.timezone)}
               <small>Until {instantLabel(b.endsAtUtc, venue.timezone)}</small></td>
-            <td>Court {b.courtId}</td><td>{money(b.totalAmount, venue.currency)}</td>
-            <td><span className={"admin-status status-" + b.status.toLowerCase()}>
+            <td data-label="Court">Court {b.courtId}</td><td data-label="Amount">{money(b.totalAmount, venue.currency)}</td>
+            <td data-label="Status"><span className={"admin-status status-" + b.status.toLowerCase()}>
               {b.status.replaceAll("_", " ")}</span></td>
-            <td>{canManage && b.status === "HELD" && <button
+            <td data-label="Actions">{canManage && b.status === "HELD" && <button
               type="button" className="button-outline admin-small-button"
               disabled={Boolean(busy)} onClick={() => void action(b, "confirm")}>Confirm</button>}
               {canManage && ["HELD", "AWAITING_REVIEW", "CONFIRMED"].includes(b.status) &&

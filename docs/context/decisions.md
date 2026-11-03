@@ -63,3 +63,9 @@ Documentation records decisions, not proof of a passing local build.
 | D-050 | Public launch needs official payment instructions, malware controls and operator TLS/backups/monitoring acceptance | Open launch gates; no production deployment authorized |
 
 | D-051 | Round the exact full reservation total once; displayed rounded slot estimates are not authoritative totals | Phase 9 correctness fix; guest/manual persistence regression tested |
+
+| D-052 | Post-Phase-9 improvements: five regular operator sections, one OWNER default; retain independent staff APIs/roles for future venues | Phase 1 source |
+| D-053 | Hide Venue Settings / Team Accounts in normal admin; developer-only configuration flag defaults off for venue brand/policy PUT | Phase 1 source |
+| D-054 | Share live staff visual schedule for booking and court blocks, mobile tabs, max 8 consecutive slots; backend revalidates | Phase 1 source |
+| D-055 | WALK_IN alone permits current elapsed slot during min(half slot,30m) grace after active schedule check and transactional revalidation | Phase 1 source |
+| D-056 | Keep top back controls and mobile labeled reservation cards; prefer operational tasks over administrative complexity | Phase 1 source |
