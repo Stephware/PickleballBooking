@@ -98,3 +98,12 @@ export function parseVenuePublicDetails(config: Record<string, string | undefine
     },
   };
 }
+
+/** Photos uploaded by this venue and imported from its original feature branch.
+ * Descriptions are deliberately neutral: never infer facilities from a filename. */
+export const defaultReservePhotos: VenuePhoto[] = [
+  { src: "/venue/court-1.jpg", alt: "Pickleball venue — court photograph one" },
+  { src: "/venue/court-2.jpg", alt: "Pickleball venue — court photograph two" },
+  { src: "/venue/court-3.jpg", alt: "Pickleball venue — court photograph three" },
+  { src: "/venue/court-4.jpg", alt: "Pickleball venue — court photograph four" },
+];

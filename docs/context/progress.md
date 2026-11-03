@@ -105,3 +105,13 @@ No production volumes, venue database data or real secrets were touched.
 - [ ] Merge PR #16 only after final review; a passing synthetic CI is not permission to deploy.
 
 See [Phase 4 release verification](../improvements-phase-4-final-verification.md) for evidence and blocked gates.
+
+
+## Pickleball Reserve design integration — review branch (2026-11-03)
+
+- [x] Preserved current main implementation and imported five brand assets from the old Phase 9 feature branch into the dedicated visual branch.
+- [x] Applied burgundy/cream branding, navigation, real court-photo showcase, paddle-and-ball hero and responsive owner/player UI.
+- [x] Existing court schedule, real payment statuses, private tokens, owner roles, no-fake-contact safeguard and backend booking/payment/SQL logic were retained.
+- [x] Added theme configuration unit tests, documented photo defaults and corrected green AVAILABLE visual statuses.
+- [ ] Fresh GitHub Actions CI, mobile/desktop browser screenshots and keyboard/a11y regression testing still required.
+- [ ] Public venue launch still NO-GO pending official payment details, operator security and physical-device acceptance.

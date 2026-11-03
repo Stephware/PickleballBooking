@@ -93,3 +93,14 @@ Use the same typography, spacing, status colors and brand tokens instead of a vi
 For asynchronous views, distinguish loading, genuine empty, and fetch failure; provide a retry button and never display editable dummy opening hours after an error. Ignore stale results when switching dates/payments quickly. Focus the newly revealed form title with `tabIndex=-1`; native `details/summary` hides optional guest token for same-device lookup. Browser Back/Forward should work for admin top-level sections without exposing hidden routes.
 
 Inspect 320/375/768/1024px, screen reader, keyboard Tab/Escape, no horizontal overflow, readable long names, error/retry flows and minimum 44px controls. UI UX Pro Max/Impeccable on the local developer machine can audit further; do not claim execution without evidence.
+
+
+## 2026-11-03 — Pickleball Reserve visual branding
+
+- Approved presentation: deep burgundy (#80011f), warm cream (#fff9ed), neutral white/stone, compact modern typography and the developer-supplied logo.
+- Supplied media: frontend/public/venue/brand-logo.jpg and four real court images court-1.jpg through court-4.jpg. The hero combines an approved venue court image with original paddle-and-ball vector artwork. No generic stock photography or real payment screenshots are used.
+- Homepage: accessible desktop navigation and collapsible mobile menu, striking sports hero, Book a Court and How It Works CTAs, three-card scroll-snap court gallery (no autoplay), existing live availability grid, booking steps and venue contact section.
+- Player booking uses real server-returned court states, slots, prices, holds and private payment proof flows; all remain unchanged. Green still means available, red reserved, yellow pending, gray elapsed, with separate blocked styling. Colors never replace status text.
+- Owner: preserve five sections Today, Schedule, Payments, Manage, My Account; branded sidebar and four mobile quick-navigation entries with full menu access to account/signout. Actions and metrics are live data only, not the example numbers in the mockup.
+- Venue-specific presentation configuration is developer managed. The bundled photos are used when the Reserve theme is active and VENUE_GALLERY_JSON is omitted; use VENUE_HIDE_IMPORTED_PHOTOS=true to hide them, including for existing VENUE_GALLERY_JSON=[]. Other venue deployments with VENUE_BRAND_MODE=api must provide their own approved photos.
+- All new visual changes remain source implementation until fresh CI, browser screenshots, accessibility and physical phone review. Payment recipient approval and production security gates still apply.

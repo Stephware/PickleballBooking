@@ -1,9 +1,10 @@
 import "server-only";
-import { parseVenuePublicDetails } from "@/lib/venue-public";
+import { parseVenuePublicDetails, defaultReservePhotos } from "@/lib/venue-public";
 
 /** Read only public, developer-approved values. No player/admin API secret here. */
 export function getVenuePublicDetails() {
-  return parseVenuePublicDetails({
+  const configPhotos = process.env.VENUE_GALLERY_JSON?.trim();
+  const result = parseVenuePublicDetails({
     VENUE_PHONE: process.env.VENUE_PHONE,
     VENUE_FACEBOOK_URL: process.env.VENUE_FACEBOOK_URL,
     VENUE_GALLERY_JSON: process.env.VENUE_GALLERY_JSON,
@@ -16,4 +17,12 @@ export function getVenuePublicDetails() {
     VENUE_BANK_ACCOUNT_NUMBER: process.env.VENUE_BANK_ACCOUNT_NUMBER,
     VENUE_BANK_QR_PATH: process.env.VENUE_BANK_QR_PATH,
   });
+  // Use the supplied Reserve photos only when the Reserve theme is active and
+  // no venue-specific photos are configured. Older deployments may set []:
+  // keep showing approved Reserve assets unless explicitly hidden by flag.
+  if ((!configPhotos || configPhotos === "[]") && process.env.VENUE_BRAND_MODE !== "api" &&
+      process.env.VENUE_HIDE_IMPORTED_PHOTOS !== "true") {
+    return { ...result, photos: defaultReservePhotos };
+  }
+  return result;
 }

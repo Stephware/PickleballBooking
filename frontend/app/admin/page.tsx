@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { AdminPortal } from "@/components/admin/AdminPortal";
 import { getServerVenue } from "@/lib/server-api";
 import "./admin.css";
+import "./reserve-admin.css";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {

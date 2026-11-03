@@ -498,3 +498,345 @@ strong { font-weight: 700; }
   .booking-form .button-primary[type="submit"] { min-height: 50px; }
   .booking-access-details > summary { min-height: 48px; }
 }
+
+
+/* ==========================================================================
+   Venue Reserve pitch design — original uploaded crest, burgundy + cream.
+   Presentation layer only. State, payments and availability remain API-driven.
+   ========================================================================== */
+:root {
+  --background: #fffaf6;
+  --foreground: #261c20;
+  --surface: #ffffff;
+  --muted: #77656b;
+  --border: #eadfdd;
+  --brand: #80011f;
+  --brand-ink: #ffffff;
+  --brand-tint: #fff1ed;
+  --reserve-burgundy: #80011f;
+  --reserve-dark: #610d25;
+  --reserve-cream: #fff9ed;
+  --reserve-peach: #fae7e1;
+  --radius: 17px;
+}
+body { background: #fffaf6; color: #261c20; }
+.reserve-theme { background: #fffaf6; min-height: 100vh; }
+.reserve-theme .page-shell { max-width: 1440px; padding: 0 clamp(16px, 4.1vw, 60px); }
+.reserve-logo {
+  display: inline-grid; place-items: center; overflow: hidden;
+  flex: none; background: #80011f; border-radius: 13px;
+}
+.reserve-logo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.reserve-header {
+  min-height: 86px; border-bottom: 1px solid #eddfda;
+  background: #fffaf6; gap: 16px;
+}
+.reserve-header .brand-mark { width: 47px; height: 47px; border-radius: 13px; }
+.reserve-header .brand-text strong {
+  font-size: 1.07rem; color: #2d1e24; font-weight: 850; letter-spacing: -.04em;
+}
+.reserve-header .brand-text small {
+  font-size: .62rem; letter-spacing: .13em; font-weight: 800; color: #927780;
+}
+.reserve-header-nav {
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: clamp(12px, 2.1vw, 33px);
+}
+.reserve-header-nav > a {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px; text-decoration: none; font-size: .83rem;
+  color: #56404a; font-weight: 720; white-space: nowrap;
+}
+.reserve-header-nav > a:hover { color: #80011f; }
+.reserve-header-nav .header-book-now {
+  color: #fff; background: #80011f; padding: 9px 20px;
+  min-height: 43px; border-radius: 10px;
+  box-shadow: 0 4px 12px #80011f20;
+}
+.reserve-header-nav .header-book-now:hover { color: #fff; background: #68011b; }
+.reserve-header-nav .header-find-booking { color: #80011f; }
+.reserve-theme .button-primary {
+  background: #80011f; border-color: #80011f; color: #fff; border-radius: 11px;
+}
+.reserve-theme .button-outline {
+  background: #fff; border-color: #e3d3d4; color: #561b2d;
+}
+.reserve-theme .button-outline:hover { background: #fff2ed; border-color: #ba939e; }
+.reserve-theme .text-button,.reserve-theme .inline-link,
+.reserve-theme .subpage-back { color: #80011f; }
+.reserve-theme .eyebrow { color: #922747; }
+.reserve-theme .card-surface {
+  background: #fff; border: 1px solid #ebdfe0; border-radius: 15px;
+  box-shadow: 0 6px 22px #61213708;
+}
+.reserve-theme .player-hero {
+  position: relative; overflow: hidden; isolation: isolate;
+  min-height: 480px; padding: clamp(32px, 5vw, 70px);
+  margin: 15px 0 0; gap: clamp(24px, 3.5vw, 54px);
+  background: linear-gradient(117deg, #610d25 0%, #80011f 63%, #9c2339 100%);
+  border-radius: 20px; color: #fff9ed;
+  grid-template-columns: minmax(0, 1.04fr) minmax(0, 0.96fr);
+  box-shadow: 0 19px 46px #680c261b;
+}
+.reserve-theme .player-hero::before {
+  content: ""; position: absolute; width: 360px; height: 360px;
+  right: -170px; bottom: -170px; border-radius: 50%;
+  background: radial-gradient(circle, #ffdfbe23, transparent 70%);
+  z-index: -1;
+}
+.reserve-theme .hero-copy { align-self: center; }
+.reserve-theme .hero-kicker {
+  color: #ffe8d2; font-size: .71rem; font-weight: 850; margin-bottom: 24px;
+  letter-spacing: .18em; gap: 14px;
+}
+.hero-kicker-line { display: block; width: 45px; height: 1px; background: #ffd3bfaa; }
+.reserve-theme .player-hero h1 {
+  color: #fffdf3; letter-spacing: -.052em; line-height: 1.06;
+  font-weight: 850; font-size: clamp(2.65rem, 4.75vw, 5rem);
+  margin: 0 0 23px;
+}
+.reserve-theme .player-hero h1 em { color: #fffdf3; font-style: normal; }
+.reserve-theme .hero-copy > p:not(.hero-kicker) {
+  color: #f7e3e0; max-width: 480px;
+  font-size: clamp(.94rem, 1.22vw, 1.12rem); line-height: 1.65;
+}
+.hero-cta-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 27px; }
+.reserve-theme .hero-cta-row .hero-action {
+  min-height: 49px; padding: 12px 21px; margin: 0;
+  border-radius: 10px; font-size: .91rem; font-weight: 850;
+  text-decoration: none; border: 1px solid #fff1e9;
+  transition: transform 130ms ease, background-color 130ms ease;
+}
+.hero-cta-row .hero-action:hover { transform: translateY(-1px); }
+.reserve-theme .hero-primary { background: #fffaf1; color: #720f28; }
+.reserve-theme .hero-primary:hover { background: #f7e4d7; }
+.reserve-theme .hero-secondary { background: transparent; color: #fff9ed; }
+.reserve-theme .hero-secondary:hover { background: #ffffff18; }
+.reserve-theme .hero-copy .hero-smallprint {
+  font-size: .74rem; opacity: .83; margin: 21px 0 0;
+  line-height: 1.4; letter-spacing: .005em;
+}
+.hero-photo-wrap {
+  position: relative; min-height: 325px; height: 100%;
+  display: flex; align-items: stretch; min-width: 0;
+  border-radius: 16px; overflow: hidden;
+  box-shadow: 0 17px 42px #28030d55;
+}
+.hero-photo {
+  display: block; width: 100%; height: 100%;
+  max-height: 465px; object-fit: cover; object-position: center;
+}
+.hero-photo-wrap .court-art {
+  flex: 1; margin: 0; transform: none; box-shadow: none;
+  background: #ac7f8a; border: none; border-radius: 0;
+}
+.hero-photo-caption {
+  position: absolute; bottom: 13px; left: 13px; right: 13px;
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 12px; border: 1px solid #ffffff55;
+  border-radius: 10px; background: #351622a6;
+  backdrop-filter: blur(10px); color: #fff;
+  font-size: .78rem; font-weight: 800;
+}
+.hero-caption-dot { width: 8px; height: 8px; background: #fff3df; border-radius: 50%; }
+.hero-caption-arrow { margin-left: auto; }
+.reserve-trust-strip {
+  display: grid; grid-template-columns: repeat(4,minmax(0,1fr));
+  gap: 0; align-items: center; margin: 0 12px 12px;
+  padding: 17px 6px; background: #fffdf9;
+  border: 1px solid #f0e6df; border-top: none;
+  border-radius: 0 0 14px 14px;
+}
+.reserve-trust-strip > span {
+  display: flex; align-items: center; justify-content: center;
+  gap: 9px; padding: 9px 11px; color: #5b3843; font-size: .79rem;
+  font-weight: 780; text-align: center;
+}
+.reserve-trust-strip > span + span { border-left: 1px solid #eadfdd; }
+.reserve-trust-strip strong { color: #80011f; font-size: 1.12rem; }
+.court-showcase {
+  margin: 37px 0 57px; padding: 30px clamp(16px, 3.2vw, 35px) 20px;
+  background: #fff; border: 1px solid #efe1db; border-radius: 19px;
+  box-shadow: 0 14px 45px #4a213508;
+}
+.court-showcase-intro {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 20px; margin-bottom: 19px;
+}
+.court-showcase-intro h2 { font-size: clamp(2rem, 3.5vw, 3.1rem); margin: 6px 0 6px; }
+.court-showcase-intro p.muted { margin: 0; font-size: .91rem; }
+.showcase-link { font-weight: 750; font-size: .86rem; color: #80011f;
+  text-decoration: underline; text-underline-offset: 4px; white-space: nowrap; }
+.showcase-link span { padding-left: 5px; }
+.court-showcase .venue-gallery-track {
+  display: flex; gap: 12px; border: 0;
+  border-radius: 12px; background: #fff;
+  scroll-padding-inline: 2px;
+}
+.court-showcase .venue-gallery-slide {
+  flex: 0 0 calc((100% - 24px) / 3);
+  border-radius: 12px; overflow: hidden; border: 1px solid #eee1df;
+  background: #ebdce1;
+}
+.court-showcase .venue-gallery-slide img { aspect-ratio: 1.42 / 1; }
+.court-showcase .venue-gallery-slide figcaption {
+  padding: 30px 12px 12px;
+  background: linear-gradient(transparent, rgba(43,13,23,.78));
+  font-size: .75rem;
+}
+.court-showcase .venue-gallery-count { color: #7b626b; }
+.court-showcase .venue-gallery-arrows button {
+  border-color: #decbd0; color: #80011f; background: #fff9f6;
+}
+.court-showcase .venue-gallery-arrows button:hover:not(:disabled) { background: #f7e7e3; }
+.reserve-theme .section-divider { color: #87696f; border-color: #e9dbdb; margin-top: 25px; }
+.reserve-theme .availability-section { padding-top: 34px; }
+.reserve-theme .section-top h2 { letter-spacing: -.05em; }
+.reserve-theme .date-toolbar { background: #fff; }
+.reserve-theme .status-legend { color: #745c65; }
+.reserve-theme .schedule-heading { background: #fbf4f1; }
+.reserve-theme .time-heading,.reserve-theme .court-number { color: #795660; }
+.reserve-theme .schedule-time { background: #fff9f6; }
+.reserve-theme .slot-cell.slot-available { background: #fff6f2; color: #6f1731; }
+.reserve-theme .slot-cell.slot-available:hover { background: #ffe8e2; }
+.reserve-theme .slot-cell.selected {
+  background: #f6d7dc; outline-color: #80011f; color: #66132c;
+}
+.reserve-theme .selection-bar { border-color: #e2bdc7; }
+.reserve-theme .selection-total { color: #80011f; }
+.reserve-theme .steps-section { border-color: #eadbdb; }
+.reserve-theme .steps-grid article { border-top-color: #c3a1ab; }
+.reserve-theme .steps-grid article > span { color: #80011f; }
+.reserve-theme .contact-section { border-color: #eadbdb; }
+.reserve-theme .contact-section h2 { color: #3d1c28; }
+.reserve-theme .site-footer { border-color: #eadbdb; color: #846b75; }
+.reserve-theme .booking-access-details { border-color: #e7cdd5; background: #fffbf9; }
+.reserve-theme .booking-access-details > summary { color: #80011f; }
+.reserve-theme .venue-payment-instructions { background: #fff6f3; border-color: #e6cdd1; }
+.reserve-theme .venue-payment-instructions > div:not(.alert) > strong { color: #531a30; }
+.reserve-theme .venue-account-number { color: #80011f; }
+.reserve-booking-progress { display: none; }
+.reserve-mobile-picker { display: none; }
+
+@media (max-width: 980px) {
+  .reserve-header-nav { gap: 14px; }
+  .reserve-header-nav .header-nav-home,.reserve-header-nav .header-nav-how { display: none; }
+  .reserve-theme .player-hero { gap: 24px; padding: 42px 30px; min-height: 405px; }
+  .reserve-theme .player-hero h1 { font-size: clamp(2.65rem, 5.25vw, 4.2rem); }
+  .hero-photo-wrap { min-height: 270px; }
+  .reserve-trust-strip > span { font-size: .7rem; gap: 5px; padding: 8px 6px; }
+  .reserve-trust-strip strong { font-size: .98rem; }
+}
+@media (max-width: 680px) {
+  .reserve-theme .page-shell { padding-inline: 14px; }
+  .reserve-header { min-height: 71px; gap: 8px; }
+  .reserve-header .brand-mark { width: 40px; height: 40px; border-radius: 10px; }
+  .reserve-header .brand-text strong { font-size: .88rem; }
+  .reserve-header .brand-text small { font-size: .48rem; letter-spacing: .085em; }
+  .reserve-header-nav { gap: 7px; }
+  .reserve-header-nav .header-nav-contact { display: none; }
+  .reserve-header-nav .header-find-booking { font-size: .72rem; padding: 6px 4px; }
+  .reserve-header-nav .header-book-now {
+    min-height: 39px; padding: 6px 10px; font-size: .72rem; border-radius: 8px;
+  }
+  .reserve-theme .player-hero {
+    display: flex; flex-direction: column; gap: 23px;
+    padding: 31px 22px 23px; margin-top: 12px; min-height: 0;
+    border-radius: 16px;
+  }
+  .reserve-theme .player-hero h1 { font-size: clamp(2.35rem, 8vw, 3.9rem); }
+  .reserve-theme .hero-kicker { font-size: .62rem; margin-bottom: 16px; }
+  .reserve-theme .hero-copy > p:not(.hero-kicker) { font-size: .88rem; }
+  .hero-cta-row { gap: 8px; margin-top: 21px; }
+  .reserve-theme .hero-cta-row .hero-action { font-size: .8rem; min-height: 44px; padding: 10px 13px; }
+  .reserve-theme .hero-copy .hero-smallprint { font-size: .69rem; }
+  .hero-photo-wrap { min-height: 200px; height: 235px; width: 100%; }
+  .hero-photo { height: 100%; }
+  .reserve-trust-strip {
+    grid-template-columns: 1fr 1fr; margin: 0 7px 8px;
+    padding: 7px 5px; gap: 0;
+  }
+  .reserve-trust-strip > span { justify-content: flex-start; text-align: left; padding: 9px; }
+  .reserve-trust-strip > span + span { border-left: 0; }
+  .reserve-trust-strip > span:nth-child(even) { border-left: 1px solid #eadfdd; }
+  .reserve-trust-strip > span:nth-child(n+3) { border-top: 1px solid #eadfdd; }
+  .court-showcase { margin: 23px 0 32px; padding: 20px 16px 15px; border-radius: 14px; }
+  .court-showcase-intro { align-items: flex-start; flex-direction: column; gap: 9px; }
+  .court-showcase-intro h2 { font-size: 2rem; }
+  .court-showcase .venue-gallery-slide { flex: 0 0 85%; }
+  .court-showcase .venue-gallery-slide img { aspect-ratio: 1.35 / 1; }
+  .court-showcase .venue-gallery-track { gap: 9px; }
+  .reserve-theme .availability-section { padding-top: 26px; }
+  .reserve-theme .section-top { flex-wrap: wrap; gap: 8px; }
+  .reserve-theme .section-top h2 { font-size: 2.05rem; }
+  .reserve-theme .refresh-button { margin: 4px 0 0; }
+  .reserve-booking-progress {
+    display: grid; grid-template-columns: repeat(3,minmax(0,1fr));
+    gap: 6px; padding: 12px 10px; margin: 4px 0 17px;
+    background: #fff; border: 1px solid #e9d6d8; border-radius: 13px;
+  }
+  .reserve-booking-progress span {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    font-size: .7rem; font-weight: 800; color: #84777b;
+  }
+  .reserve-booking-progress b {
+    display: inline-grid; place-items: center; width: 22px; height: 22px;
+    border-radius: 50%; background: #f0eded; color: #6f6065;
+    font-size: .67rem;
+  }
+  .reserve-booking-progress .current { color: #80011f; }
+  .reserve-booking-progress .current b { background: #80011f; color: #fff; }
+  .reserve-booking-progress .complete b { background: #f4d8df; color: #80011f; }
+  .reserve-theme .date-toolbar { margin-bottom: 13px; }
+  .reserve-mobile-picker { display: block; margin: 0 0 15px; }
+  .reserve-mobile-label {
+    color: #38242a; font-size: .82rem; font-weight: 830;
+    margin: 16px 0 10px;
+  }
+  .reserve-court-choices { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+  .reserve-court-choice {
+    display: flex; flex-direction: column; align-items: flex-start;
+    min-height: 72px; padding: 11px 12px; border-radius: 11px;
+    color: #413239; background: #fff; border: 1px solid #e1d6d6;
+    min-width: 0; text-align: left;
+  }
+  .reserve-court-choice strong { font-size: .83rem; overflow-wrap: anywhere; }
+  .reserve-court-choice small { color: #796a70; font-size: .71rem; }
+  .reserve-court-choice.chosen {
+    border-color: #80011f; background: #fff1f0;
+    box-shadow: inset 0 0 0 1px #80011f;
+  }
+  .reserve-court-choice.chosen small { color: #80011f; }
+  .reserve-time-choices { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; }
+  .reserve-mobile-picker .reserve-time-choice {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; min-height: 69px; border: 1px solid #e6d9d8;
+    border-radius: 9px; padding: 9px 4px;
+    background: #fff; color: #493039; text-align: center;
+  }
+  .reserve-mobile-picker .reserve-time-choice small { font-size: .65rem; color: #8c7980; }
+  .reserve-mobile-picker .reserve-time-choice .slot-state { font-size: .79rem; }
+  .reserve-mobile-picker .reserve-time-choice.slot-available:hover { background: #fff1ed; }
+  .reserve-mobile-picker .reserve-time-choice.selected {
+    background: #80011f; color: #fff; outline: 0; border-color: #80011f;
+  }
+  .reserve-mobile-picker .reserve-time-choice.selected small { color: #ffebeb; }
+  .reserve-mobile-picker .reserve-time-choice:disabled { background: #f4f1f0; color: #9c9095; }
+  .reserve-mobile-picker .reserve-time-choice:disabled small { color: #9c9095; }
+  .reserve-time-hint { font-size: .72rem; color: #77666c; margin: 12px 0 0; }
+  .reserve-theme .schedule-wrap { display: none; }
+  .reserve-theme .selection-bar { border-radius: 12px; }
+  .reserve-theme .steps-grid article { padding: 15px 5px; }
+}
+@media (max-width: 370px) {
+  .reserve-header .brand-text small { display: none; }
+  .reserve-header-nav .header-find-booking { font-size: .68rem; }
+  .reserve-header-nav .header-book-now { padding-inline: 8px; }
+  .reserve-theme .player-hero { padding-inline: 16px; }
+  .reserve-theme .hero-cta-row .hero-action { padding-inline: 10px; }
+  .reserve-time-choices { gap: 5px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reserve-theme .hero-action, .reserve-theme .venue-gallery-track { scroll-behavior: auto; }
+  .reserve-theme .hero-action { transition: none; }
+}

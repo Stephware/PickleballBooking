@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { adminRequest, extractError } from "@/lib/admin-client";
-import { brandStyle } from "@/lib/player";
+import { reserveBrandStyle } from "@/lib/reserve-brand";
+import { ReserveMark } from "@/components/ui/ReserveMark";
 import type { AdminSectionId, StaffProfile } from "@/types/admin";
 import type { Venue } from "@/types/player";
 import { AdminOverview } from "@/components/admin/sections/Overview";
@@ -12,6 +13,24 @@ import { AdminPayments } from "@/components/admin/sections/Payments";
 import { AdminManage } from "@/components/admin/sections/Manage";
 import { AdminAccount } from "@/components/admin/sections/Account";
 import { Notice, StaffBadge } from "@/components/admin/AdminShared";
+
+/** Consistent line icons: sidebar and phone navigation share the same labels. */
+function AdminNavIcon({ section }: { section: AdminSectionId }) {
+  const common = { fill: "none", stroke: "currentColor", strokeWidth: 1.8,
+    strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+  return <svg {...common} aria-hidden="true" viewBox="0 0 24 24" width="19" height="19">
+    {section === "overview" && <><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v11h14V10M10 21v-7h4v7"/></>}
+    {section === "schedule" && <><rect x="3.5" y="5" width="17" height="15.5" rx="2"/>
+      <path d="M7.5 3v4M16.5 3v4M3.5 10h17M8 14h3M8 17.5h3"/></>}
+    {section === "payments" && <><rect x="2.5" y="5" width="19" height="14" rx="2"/>
+      <path d="M2.5 10h19M7 15h4"/></>}
+    {section === "manage" && <><path d="M4 7h16M4 17h16M4 12h16"/>
+      <circle cx="8" cy="7" r="2" fill="currentColor" stroke="none"/>
+      <circle cx="16" cy="12" r="2" fill="currentColor" stroke="none"/>
+      <circle cx="10" cy="17" r="2" fill="currentColor" stroke="none"/></>}
+    {section === "account" && <><circle cx="12" cy="8" r="4"/><path d="M4.5 21v-2a7.5 7.5 0 0 1 15 0v2"/></>}
+  </svg>;
+}
 
 const navigation: { section: AdminSectionId; title: string; group: string }[] = [
   { section: "overview", title: "Today", group: "YOUR WORKSPACE" },
@@ -126,11 +145,11 @@ export function AdminPortal({ venue }: { venue: Venue }) {
   }
   const title = navigation.find((n) => n.section === section)?.title ?? "Today";
 
-  return <div className="admin-app" style={brandStyle(venue)}>
+  return <div className="admin-app reserve-admin" style={reserveBrandStyle(venue)}>
     {loading ? <main className="admin-auth-cover"><p role="status">Checking staff access…</p></main>
       : !user ? <main className="admin-auth-cover">
         <div className="admin-auth-card card-surface">
-          <div className="admin-auth-mark">P</div>
+          <div className="admin-auth-mark"><ReserveMark/></div>
           <p className="eyebrow">Staff workspace</p>
           <h1>Welcome back.</h1>
           <p className="muted">Sign in with your venue Owner account.</p>
@@ -153,7 +172,7 @@ export function AdminPortal({ venue }: { venue: Venue }) {
         <aside ref={sidebar} id="admin-navigation"
           className={"admin-sidebar" + (menuOpen ? " sidebar-open" : "")}>
           <div className="admin-logo">
-            <span className="admin-logo-mark">{venue.venueName.charAt(0).toUpperCase()}</span>
+            <ReserveMark className="admin-logo-mark"/>
             <div><strong>{venue.venueName}</strong><small>Venue operations</small></div>
           </div>
           <nav aria-label="Staff navigation" className="admin-nav">
@@ -164,7 +183,7 @@ export function AdminPortal({ venue }: { venue: Venue }) {
                 (section === item.section ? " active" : "")}
                 onClick={() => navigate(item.section)} aria-current={
                   section === item.section ? "page" : undefined
-                }>{item.title}{section === item.section && <span aria-hidden="true">↗</span>}</button>
+                }><AdminNavIcon section={item.section}/><span>{item.title}</span></button>
             </div>)}
           </nav>
           <div className="admin-sidebar-bottom">
@@ -177,6 +196,7 @@ export function AdminPortal({ venue }: { venue: Venue }) {
           tabIndex={-1} aria-label="Close navigation" onClick={() => setMenuOpen(false)} />}
         <div className="admin-main" inert={menuOpen}>
           <header className="admin-topbar">
+            <ReserveMark className="admin-mobile-mark"/>
             <div className="admin-page-intro">
               <button ref={menuButton} type="button" className="admin-menu-button"
                 aria-label="Open navigation" aria-expanded={menuOpen} aria-controls="admin-navigation"
@@ -200,6 +220,16 @@ export function AdminPortal({ venue }: { venue: Venue }) {
               setUser(null); setNotice("Password changed. Sign in with your new password.");
             }} />}
           </main>
+          <nav className="admin-bottom-nav" aria-label="Mobile quick navigation">
+            {navigation.filter(item => item.section !== "account").map(item =>
+              <button type="button" key={item.section}
+                className={section === item.section ? "active" : ""}
+                aria-current={section === item.section ? "page" : undefined}
+                onClick={() => navigate(item.section)}>
+                <AdminNavIcon section={item.section}/>
+                <span>{item.title}</span>
+              </button>)}
+          </nav>
         </div>
       </div>}
   </div>;

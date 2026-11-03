@@ -50,7 +50,14 @@ services:
       # Developer-managed public venue presentation (no owner-side customization).
       VENUE_PHONE: ${VENUE_PHONE:-}
       VENUE_FACEBOOK_URL: ${VENUE_FACEBOOK_URL:-}
-      VENUE_GALLERY_JSON: ${VENUE_GALLERY_JSON:-[]}
+      # Reserve default enables the supplied four court photographs.
+      # VENUE_BRAND_MODE=api uses another venue's logo/colors and no Reserve images.
+      VENUE_BRAND_MODE: ${VENUE_BRAND_MODE:-reserve}
+      VENUE_BRAND_PRIMARY: ${VENUE_BRAND_PRIMARY:-}
+      VENUE_BRAND_SECONDARY: ${VENUE_BRAND_SECONDARY:-}
+      VENUE_LOGO_PATH: ${VENUE_LOGO_PATH:-}
+      VENUE_GALLERY_JSON: ${VENUE_GALLERY_JSON:-}
+      VENUE_HIDE_IMPORTED_PHOTOS: ${VENUE_HIDE_IMPORTED_PHOTOS:-false}
       VENUE_PAYMENT_INSTRUCTIONS_APPROVED: ${VENUE_PAYMENT_INSTRUCTIONS_APPROVED:-false}
       VENUE_GCASH_NAME: ${VENUE_GCASH_NAME:-}
       VENUE_GCASH_NUMBER: ${VENUE_GCASH_NUMBER:-}

@@ -4,7 +4,7 @@ import { BookingStatus } from "@/components/booking/BookingStatus";
 import { VenueHeader } from "@/components/ui/VenueHeader";
 import { getServerVenue } from "@/lib/server-api";
 import { getVenuePublicDetails } from "@/lib/venue-public-server";
-import { brandStyle } from "@/lib/player";
+import { reserveBrandStyle } from "@/lib/reserve-brand";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -19,7 +19,7 @@ export default async function BookingPage({ params }: {
   if (!/^PB-[0-9A-F]{16}$/.test(code)) notFound();
   const { venue } = await getServerVenue();
   const publicDetails = getVenuePublicDetails();
-  const style = brandStyle(venue);
+  const style = reserveBrandStyle(venue);
   return (
     <div className="app-shell" style={style}>
       <div className="page-shell">

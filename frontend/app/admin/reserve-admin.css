@@ -1,0 +1,115 @@
+/* Pickleball Reserve owner workspace — presentation overrides only. */
+.admin-app {
+  background:#fcf8f3; color:#291a21;
+  --admin-edge:#e8d8d4; --admin-muted:#78666d;
+  --admin-panel:#ffffff;
+}
+.admin-app .admin-auth-cover {
+  background:radial-gradient(circle at 70% 22%,#f4d9d6 0%,#fcf8f3 52%,#f9ece4 100%);
+}
+.admin-app .admin-auth-card { border-color:#ead7d3; box-shadow:0 25px 70px #5d143027; }
+.admin-app .admin-auth-mark,.admin-app .admin-logo-mark { overflow:hidden; background:var(--brand); }
+.admin-app .admin-auth-mark img,.admin-app .admin-logo-mark img {
+  width:100%; height:100%; object-fit:cover; display:block;
+}
+.admin-app .admin-back-link { color:#a23d57; }
+.admin-app .admin-sidebar {
+  background:linear-gradient(175deg,#68051e 0%,#8a0d2c 56%,#67071f 100%);
+  color:white; border-right:0; box-shadow:12px 0 35px #530a2912;
+}
+.admin-app .admin-logo { border-bottom:1px solid #ffffff36; }
+.admin-app .admin-logo strong { color:#fff; }
+.admin-app .admin-logo small { color:#f0bbc6; }
+.admin-app .admin-nav-group { color:#e5a9b9; }
+.admin-app .admin-nav-item { color:#fff5f4; min-height:45px; font-weight:700; }
+.admin-app .admin-nav-item:hover { color:#fff; background:#ffffff22; }
+.admin-app .admin-nav-item.active {
+  background:rgba(255,255,255,.18); color:#fff; font-weight:850;
+  border:1px solid rgba(255,255,255,.16);
+}
+.admin-app .admin-nav-label { display:inline-flex; align-items:center; gap:12px; }
+.admin-app .admin-nav-symbol { min-width:20px; text-align:center; font-size:1.1rem; }
+.admin-app .admin-sidebar-bottom { border-top-color:#ffffff36; }
+.admin-app .admin-sidebar-bottom .admin-back-link { color:#fff0ef; }
+.admin-app .admin-signout { color:#ffe8d8; }
+.admin-app .admin-topbar { background:#fffaf6; border-bottom-color:#eadbd6; }
+.admin-app .admin-page-intro strong { color:#361725; }
+.admin-app .admin-page-intro .micro-label { color:#976779; }
+.admin-app .admin-role-badge { color:#702037; background:#fce6e8; }
+.admin-app .admin-section-header h2 { color:#321924; }
+.admin-app .admin-panel,.admin-app .admin-kpi,.admin-app .admin-form-panel,.admin-app .admin-ledger {
+  box-shadow:0 7px 24px #62112c0a; border-color:#eadbd7;
+}
+.admin-app .admin-kpi > strong { color:#7d0b2b; }
+.admin-app .admin-kpi .micro-label { color:#82576b; }
+.admin-app .admin-nav-item:focus-visible,.admin-app .admin-bottom-nav button:focus-visible {
+  outline:3px solid #ffc4a8; outline-offset:-3px;
+}
+.admin-app .admin-form input,.admin-app .admin-form select,.admin-app .admin-form textarea,
+.admin-app .admin-toolbar input,.admin-app .admin-toolbar select,
+.admin-app .admin-inline-form input { border-color:#dbcac8; color:#2e1c25; }
+.admin-app .admin-form input:focus,.admin-app .admin-toolbar input:focus,
+.admin-app .admin-inline-form input:focus { border-color:#931b3b; }
+.admin-app .admin-table thead { background:#fff6f0; }
+.admin-app .admin-table th { color:#7e5361; }
+.admin-app .admin-panel-heading { border-bottom-color:#f0e3dd; }
+.admin-app .admin-list-row { border-bottom-color:#f2e7e2; }
+.admin-app .admin-quick-actions h3 { color:#3a1b28; }
+.admin-app .admin-detail-back { color:#891736; }
+.admin-app .admin-picked-summary { background:#fdf0e9; border-color:#eed3c9; }
+.admin-app .admin-selected-recap { background:#fff2ea; }
+.admin-app .admin-ledger-disclosure { border-color:#e8d6d0; }
+.admin-app .admin-ledger-disclosure > summary { color:#5b1a31; }
+.admin-app .admin-ledger-disclosure > summary:hover { background:#fff6f1; }
+.admin-app .admin-workflow-tabs button.active,
+.admin-app .admin-court-tabs button.active { border-color:#831332; background:#f9e7e9; color:#721029; }
+.admin-app .admin-court-tabs button:hover { background:#fff3f1; }
+.admin-app .admin-slot-cell.admin-slot-selected {
+  outline-color:#840d2e;
+}
+.admin-app .admin-auth-card .eyebrow { color:#8a1c3a; }
+.admin-bottom-nav { display:none; }
+@media(max-width:950px) {
+  .admin-app .admin-sidebar { z-index:22; box-shadow:15px 0 35px #3e061b45; }
+  .admin-app .admin-menu-scrim { z-index:21; }
+  .admin-app .admin-menu-button { background:#fff1eb; color:#771029; border-color:#e6c9c4; }
+  .admin-app .admin-content { padding-bottom:110px; }
+  .admin-bottom-nav {
+    display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0;
+    position:fixed; left:0; right:0; bottom:0; z-index:12;
+    padding:6px max(5px,env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom))
+      max(5px,env(safe-area-inset-right));
+    border-top:1px solid #ead5d0; box-shadow:0 -8px 25px #4e0b2912; background:#fffaf6;
+  }
+  .admin-bottom-nav button {
+    display:grid; justify-items:center; align-content:center; gap:1px;
+    border:0; background:none; border-radius:9px;
+    min-width:0; min-height:56px; padding:5px 2px;
+    color:#65565b; font-weight:700; overflow:hidden;
+  }
+  .admin-bottom-nav button.active { color:#850b2e; background:#f8e7e7; }
+  .admin-bottom-nav button > span { line-height:1; font-size:1.4rem; }
+  .admin-bottom-nav button small { font-size:clamp(.61rem,1.8vw,.76rem); font-weight:750;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+}
+@media(max-width:380px) {
+  .admin-bottom-nav button > span { font-size:1.24rem; }
+  .admin-bottom-nav button small { font-size:.6rem; }
+  .admin-app .admin-content { padding-inline:12px; }
+}
+
+/* Semantic availability states remain independent of venue branding. */
+.reserve-admin .admin-slot-cell.admin-slot-available { background:#eaf7ee; color:#205e3d; }
+.reserve-admin .admin-slot-cell.admin-slot-available:hover { background:#d8f0de; }
+.reserve-admin .admin-slot-cell.admin-slot-walk_in_now { background:#d5ebdf; color:#164a32; }
+.reserve-admin .admin-slot-cell.admin-slot-selected { background:#daf1e2; outline-color:#80011f; color:#164a32; }
+@media(max-width:950px) { .reserve-admin .admin-bottom-nav { grid-template-columns:repeat(4,minmax(0,1fr)); } }
+
+/* Axe AA on staff Today: small labels must meet >=4.5:1 on warm-white cards. */
+.reserve-admin .admin-page-intro .micro-label { color:#64515a; }
+.reserve-admin .admin-kpi small { color:#62515a; }
+
+/* Common low-emphasis staff labels need AA text contrast on white/cream. */
+.reserve-admin .micro-label { color:#64515a; }
+.reserve-admin .admin-list-row small,
+.reserve-admin .admin-queue-item small { color:#60515a; }
