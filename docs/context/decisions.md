@@ -28,4 +28,12 @@ Last reviewed: 2026-11-03
 | D-021 | Customer may cancel HELD/AWAITING_REVIEW before start; confirmed reservations require staff for cancellation | Phase 5 provisional policy |
 | D-022 | Payments/deposits deferred to Phase 6; Phase 5 snapshots required_deposit=0 | Explicitly limited MVP |
 
+| D-023 | Manual proof review for GCash/bank; online booking confirmed only after owner/manager full-payment verification | Phase 6 |
+| D-024 | Store proofs in private persistent server path; image inline for staff, PDF attachment; maximum 5 MiB | Phase 6 |
+| D-025 | Refund endpoint records externally completed refund only; does not transmit funds | Phase 6 |
+| D-026 | Staff manual bookings start CONFIRMED; record WALK_IN/PHONE/MESSENGER in notes until approved booking_source migration | Phase 6 limitation |
+| D-027 | OWNER/MANAGER manage maintenance blocks, STAFF can create manual bookings/payments, payment approvals Owner/Manager only | Phase 6 |
+| D-028 | No manual book or block may overlap an active schedule entry; PostgreSQL exclusion remains final guard | Phase 6 |
+| D-029 | Bank/GCash receipts require a reference; verification serializes identical references to prevent duplicate approvals | Phase 6 |
+
 Documentation records decisions, not proof of a passing local build.

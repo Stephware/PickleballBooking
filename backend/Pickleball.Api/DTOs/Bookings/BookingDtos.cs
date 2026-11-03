@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Pickleball.Api.DTOs.Bookings;
 
 /// <summary>IdempotencyKey must be a freshly generated UUID v4 per intended booking.</summary>
-public sealed class CreateBookingRequest
+public class CreateBookingRequest
 {
     public Guid IdempotencyKey { get; set; }
 

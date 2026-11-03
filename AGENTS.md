@@ -33,11 +33,20 @@
 - Guest booking access/cancellation requires `X-Booking-Token`; a booking code by itself grants no access. Guest cancels only unstarted HELD/AWAITING_REVIEW; OWNER/MANAGER can confirm an unexpired HELD or cancel an eligible booking.
 - Expire stale pending rows explicitly via the SQL `expire_pending_schedule_entries()` function **within booking mutations** and periodically through the background worker. A timestamp alone doesn't change exclusion constraint state.
 - Revalidate multiple consecutive slots, venue notice/horizon and pricing in the transaction; persist the entire range as one schedule entry plus one booking. Handle SQLSTATE 23P01/23505 with conflict responses. Future APIs must not overwrite the current database schema without reviewed migrations.
-- Phase 5 has no payment collection or booking frontend; Phase 6–8 supply those capabilities.
+- Phase 5/6 now contain booking, proof, manual payment verification, staff booking and block API source. There is no automatic payment gateway or frontend. Consult docs/phase-6-payments-operations.md for financial rules.
+
+## Phase 6 payment and operational safeguards
+
+- Read [docs/phase-6-payments-operations.md](docs/phase-6-payments-operations.md) before changes to receipts, payments, refunds, source metadata, staff booking or maintenance blocks.
+- The API **does not process or confirm real transfers**. Guest amounts and proof are unverified claims until OWNER/MANAGER reviews against real external GCash/bank records. Never treat SUBMITTED as paid or call a recorded refund an actual money transfer.
+- Maintain transactional relationship of schedule and payment states, serialize on the booking's schedule row, and keep Phase 5 guest cancellation from bypassing SUBMITTED/VERIFIED financial records.
+- Payment proofs belong in configured persistent private storage (outside wwwroot), never Git or public static files. Validate file headers and size, use unpredictable filenames, staff-only preview. PDFs are attachments, not inline content. Production requires malware scanning and storage backup.
+- Manual staff bookings and blocks must obey Phase 4 availability and PostgreSQL overlap exclusion. Staff-created bookings are CONFIRMED and may be unpaid; source prefix in bookings.notes is **not** a first-class booking_source column. Do not misrepresent it as a durable normalized data model.
+- Staff can record payment claims; OWNER/MANAGER approves/rejects and records external refund references. Verify authorization and CSRF before enabling payment actions in Phase 8 frontend.
 
 ## Current implementation
 
-Phases 1–2 are on main; Phase 3 and 4 PRs were merged into their parent **feature branches**, not directly into main. Phase 5 is developed on the Phase 4 branch, and runtime build/PostgreSQL validation is still pending. See [docs/context/progress.md](docs/context/progress.md) before claiming a feature is verified. The API now has booking/hold source code, but not payments, public booking screens or admin booking UI.
+Phases 1–2 are on main; Phase 3 and 4 PRs were merged into their parent **feature branches**, not directly into main. Phase 5 merged into its parent Phase 4 feature branch, not into main. Phase 6 is stacked on Phase 5, and runtime build/PostgreSQL verification is still pending. See [docs/context/progress.md](docs/context/progress.md) before claiming a feature is verified. The API now has booking/hold, manual payments/receipt review and staff operations source, but not automated settlement or public/admin booking UI.
 
 ## Documentation hygiene
 

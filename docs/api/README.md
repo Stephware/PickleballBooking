@@ -1,4 +1,4 @@
-# API inventory — Phases 1–5
+# API inventory — Phases 1–6
 
 Phase 5 adds guest booking holds and staff management endpoints, but **does not implement payment processing or a player calendar UI**. Administrative writes require the Phase 3 staff cookie/CSRF; public slot and quote routes are read-only.
 
@@ -65,3 +65,27 @@ POST create accepts idempotencyKey (UUID v4), courtId, date, startsAt, endsAt, g
 The `/health/db` endpoint checks the nine-table SQL schema; the expiry worker processes timed-out holds through the existing SQL function. The API requires a persistent secret `Booking:SigningKey` (32+ bytes) from user-secrets/env for guest access. **No payment guarantee, customer frontend, or self-service confirmed-booking cancellation** exists in this phase.
 
 [Full Phase 5 guide](../phase-5-booking-engine.md).
+
+## Phase 6 — manual payments and staff operations
+
+| Method | Route | Permission |
+| --- | --- | --- |
+| POST | `/api/v1/bookings/{code}/payments` | Guest booking bearer token, rate limited, multipart proof |
+| GET | `/api/v1/bookings/{code}/payments` | Guest booking bearer token |
+| GET | `/api/v1/admin/payments/pending` | Any staff |
+| GET | `/api/v1/admin/payments/bookings/{code}` | Any staff |
+| GET | `/api/v1/admin/payments/{id}/proof` | Any staff; private image or PDF attachment |
+| POST | `/api/v1/admin/payments/bookings/{code}` | Any staff + CSRF; record external payment |
+| POST | `/api/v1/admin/payments/{id}/approve` | OWNER/MANAGER + CSRF |
+| POST | `/api/v1/admin/payments/{id}/reject` | OWNER/MANAGER + CSRF |
+| POST | `/api/v1/admin/payments/{id}/record-refund` | OWNER/MANAGER + CSRF; record external refund only |
+| POST | `/api/v1/admin/operations/manual-bookings` | Any staff + CSRF |
+| GET | `/api/v1/admin/operations/blocks?date=YYYY-MM-DD` | Any staff |
+| POST | `/api/v1/admin/operations/blocks` | OWNER/MANAGER + CSRF |
+| POST | `/api/v1/admin/operations/blocks/{id}/remove` | OWNER/MANAGER + CSRF |
+
+GCash/bank submissions require a transaction reference; duplicate verified references are rejected. Guest proof submission changes a live HELD booking to AWAITING_REVIEW. Manager verification can change it to CONFIRMED, rejection to EXPIRED. A payment claim's `SUBMITTED` status **does not verify any transfer**. Admins should preview the uploaded file, compare payment reference and amount to their external account and record approval/rejection. Proof files are never public.
+
+Staff manual bookings are immediately CONFIRMED but may have a nonzero balance due. The source channel is encoded in booking notes until a reviewed schema migration adds booking_source.
+
+See [Phase 6 detailed contract](../phase-6-payments-operations.md).

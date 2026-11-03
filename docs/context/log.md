@@ -8,3 +8,5 @@
 - **2026-11-03 — Phase 4:** Availability grid/status engine, timezone-local slots, batched active schedule queries, pricing rules and prorated calculator, quote + admin endpoints, unit/integration test source; stacked on Phase 3. DB unchanged. Local build and DB verification still pending.
 
 - **2026-11-03 — Phase 5:** Added transactional guest bookings/holds with deterministic HMAC idempotency, guest access tokens, staff confirmation/cancellation, automatic SQL hold expiry, rate limits, tests and operator guide. Branched from Phase 4. No PostgreSQL schema or Docker changes. Build/live DB verification pending.
+
+- **2026-11-03 — Phase 6:** Added private GCash/bank payment proof storage, review/approval/rejection, manual payment/refund recording, confirmed staff bookings, schedule blocks, payment-sensitive booking status guards, API tests, AGENTS/wiki. No DB schema or Docker modifications. Build/live payment verification pending.

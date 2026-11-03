@@ -6,6 +6,7 @@ using Pickleball.Api.Repositories;
 using Pickleball.Api.Repositories.Bookings;
 using Pickleball.Api.Repositories.Courts;
 using Pickleball.Api.Repositories.Pricing;
+using Pickleball.Api.Repositories.Payments;
 using Pickleball.Api.Repositories.Scheduling;
 using Pickleball.Api.Repositories.Settings;
 
@@ -34,6 +35,7 @@ public static class DatabaseServiceExtensions
         services.AddScoped<IScheduleRepository, ScheduleRepository>();
         services.AddScoped<IBookingRepository, BookingRepository>();
         services.AddScoped<IPricingRuleRepository, PricingRuleRepository>();
+        services.AddScoped<IPaymentRepository, PaymentRepository>();
         services.AddHealthChecks().AddCheck<PostgresSchemaHealthCheck>(
             "postgres", tags: ["database"]);
         return services;

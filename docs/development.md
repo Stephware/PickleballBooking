@@ -1,4 +1,4 @@
-# Development setup — Phases 1–5
+# Development setup — Phases 1–6
 
 Prerequisites: .NET 10 SDK, Node.js 22 LTS recommended, and your **already-running** PostgreSQL 17 Docker instance on localhost:5435. Do not change the Docker volume.
 
@@ -66,3 +66,19 @@ With `/health/db` healthy, test a future AVAILABLE court slot using POST `/api/v
 **Live integration constraint tests** require `PICKLEBALL_TEST_CONNECTION_STRING` pointing to a disposable test database and explicit `PICKLEBALL_TEST_MUTATIONS_ENABLED=1`. Never run mutation tests on production/current venue data. `dotnet test PickleballBooking.slnx` runs offline tests by default.
 
 GitHub branch warning: PR #3 and PR #4 were merged into parent feature branches, **not main**. Phase 5 is stacked on the Phase 4 feature branch; integrate all subsequent features into main in order after build/runtime verification.
+
+## Phase 6 — payment and operations setup
+
+Configure a durable **private** location outside the repository webroot (example below; replace the path with your Mac username or deployment mount):
+
+```bash
+dotnet user-secrets set "ProofStorage:Directory" "/Users/your-mac-user/pickleball-private-proofs" --project backend/Pickleball.Api
+```
+
+The existing `ConnectionStrings:Pickleball` and `Booking:SigningKey` must also be configured. Without the signing key, guest bearer access fails; without the private storage path, payment-proof submissions fail. **Do not commit** credentials, real payment images or storage files.
+
+Check `/health/db` is healthy. Then create a future HELD booking, use its `X-Booking-Token` to submit multipart GCash/bank proof, sign in with Phase 3 staff auth + CSRF and approve/reject through `/api/v1/admin/payments/{id}/...`. Ensure the admin preview endpoint returns a valid private file only when staff is authenticated. Test verified paid amount and balance due; repeated approvals/rejections should conflict. Manually record cash payments only against CONFIRMED bookings and have Owner/Manager verify them.
+
+Staff operations include confirmed future WALK_IN/PHONE/MESSENGER bookings and maintenance blocks, both guarded by the same schedule overlap exclusion. Source is currently stored as a structured notes prefix; actual `booking_source` is not a schema column.
+
+See [Phase 6 runbook](phase-6-payments-operations.md) for detailed endpoints, limits, external refund recording and security caveats. Recheck `docs/context/progress.md` before claiming live verification or merging into main.
