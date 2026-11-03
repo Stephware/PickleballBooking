@@ -20,4 +20,4 @@ raster asset in this directory. Verify the QR destination before enabling
 
 ## Pickleball Reserve supplied assets
 
-Approved real venue media: brand-logo.jpg and court-1.jpg through court-4.jpg. The original hero-paddle.svg illustration sits over a real court photo; it is not represented as a venue photograph. With Reserve branding and no VENUE_GALLERY_JSON configured, the real-photo gallery is shown. Use VENUE_GALLERY_JSON=[] to opt out; other venues use VENUE_BRAND_MODE=api with their own approved assets. All media is publicly served, never store private receipt evidence here.
+Approved real venue media: brand-logo.jpg and court-1.jpg through court-4.jpg. The original hero-paddle.svg illustration sits over a real court photo; it is not represented as a venue photograph. With Reserve branding and no VENUE_GALLERY_JSON configured, the real-photo gallery is shown. Use VENUE_HIDE_IMPORTED_PHOTOS=true to hide the supplied images; an existing VENUE_GALLERY_JSON=[] is backward-compatible and still shows them. Other venues use VENUE_BRAND_MODE=api with their own approved assets. All media is publicly served, never store private receipt evidence here.

@@ -18,8 +18,9 @@ export function getVenuePublicDetails() {
     VENUE_BANK_QR_PATH: process.env.VENUE_BANK_QR_PATH,
   });
   // Use the supplied Reserve photos only when the Reserve theme is active and
-  // no custom gallery is configured. An explicit [] disables the photo gallery.
-  if (!configPhotos && process.env.VENUE_BRAND_MODE !== "api" &&
+  // no venue-specific photos are configured. Older deployments may set []:
+  // keep showing approved Reserve assets unless explicitly hidden by flag.
+  if ((!configPhotos || configPhotos === "[]") && process.env.VENUE_BRAND_MODE !== "api" &&
       process.env.VENUE_HIDE_IMPORTED_PHOTOS !== "true") {
     return { ...result, photos: defaultReservePhotos };
   }
