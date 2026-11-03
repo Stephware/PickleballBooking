@@ -151,4 +151,44 @@ exclusions=$(count "SELECT count(*) FROM pg_constraint WHERE contype='x';")
 [[ "$bookings" =~ ^[0-9]+$ && "$bookings" -gt 0 ]] || die "Restored bookings missing"
 [[ "$payments" =~ ^[0-9]+$ && "$payments" -gt 0 ]] || die "Restored payment records missing"
 [[ "$exclusions" =~ ^[0-9]+$ && "$exclusions" -gt 0 ]] || die "Restored GiST exclusion missing"
-echo "PASS Phase 4 isolated Compose production images + session/proof persistence + restore ($tables tables, $bookings bookings, $payments payments, $exclusions exclusion constraint(s))"
+
+# Actively prove the restored constraint works, not merely that its name exists.
+# Use a far-future synthetic range inside a transaction and roll everything
+# back. Active overlapping blocks must raise PostgreSQL exclusion_violation.
+dc exec -T database psql -U pickleball_admin -d pickleball_restored_test \
+  -v ON_ERROR_STOP=1 <<'SQL'
+BEGIN;
+DO $
+DECLARE selected_court BIGINT;
+BEGIN
+  SELECT id INTO selected_court FROM courts ORDER BY id LIMIT 1;
+  IF selected_court IS NULL THEN
+    RAISE EXCEPTION 'Restored database contains no court to test';
+  END IF;
+
+  INSERT INTO court_schedule_entries
+    (court_id, entry_type, status, starts_at, ends_at, block_reason)
+  VALUES (selected_court, 'BLOCK', 'BLOCKED',
+    '2099-06-10 08:00:00+00', '2099-06-10 09:00:00+00', 'Phase 4 disposable test');
+
+  -- Adjacent half-open ranges must be permitted.
+  INSERT INTO court_schedule_entries
+    (court_id, entry_type, status, starts_at, ends_at, block_reason)
+  VALUES (selected_court, 'BLOCK', 'BLOCKED',
+    '2099-06-10 09:00:00+00', '2099-06-10 10:00:00+00', 'Phase 4 disposable adjacent');
+
+  BEGIN
+    INSERT INTO court_schedule_entries
+      (court_id, entry_type, status, starts_at, ends_at, block_reason)
+    VALUES (selected_court, 'BLOCK', 'BLOCKED',
+      '2099-06-10 08:30:00+00', '2099-06-10 09:30:00+00', 'Must reject overlap');
+    RAISE EXCEPTION 'GiST exclusion did not reject an overlapping active block';
+  EXCEPTION
+    WHEN exclusion_violation THEN
+      RAISE NOTICE 'PASS restored GiST rejects overlapping active blocks';
+  END;
+END $;
+ROLLBACK;
+SQL
+
+echo "PASS Phase 4 isolated Compose production images + session/proof persistence + restore ($tables tables, $bookings bookings, $payments payments, $exclusions exclusion constraint(s)); actual overlap rejection verified"
