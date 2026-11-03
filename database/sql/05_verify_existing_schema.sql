@@ -50,6 +50,16 @@ BEGIN
     RAISE EXCEPTION 'Expiration transition function is missing';
   END IF;
 
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint c
+    JOIN pg_class t ON t.oid = c.conrelid
+    WHERE t.relname = 'court_schedule_entries'
+      AND c.conname = 'schedule_pending_has_expiry'
+      AND pg_get_constraintdef(c.oid) NOT LIKE '%AWAITING_REVIEW%'
+  ) THEN
+    RAISE EXCEPTION 'Legacy pending-review expiry constraint active: apply 06_payment_review_no_expiry.sql';
+  END IF;
+
   -- Reject deployments still running the old timed payment-review function.
   IF (SELECT pg_get_functiondef('expire_pending_schedule_entries()'::regprocedure))
       NOT LIKE '%WHERE status = ''HELD''%' THEN

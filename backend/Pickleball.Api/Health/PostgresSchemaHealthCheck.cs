@@ -41,6 +41,13 @@ public sealed class PostgresSchemaHealthCheck(IServiceProvider provider) : IHeal
                 SELECT CASE WHEN pg_get_functiondef(
                     'public.expire_pending_schedule_entries()'::regprocedure
                 ) LIKE '%WHERE status = ''HELD''%'
+                AND EXISTS (
+                    SELECT 1 FROM pg_constraint c
+                    JOIN pg_class t ON t.oid = c.conrelid
+                    WHERE t.relname = 'court_schedule_entries'
+                      AND c.conname = 'schedule_pending_has_expiry'
+                      AND pg_get_constraintdef(c.oid) NOT LIKE '%AWAITING_REVIEW%'
+                )
                 THEN 1 ELSE 0 END AS "Value"
                 """;
             var policyCurrent = await db.Database.SqlQueryRaw<int>(reviewPolicySql)
