@@ -15,12 +15,13 @@ Last updated: 2026-11-03 (Asia/Manila).
 - Frontend check clean: **18 Node tests passed**, lint/types passed; standalone production build passed; runtime dependency audit **0 vulnerabilities**.
 - HTTP real API workflow: **29 checks passed / 0 failed** with repeatable synthetic fixtures.
 - Browser **79 checks passed** (76 layouts + 3 workflows), 0 runtime errors; sampled Axe checks 0 violations. Widths 320/375/768/1024; actual 3-court flows plus explicit read-only count/error fixtures.
+- Remote GitHub Actions run [41561368392](https://github.com/Stephware/PickleballBooking/actions/runs/41561368392) passed end-to-end on implementation commit 784cb5d.
 - Both container images built; production-image deployment **7 checks passed**, including per-client throttling and surviving staff/guest/proof access after application recreation.
 - Synthetic PostgreSQL dump restored into a different test database: nine tables, exclusion constraint and sample records verified.
 
 ## Pending / blocked
 
-- Main merge requires approval. Remote CI status is independent of the executed local checks.
+- Main merge requires approval: review PR #9 and draft main integration PR #10 are open and unmerged. Remote CI run 41561368392 passed all implementation checks for 784cb5d, including Linux browser/Axe.
 - **Public launch blocked:** official payment recipient instructions, malware controls, actual TLS/DNS/certificate/CDN trust configuration and operator backup/retention/monitoring acceptance.
 - Physical touch devices, live screen readers, production load and actual external payment reconciliation are not verified.
 - Cross-device verified guest recovery, automated settlement/refund transfers and normalized booking-source reporting remain deferred.

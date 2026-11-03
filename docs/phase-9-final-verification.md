@@ -23,7 +23,7 @@ GitHub was checked live, rather than using the Phase 8 opening snapshot:
 | #7 player frontend | Merged | feature/phase-6-payments-operations |
 | #8 admin frontend | Merged | feature/phase-7-player-frontend |
 
-Phase 9 branches from **3b0a67e**, the Phase 8 merge into the Phase 7 branch; main is **0a3aeba** at integration start. The implementation chain includes 671bcad, d5b75b8/5beea53, 3261205, 1834b4e, 1e2569d and 93136af. No cherry-pick duplication, force-push, history rewrite or main merge was needed. Separate phase-review and main-integration PRs are prepared after verification. Phase 1–2 standalone implementation documents were not present; their actual code, SQL, tests, development and migration guides were reviewed alongside all existing Phase 3–8 documents.
+Phase 9 branches from **3b0a67e**, the Phase 8 merge into the Phase 7 branch; main is **0a3aeba** at integration start. The implementation chain includes 671bcad, d5b75b8/5beea53, 3261205, 1834b4e, 1e2569d and 93136af. No cherry-pick duplication, force-push, history rewrite or main merge was needed. Review PR [#9](https://github.com/Stephware/PickleballBooking/pull/9) targets the Phase 8 parent; draft integration PR [#10](https://github.com/Stephware/PickleballBooking/pull/10) targets main. Neither is merged. Phase 1–2 standalone implementation documents were not present; their actual code, SQL, tests, development and migration guides were reviewed alongside all existing Phase 3–8 documents.
 
 ## Executed checks
 
@@ -43,7 +43,7 @@ Phase 9 branches from **3b0a67e**, the Phase 8 merge into the Phase 7 branch; ma
 | API/frontend Docker image builds | Passed |
 | Disposable production Compose stack | Passed; 7 final deployment checks including persisted ticket/guest/proof access after recreation |
 | PostgreSQL synthetic dump/restore | Passed: 9 tables, overlap exclusion, venue and payment records restored into a different disposable DB |
-| Remote GitHub Actions | Definition added; remote execution is separate from the local results above |
+| Remote GitHub Actions | [Run 41561368392](https://github.com/Stephware/PickleballBooking/actions/runs/41561368392) passed all steps, including Linux PostgreSQL/API/browser/Axe checks, for implementation commit 784cb5d; subsequent documentation reconciliation changes no application source |
 
 The local SDK is 10.0.400, runtime 10.0.11 and Node 22.23.2. Initial test execution required local IPC/network access outside the restricted sandbox. Local Turbopack build hit socket-binding EPERM; supported Webpack compiled successfully and is the reproducible build script. Remaining Node module-type and upstream tool deprecation notices do not fail checks. Sixteen moderate development-only lint dependency advisories remain; no forced major dependency change was applied.
 

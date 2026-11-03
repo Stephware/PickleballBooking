@@ -18,3 +18,5 @@
 ## 2026-11-03 — Phase 9 final integration
 
 Verified GitHub PR #1–8 state and branched from Phase 8 merge 3b0a67e. Executed .NET/npm/PostgreSQL/API/browser/container checks; fixed payment history/reference reuse, reservation rounding, dependency/test runner errors, BFF request limits, production HTTPS/client-IP forwarding and UI accessibility defects. Added lockfile, guarded regression/E2E harnesses, CI and isolated-venue deployment/backup/rollback guide. Canonical schema and existing venue database unchanged. Public launch remains gated on venue payment instructions and production security/operations acceptance; main merge requires approval. See phase-9-final-verification.md for exact executed evidence and remaining limits.
+
+Remote GitHub Actions run 41561368392 passed all steps for implementation 784cb5d, including PostgreSQL, .NET, npm, HTTP and Linux Playwright/Axe checks. Opened Phase 9 review PR #9 and separate draft main integration PR #10; neither merged. Stopped only disposable test containers/processes; original database containers remain running.
