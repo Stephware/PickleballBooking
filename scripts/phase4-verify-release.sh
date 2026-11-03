@@ -158,7 +158,7 @@ exclusions=$(count "SELECT count(*) FROM pg_constraint WHERE contype='x';")
 dc exec -T database psql -U pickleball_admin -d pickleball_restored_test \
   -v ON_ERROR_STOP=1 <<'SQL'
 BEGIN;
-DO $
+DO $phase4$
 DECLARE selected_court BIGINT;
 BEGIN
   SELECT id INTO selected_court FROM courts ORDER BY id LIMIT 1;
@@ -187,7 +187,7 @@ BEGIN
     WHEN exclusion_violation THEN
       RAISE NOTICE 'PASS restored GiST rejects overlapping active blocks';
   END;
-END $;
+END $phase4$;
 ROLLBACK;
 SQL
 
