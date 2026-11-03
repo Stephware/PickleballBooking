@@ -2,18 +2,13 @@
 
 Reusable, independently branded pickleball court booking systems: **one deployment and PostgreSQL database per venue**, shared source code, configurable courts/hours/rates/branding. Not a marketplace.
 
-## Implementation progress
+## Implementation and verification
 
-- **Phase 1 (merged):** .NET 10 API and Next.js 16/TypeScript/Tailwind starter, tests, tracked wiki/AGENTS.md.
-- **Phase 2 (on main):** SQL-first EF Core/Npgsql mapping to the nine-table PostgreSQL database, repositories and DB health.
-- **Phase 3 (merged into Phase 2 feature branch):** Staff cookie/CSRF authentication, roles, venue settings/hours and court management.
-- **Phase 4 (merged into Phase 3 feature branch):** Public availability/price quote APIs and admin pricing rules.
-- **Phase 5 (merged into parent feature branch):** Guest booking holds, idempotent retries, HMAC guest access, expiry worker.
-- **Phase 6 (PR #6, stacked on Phase 5):** GCash/bank proof submissions, manual payment review, private staff-only proof preview, walk-in/phone/Messenger bookings and maintenance blocks.
-- **Phase 7 (merged to parent Phase 6 feature branch):** Responsive branded Next.js player site, court grid, booking/payment proof/status and secure guest gateway.
-- **Phase 8 (stacked on Phase 7):** Separate /admin staff dashboard, protected .NET cookie/CSRF gateway, bookings, payment proof reviews/ledger, walk-ins, blocks, courts, pricing, hours, venue and staff accounts.
+Phases 1–8 provide the .NET/SQL-first API, transactional holds, manual payment review and staff operations, player website and owner dashboard. Phase 9 integrates their stacked branch history, fixes payment/security/build/UI defects and supplies reproducible tests and independent-venue deployment artifacts.
 
-**Not yet implemented:** automated bank/GCash settlement or refunds, approved recipient configuration, normalized booking_source column, secure cross-device guest recovery, and production deployment hardening. Phases 3–8 must still be integrated into main after local tests. All source builds and DB flows still require local verification.
+See [Phase 9 verification](docs/phase-9-final-verification.md) for actual test counts and coverage, [development](docs/development.md) to run the system, and [deployment](docs/deployment.md) for containers, trusted HTTPS ingress, private storage, backups and rollback. The canonical nine-table schema is unchanged and existing local database data is untouched.
+
+Main integration requires review/approval. Public launch still needs official venue payment instructions, malware controls, real TLS ingress and operator backup/monitoring acceptance. Automated settlement/refund transfers, verified cross-device guest recovery and normalized booking-source reporting remain deferred.
 
 ## Local API
 
@@ -53,13 +48,13 @@ See [Phase 5 API, token and idempotency details](docs/phase-5-booking-engine.md)
 ```bash
 cd frontend
 cp .env.example .env.local
-npm install
+npm ci
 npm run check
 npm run build
 npm run dev
 ```
 
-Open http://localhost:3000 for venue branding, date/court grid and booking, and **http://localhost:3000/admin** for the Owner/Manager/Staff dashboard. The private /booking/{code} page supports proof upload/status. APP_ORIGIN must match the frontend public origin (required in production) and API_BASE_URL is server-only. Commit frontend/package-lock.json after the first actual local npm install. See [Phase 7 guide](docs/phase-7-player-frontend.md).
+Open http://localhost:3000 for venue branding, date/court grid and booking, and **http://localhost:3000/admin** for the Owner/Manager/Staff dashboard. The private /booking/{code} page supports proof upload/status. APP_ORIGIN must match the frontend public origin (required in production) and API_BASE_URL is server-only. Commit frontend/package-lock.json after the first actual local npm ci. See [Phase 7 guide](docs/phase-7-player-frontend.md).
 
 ## Docs and safety
 
@@ -73,6 +68,8 @@ Open http://localhost:3000 for venue branding, date/court grid and booking, and 
 - [docs/phase-8-owner-staff-dashboard.md](docs/phase-8-owner-staff-dashboard.md) — staff sign-in, role-aware dashboard, payment proof and operations
 - [docs/phase-3-authentication.md](docs/phase-3-authentication.md) — staff auth and one-time owner bootstrap
 - [docs/database-migrations.md](docs/database-migrations.md) — SQL-first EF migration safeguards
+- [docs/phase-9-final-verification.md](docs/phase-9-final-verification.md) — executed tests and launch gates
+- [docs/deployment.md](docs/deployment.md) — independent venue runtime and recovery
 - [docs/development.md](docs/development.md) — local setup
 
-No database migration or Docker reset is performed. The project has not yet been built/tested on a local .NET runtime through this GitHub-only implementation.
+No database migration or existing database reset was performed. Phase 9 executed local .NET, PostgreSQL, frontend/browser and disposable production-container verification.

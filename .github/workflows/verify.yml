@@ -1,0 +1,102 @@
+name: Verify integrated venue application
+on:
+  pull_request:
+  push:
+    branches: [main, feature/phase-9-final-integration]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: pickleball_ci_test
+          POSTGRES_USER: phase9
+          POSTGRES_PASSWORD: ci-disposable-only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U phase9 -d pickleball_ci_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Initialize disposable schema
+        env:
+          PGPASSWORD: ci-disposable-only
+        run: psql -h localhost -U phase9 -d pickleball_ci_test -v ON_ERROR_STOP=1 -f database/sql/01_schema.sql
+      - run: dotnet restore PickleballBooking.slnx
+      - run: dotnet build PickleballBooking.slnx --no-restore
+      - name: Bootstrap synthetic owner before session tests
+        env:
+          ASPNETCORE_ENVIRONMENT: Development
+          ConnectionStrings__Pickleball: Host=localhost;Database=pickleball_ci_test;Username=phase9;Password=ci-disposable-only
+          Bootstrap__OwnerName: CI Test Owner
+          Bootstrap__OwnerEmail: owner@phase9.example.test
+          Bootstrap__OwnerPassword: CI-Synthetic-Owner-Only!
+        run: dotnet run --no-build --no-launch-profile --project backend/Pickleball.Api -- --bootstrap-owner
+      - run: dotnet test PickleballBooking.slnx --no-build
+        env:
+          PICKLEBALL_TEST_CONNECTION_STRING: Host=localhost;Database=pickleball_ci_test;Username=phase9;Password=ci-disposable-only
+          PICKLEBALL_TEST_MUTATIONS_ENABLED: '1'
+      - run: npm ci
+        working-directory: frontend
+      - run: npm run check
+        working-directory: frontend
+      - run: npm run build
+        working-directory: frontend
+      - run: npm audit --omit=dev --audit-level=high
+        working-directory: frontend
+      - name: Start isolated API and execute HTTP scenarios
+        env:
+          PGPASSWORD: ci-disposable-only
+          ASPNETCORE_ENVIRONMENT: Development
+          ConnectionStrings__Pickleball: Host=localhost;Database=pickleball_ci_test;Username=phase9;Password=ci-disposable-only
+          Booking__SigningKey: ci-test-only-persistent-signing-key-never-production
+          ProofStorage__Directory: /tmp/pickleball-ci-proofs
+          PHASE9_API_URL: http://127.0.0.1:5099
+          PHASE9_MUTATIONS: '1'
+          PHASE9_OWNER_EMAIL: owner@phase9.example.test
+          PHASE9_OWNER_PASSWORD: CI-Synthetic-Owner-Only!
+        run: |
+          psql -h localhost -U phase9 -d pickleball_ci_test -v ON_ERROR_STOP=1 -f scripts/seed-test.sql
+          dotnet backend/Pickleball.Api/bin/Debug/net10.0/Pickleball.Api.dll --urls http://127.0.0.1:5099 > "$RUNNER_TEMP/pickleball-api.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/pickleball-api.pid"
+          for attempt in $(seq 1 40); do
+            if curl --fail --silent http://127.0.0.1:5099/health/db; then break; fi
+            sleep 1
+          done
+          node scripts/verify-api.mjs
+      - name: Install isolated browser test tools
+        run: |
+          npm install --prefix "$RUNNER_TEMP/pickleball-browser" --no-save playwright @axe-core/playwright
+          "$RUNNER_TEMP/pickleball-browser/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Run browser integration and accessibility checks
+        env:
+          ASPNETCORE_ENVIRONMENT: Development
+          ConnectionStrings__Pickleball: Host=localhost;Database=pickleball_ci_test;Username=phase9;Password=ci-disposable-only
+          Booking__SigningKey: ci-test-only-persistent-signing-key-never-production
+          ProofStorage__Directory: /tmp/pickleball-ci-proofs
+          API_BASE_URL: http://127.0.0.1:5099
+          APP_ORIGIN: http://localhost:3099
+          E2E_ORIGIN: http://localhost:3099
+          E2E_MUTATIONS: 'true'
+          E2E_STAFF_EMAIL: owner@phase9.example.test
+          E2E_STAFF_PASSWORD: CI-Synthetic-Owner-Only!
+        run: |
+          kill "$(cat "$RUNNER_TEMP/pickleball-api.pid")"
+          dotnet backend/Pickleball.Api/bin/Debug/net10.0/Pickleball.Api.dll --urls http://127.0.0.1:5099 > "$RUNNER_TEMP/pickleball-api.log" 2>&1 &
+          npm --prefix frontend run start -- --port 3099 > "$RUNNER_TEMP/pickleball-frontend.log" 2>&1 &
+          for attempt in $(seq 1 40); do
+            if curl --fail --silent http://localhost:3099/api/player/venue > /dev/null; then break; fi
+            sleep 1
+          done
+          E2E_PLAYWRIGHT_MODULE="$RUNNER_TEMP/pickleball-browser/node_modules/playwright/index.mjs" E2E_AXE_MODULE="$RUNNER_TEMP/pickleball-browser/node_modules/@axe-core/playwright/dist/index.mjs" node frontend/tests/e2e/browser-smoke.mjs

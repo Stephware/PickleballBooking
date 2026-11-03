@@ -16,18 +16,14 @@ export function AdminOverview({ user, venue, navigate }: {
   const [pending, setPending] = useState<PendingPayment[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const reload = useCallback(async () => {
-    setLoading(true); setError("");
-    try {
-      const [b, c, p] = await Promise.all([
+  const reload = useCallback(() => Promise.all([
         adminRequest<AdminBooking[]>("/bookings?date=" + today),
         adminRequest<CourtAdmin[]>("/courts"),
         adminRequest<PendingPayment[]>("/payments/pending"),
-      ]);
-      setBookings(b); setCourts(c); setPending(p);
-    } catch (reason) { setError(extractError(reason)); }
-    finally { setLoading(false); }
-  }, [today]);
+      ]).then(([b, c, p]) => {
+      setBookings(b); setCourts(c); setPending(p); setError("");
+    }).catch(reason => { setError(extractError(reason)); })
+    .finally(() => { setLoading(false); }), [today]);
   useEffect(() => { void reload(); }, [reload]);
   const confirmed = bookings.filter((b) => b.status === "CONFIRMED").length;
   const held = bookings.filter((b) => ["HELD", "AWAITING_REVIEW"].includes(b.status)).length;
@@ -36,7 +32,7 @@ export function AdminOverview({ user, venue, navigate }: {
     <SectionHeader eyebrow="Your venue at a glance" title={"Good day, " + user.fullName.split(" ")[0] + "."}
       description="A snapshot of today's reservations and pending reviews."
       action={<button className="button-outline" type="button" disabled={loading}
-        onClick={() => void reload()}>↻ Refresh</button>} />
+        onClick={() => { setLoading(true); setError(""); void reload(); }}>↻ Refresh</button>} />
     {error && <Notice>{error}</Notice>}
     <div className="admin-kpi-grid">
       {[

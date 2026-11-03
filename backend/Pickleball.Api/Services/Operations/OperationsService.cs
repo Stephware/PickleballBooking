@@ -11,6 +11,7 @@ using Pickleball.Api.Repositories.Settings;
 using Pickleball.Api.Security;
 using Pickleball.Api.Services.Availability;
 using Pickleball.Api.Services.Bookings;
+using Pickleball.Api.Services.Pricing;
 
 namespace Pickleball.Api.Services.Operations;
 
@@ -36,7 +37,7 @@ public sealed class OperationsService(
         await ExpireAsync(ct);
         var (slots, currency) = await SelectAvailableAsync(input.Date, input.CourtId,
             input.StartsAt, input.EndsAt, ct);
-        var total = slots.Sum(x => x.TotalPrice);
+        var total = PricingCalculator.RoundTotal(slots.Sum(x => x.UnroundedTotalPrice));
         if (total is < 0m or > 99999999.99m) throw Invalid("Price is outside booking limit.");
 
         // Structured source note avoids schema changes, but is not a permanent

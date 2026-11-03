@@ -13,7 +13,7 @@
 ## Architecture and safety
 
 - Keep the requested repository layout: backend/Pickleball.Api, frontend, database, docs, and PickleballBooking.slnx.
-- Backend: ASP.NET Core (.NET 10); frontend: Next.js 16 and TypeScript (player UI Phase 7, admin UI planned Phase 8); database: PostgreSQL 17 on Docker.
+- Backend: ASP.NET Core (.NET 10); frontend: Next.js 16 and TypeScript (player UI Phase 7, admin UI Phase 8); database: PostgreSQL 17 on Docker.
 - The user's PostgreSQL instance is ALREADY working. Never run docker compose down -v, reset its volumes, rerun schema initialization SQL on real data, call EnsureCreated/EnsureDeleted/Migrate at startup, or overwrite local .env credentials. Read docs/database-migrations.md before ANY EF migration changes.
 - Each venue has its own database and deployment; court count, rates, hours, policy and branding are configuration, not new tables per client.
 - EF Core mapping must preserve the SQL-first nine-table schema, UTC timestamptz, TimeOnly for hours, SQL indexes/triggers and PostgreSQL exclusion constraint. Coordinate changes using repositories + IUnitOfWork. Enforce booking transaction safety and PostgreSQL overlap exclusions. Expired HELD/AWAITING_REVIEW rows must transition to EXPIRED before time becomes free.
@@ -33,7 +33,7 @@
 - Guest booking access/cancellation requires `X-Booking-Token`; a booking code by itself grants no access. Guest cancels only unstarted HELD/AWAITING_REVIEW; OWNER/MANAGER can confirm an unexpired HELD or cancel an eligible booking.
 - Expire stale pending rows explicitly via the SQL `expire_pending_schedule_entries()` function **within booking mutations** and periodically through the background worker. A timestamp alone doesn't change exclusion constraint state.
 - Revalidate multiple consecutive slots, venue notice/horizon and pricing in the transaction; persist the entire range as one schedule entry plus one booking. Handle SQLSTATE 23P01/23505 with conflict responses. Future APIs must not overwrite the current database schema without reviewed migrations.
-- Phase 5/6 now contain booking, proof, manual payment verification, staff booking and block API source. There is no automatic payment gateway or frontend. Consult docs/phase-6-payments-operations.md for financial rules.
+- Phase 5/6 now contain booking, proof, manual payment verification, staff booking and block API source. There is no automatic payment gateway; Phases 7–8 provide the frontend. Consult docs/phase-6-payments-operations.md for financial rules.
 
 ## Phase 6 payment and operational safeguards
 
@@ -46,7 +46,7 @@
 
 ## Current implementation
 
-Phases 1–2 are on main; Phase 3 and 4 PRs were merged into their parent **feature branches**, not directly into main. Phase 5 merged into its parent Phase 4 feature branch, not into main. Phase 6 is stacked on Phase 5, and runtime build/PostgreSQL verification is still pending. See [docs/context/progress.md](docs/context/progress.md) before claiming a feature is verified. The API has booking/holds, manual payments and staff operations source. Phase 7 adds player booking UI but NOT an admin dashboard or automated payment settlement.
+Phases 1–8 source is integrated on `feature/phase-9-final-integration`, based on Phase 8 merge `3b0a67e`. Main contains Phases 1–2 until the integration PR is approved and merged. Backend/player/admin workflows have executed against disposable PostgreSQL and real browser/API checks; see [Phase 9 verification](docs/phase-9-final-verification.md) for precise coverage and remaining launch gates. Do not equate passing local tests with production acceptance.
 
 ## Documentation hygiene
 
@@ -61,7 +61,7 @@ Prefer concise topic pages linking to canonical SQL/code. Update decisions.md wh
 - Keep API_BASE_URL and the booking bearer access token **server-only**. On booking creation, Next.js Route Handler removes accessToken from JSON and stores it in an HttpOnly, SameSite=Lax cookie (Secure in production). No localStorage, analytics, query parameters, or public client code may read the secret.
 - Restrict the Next.js player gateway to explicit backend public routes; verify Origin for POST, set APP_ORIGIN to the public HTTPS origin in production, disable caching of booking/payment responses, and never proxy staff admin endpoints through player routes.
 - Online guest cross-device recovery remains unimplemented due to non-exportable HttpOnly tokens; the optional recovery input is only for venue-supplied tokens. Do not imply booking reference alone grants access.
-- UI UX Pro Max and Impeccable are installed globally on developer machine but not callable through GitHub connector. Conduct real browser/mobile/accessibility audit using them locally; never mark a rendered UI verification as passed without evidence. Run npm run check and npm run build locally.
+- UI UX Pro Max and Impeccable were used locally in Phase 9. Continue rendered browser/accessibility verification for UI changes; never mark an audit passed without evidence. Run npm run check and npm run build locally.
 - AGENTS.md and docs/context/*.md MUST remain committed, never excluded by .gitignore.
 
 
@@ -73,5 +73,15 @@ Prefer concise topic pages linking to canonical SQL/code. Update decisions.md wh
 - Keep payment proof previews private under authenticated admin BFF with no-store/nosniff and safe MIME; do not copy PDFs/images into public/static URLs. Refund buttons **record external refunds**, never disburse money.
 - Preserve role semantics: STAFF can view reservations and proof and create manual bookings/payment claims; MANAGER/OWNER manage court, pricing, hours, blocks and payment reviews; OWNER alone manages branding/venue policy and staff accounts.
 - Use the established Phase 7 theme tokens and scoped frontend/app/admin/admin.css. All status indicators need readable text, confirm dangerous financial/cancel actions, make forms keyboard/mobile accessible, and leave blank amount inputs blank rather than prefilled 0.00.
-- Phase 8 admin UI is **source-only** until npm check/build and browser/API security tests pass. The UI UX Pro Max and Impeccable skills are installed globally on developer machine but have not been executed from GitHub connector.
+- Phase 8 admin UI has passed the documented Phase 9 local checks; public production acceptance remains separate. The UI UX Pro Max and Impeccable skills are installed globally on developer machine but have not been executed from GitHub connector.
 - Backend SQL-first nine tables and existing Docker data must remain untouched; do not auto-apply EF migrations or reset database volumes.
+
+## Phase 9 verification and deployment safeguards
+
+- Run root `dotnet restore/build/test`; global.json selects Microsoft.Testing.Platform. Live tests require PICKLEBALL_TEST_CONNECTION_STRING plus PICKLEBALL_TEST_MUTATIONS_ENABLED=1 and a database name ending `_test`. Disabled DB tests must report skipped, never false passes.
+- Frontend package-lock.json is real and tracked; use npm ci, npm run check and npm run build (supported Webpack build). Browser harness at frontend/tests/e2e/browser-smoke.mjs requires loopback and an explicitly labelled disposable venue before mutations.
+- Production requires explicit AllowedHosts, DB configuration, stable Booking signing key, and separate absolute persistent ProofStorage and DataProtection directories. Never recreate a real database to satisfy startup checks.
+- Read docs/deployment.md before proxy changes. Trust only the configured BFF peer; derive upstream scheme from APP_ORIGIN. Enable TRUST_PROXY_HEADERS only behind an ingress that replaces X-Forwarded-For and blocks direct public frontend/API access. Validate one client IP; never forward arbitrary chains.
+- Refunded transfer references remain consumed; refund metadata appends history without replacing the original verification actor/time/reference.
+- Private proof signature/size checks are not malware scanning. Official payment instructions, malware controls, real TLS ingress, backup/restore and monitoring acceptance remain public-launch gates.
+- Do not deploy production or merge main without explicit authorization. Preserve all context pages and this file in Git.

@@ -9,8 +9,8 @@ using Xunit;
 
 namespace Pickleball.Api.Tests.Integration;
 
-public sealed class Phase5AccessTests(WebApplicationFactory<Program> factory)
-    : IClassFixture<WebApplicationFactory<Program>>
+public sealed class Phase5AccessTests(IsolatedApiFactory factory)
+    : IClassFixture<IsolatedApiFactory>
 {
     [Fact]
     public async Task GuestBooking_InvalidJsonBody_IsRejected()
@@ -42,10 +42,10 @@ public sealed class Phase5AccessTests(WebApplicationFactory<Program> factory)
     }
 
     [Fact]
-    public async Task AdminConfirmationWithoutCsrf_IsRejected()
+    public async Task AdminConfirmation_DeniesAnonymous()
     {
         using var client = factory.CreateClient();
-        Assert.Equal(HttpStatusCode.BadRequest,
+        Assert.Equal(HttpStatusCode.Unauthorized,
             (await client.PostAsync(
                 "/api/v1/admin/bookings/PB-0000000000000000/confirm", null)).StatusCode);
     }

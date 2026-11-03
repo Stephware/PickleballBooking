@@ -1,116 +1,52 @@
-# Development setup — Phases 1–8
+# Development and repeatable verification
 
-Prerequisites: .NET 10 SDK, Node.js 22 LTS recommended, and your **already-running** PostgreSQL 17 Docker instance on localhost:5435. Do not change the Docker volume.
+Use .NET 10 SDK, Node.js 22 and PostgreSQL 17. Preserve the existing venue database and credentials; no startup migration/reset is used. Set local `ConnectionStrings:Pickleball`, `Booking:SigningKey` (stable random 32+ bytes) and an absolute private `ProofStorage:Directory` through user-secrets or environment variables. Development uses the existing launch profile; Production also requires explicit hosts and persistent authentication keys (see deployment.md).
 
-## Local API database connection
-
-Set `ConnectionStrings:Pickleball` through ASP.NET Core user-secrets (or environment variables). Avoid putting the password literally into saved shell commands:
-
-```bash
-dotnet user-secrets set "ConnectionStrings:Pickleball" "Host=localhost;Port=5435;Database=pickleball_db;Username=pickleball_app;Password=YOUR_PASSWORD" --project backend/Pickleball.Api
+```sh
 dotnet restore PickleballBooking.slnx
 dotnet build PickleballBooking.slnx
 dotnet test PickleballBooking.slnx
 dotnet run --project backend/Pickleball.Api
 ```
 
-Then check `http://localhost:5090/health` and `http://localhost:5090/health/db`. Database health must be 200 before public availability queries. If you haven't yet created a staff OWNER, follow [Phase 3 owner bootstrap](phase-3-authentication.md).
+Global.json selects Microsoft.Testing.Platform. Default tests intentionally skip database mutation scenarios. Never report those skips as live database passes. For real integration tests, initialize only an empty disposable PostgreSQL database using the canonical SQL, then supply `PICKLEBALL_TEST_CONNECTION_STRING` and `PICKLEBALL_TEST_MUTATIONS_ENABLED=1`; its name must end `_test`. Test schema/exclusion checks and test services never recreate a populated venue database. Do not list user-secrets or copy passwords/tokens into logs.
 
-## Phase 4 endpoint checks
+The first owner uses the one-time private CLI bootstrap described in phase-3-authentication.md. No public owner registration exists. `/health` is liveness; `/health/db` must be healthy before normal API workflows.
 
-Use an actual date within the configured venue booking horizon; date below is an illustration:
+Frontend environment (`frontend/.env.local`, ignored by Git):
 
-```bash
-curl 'http://localhost:5090/api/v1/availability?date=2026-11-03'
-curl 'http://localhost:5090/api/v1/availability?date=2026-11-03&courtId=1'
-curl 'http://localhost:5090/api/v1/pricing/quote?date=2026-11-03&courtId=1&startsAt=09:00'
+```text
+API_BASE_URL=http://localhost:5090
+APP_ORIGIN=http://localhost:3000
 ```
 
-If there are no courts/opening hours, the response may contain no slots. You can add courts/hours through Phase 3 protected APIs, or use existing sample data, but **do not rerun schema creation SQL**. For pricing rules use the staff login-cookie/CSRF flow documented in Phase 3. Changes in rates affect new quotes immediately, not historical bookings.
-
-## Frontend placeholder
-
-```bash
+```sh
 cd frontend
-npm install
+npm ci
 npm run check
+npm run build
 npm run dev
 ```
 
-Open http://localhost:3000. Player availability calendar and owner dashboard are **not** implemented until Phases 7–8.
+The real npm lockfile is tracked. Production build uses supported Webpack; local Turbopack socket binding failed in the Phase 9 environment. `/` is the player site, `/admin` the staff workspace, `/booking/{code}` private guest status. A booking reference alone never grants access. API_BASE_URL remains server-only. APP_ORIGIN must match the browser origin; production uses the exact public HTTPS origin. TRUST_PROXY_HEADERS is disabled by default and must only be enabled behind the explicitly configured ingress described in deployment.md.
 
-## Safety and verification
+## HTTP integration harness
 
-- Run `database/sql/05_verify_existing_schema.sql` read-only in DBeaver to verify the SQL constraints.
-- Do **not** run `dotnet ef database update`, `EnsureCreated`, `EnsureDeleted`, `Migrate`, or `docker compose down -v`; the current DB is SQL-first. See [migration guide](database-migrations.md).
-- Test code covers price precedence, partial slot proration, weekdays, DST, status priority, multi-court slot generation and authorization boundaries.
-- A successful static file audit is not proof of a local .NET build, successful network connection, or passing runtime tests. Those checks must be executed on your Mac or a configured .NET runner.
-- Never commit .env, staff credentials, customer records, payment proofs or private database exports.
+`scripts/verify-api.mjs` refuses non-loopback targets and any venue whose slug is not `phase9-test-venue`. It additionally requires `PHASE9_MUTATIONS=1`, `PHASE9_API_URL`, `PHASE9_OWNER_EMAIL` and `PHASE9_OWNER_PASSWORD`. Use synthetic test credentials. For a fresh disposable `_test` DB, load `database/sql/01_schema.sql`, `scripts/seed-test.sql`, then bootstrap its owner before running the server. Never apply these test fixtures to existing venue data.
 
-Update docs/context/progress.md and log.md when local verification is completed.
+The harness creates synthetic courts and reservations so it can rerun without interval collisions. Respect rate-limit windows or restart **only the isolated test API** between whole test runs; do not weaken production limits. `scripts/verify-deployment.mjs` exercises production images through a loopback-only ingress simulation, checks separate client rate buckets and optionally saves a mode-600 temporary session file for post-recreation persistence checks. It also requires an explicitly labelled test venue.
 
-## Phase 5 reservation engine
+## Browser verification
 
-Configure the per-venue persistent random signing key **before** issuing guest bookings:
+The browser harness is `frontend/tests/e2e/browser-smoke.mjs`; Playwright/Axe are optional isolated test tools, not production dependencies. Install them outside the application, e.g. in a disposable tooling directory, and provide module paths:
 
-```zsh
-BOOKING_SIGNING_KEY=$(openssl rand -hex 32)
-dotnet user-secrets set "Booking:SigningKey" "$BOOKING_SIGNING_KEY" --project backend/Pickleball.Api
-unset BOOKING_SIGNING_KEY
+```sh
+E2E_ORIGIN=http://localhost:3099 \
+E2E_PLAYWRIGHT_MODULE=/absolute/tooling/node_modules/playwright/index.mjs \
+E2E_AXE_MODULE=/absolute/tooling/node_modules/@axe-core/playwright/dist/index.mjs \
+node frontend/tests/e2e/browser-smoke.mjs
 ```
 
-Protect and back up the secret securely; all replicas of the **same** venue require it. Never commit it to Git. See [Phase 5 guide](phase-5-booking-engine.md) for API examples, UUID v4 idempotency, bearer guest tokens and payment limitations.
+Install Playwright Chromium or supply E2E_CHROME to an installed Chrome executable. By default, public layout/error checks run against the explicitly labelled disposable venue. Add `E2E_MUTATIONS=true`, `E2E_STAFF_EMAIL` and `E2E_STAFF_PASSWORD` for real synthetic booking/payment/staff workflows. Module paths, credentials and evidence output are environment settings. Keep screenshots/session cookies/private proofs outside Git. Browser checks include 320/375/768/1024px layouts, mobile keyboard navigation, token/cookie boundaries, upload review and automated Axe rules. They do not certify physical touch devices or human screen-reader use.
 
-With `/health/db` healthy, test a future AVAILABLE court slot using POST `/api/v1/bookings`. Verify same UUID + same input returns the same booking; overlap with another UUID returns 409; GET/cancel without a token returns 404; guests cannot cancel confirmed reservations. Staff confirmations and cancellations still require Phase 3 session cookie + CSRF. After `hold_minutes`, the background worker should change HELD to EXPIRED using canonical SQL.
-
-**Live integration constraint tests** require `PICKLEBALL_TEST_CONNECTION_STRING` pointing to a disposable test database and explicit `PICKLEBALL_TEST_MUTATIONS_ENABLED=1`. Never run mutation tests on production/current venue data. `dotnet test PickleballBooking.slnx` runs offline tests by default.
-
-GitHub branch warning: PR #3 and PR #4 were merged into parent feature branches, **not main**. Phase 5 is stacked on the Phase 4 feature branch; integrate all subsequent features into main in order after build/runtime verification.
-
-## Phase 6 — payment and operations setup
-
-Configure a durable **private** location outside the repository webroot (example below; replace the path with your Mac username or deployment mount):
-
-```bash
-dotnet user-secrets set "ProofStorage:Directory" "/Users/your-mac-user/pickleball-private-proofs" --project backend/Pickleball.Api
-```
-
-The existing `ConnectionStrings:Pickleball` and `Booking:SigningKey` must also be configured. Without the signing key, guest bearer access fails; without the private storage path, payment-proof submissions fail. **Do not commit** credentials, real payment images or storage files.
-
-Check `/health/db` is healthy. Then create a future HELD booking, use its `X-Booking-Token` to submit multipart GCash/bank proof, sign in with Phase 3 staff auth + CSRF and approve/reject through `/api/v1/admin/payments/{id}/...`. Ensure the admin preview endpoint returns a valid private file only when staff is authenticated. Test verified paid amount and balance due; repeated approvals/rejections should conflict. Manually record cash payments only against CONFIRMED bookings and have Owner/Manager verify them.
-
-Staff operations include confirmed future WALK_IN/PHONE/MESSENGER bookings and maintenance blocks, both guarded by the same schedule overlap exclusion. Source is currently stored as a structured notes prefix; actual `booking_source` is not a schema column.
-
-See [Phase 6 runbook](phase-6-payments-operations.md) for detailed endpoints, limits, external refund recording and security caveats. Recheck `docs/context/progress.md` before claiming live verification or merging into main.
-
-## Phase 7 player site
-
-After starting the API (with DB, Booking:SigningKey, and private ProofStorage:Directory) in another terminal, configure frontend/.env.local from frontend/.env.example:
-
-    API_BASE_URL=http://localhost:5090
-    APP_ORIGIN=http://localhost:3000
-
-Both variables are server-only. For production, APP_ORIGIN **must** equal the public HTTPS frontend origin or booking/payment POST routes fail closed. Do not commit .env.local or any real guest data.
-
-    cd frontend
-    npm install
-    npm run check
-    npm run build
-    npm run dev
-
-Visit http://localhost:3000 and test a genuinely AVAILABLE future slot. A reservation should create HELD and navigate to /booking/{code}, where the Next.js gateway stores bearer access in an HttpOnly cookie and allows same-browser lookup, payment proof upload/preview and eligible hold cancellation. Before real public launch, configure official venue-provided GCash/bank recipient instructions rather than leaving users to guess an account.
-
-The frontend tests cover pure helpers only. Manual real-browser responsive/accessibility checks and a disposable PostgreSQL full booking/payment flow are still mandatory. See [Phase 7 runbook](phase-7-player-frontend.md). Generate/commit frontend/package-lock.json after first npm install; don't fabricate lock dependencies.
-
-The repo still has stacked feature branches Phases 3–7, with main behind. Verify and integrate carefully before deployment.
-
-
-## Phase 8 admin dashboard
-
-With the same .NET API and PostgreSQL instance used for Phase 7, run frontend npm install, npm run check, npm run build, then npm run dev. Configure API_BASE_URL and APP_ORIGIN in frontend/.env.local (APP_ORIGIN=http://localhost:3000 locally, the exact HTTPS public origin in production).
-
-Visit http://localhost:3000/admin to log in with an existing staff email/password. A first Owner must be bootstrapped via the Phase 3 CLI (do not create a public admin registration endpoint). The Next.js server obtains anonymous/backend authenticated CSRF cookies, stores backend staff and antiforgery tokens as HttpOnly cookies, and proxies only explicitly approved admin API routes. Any Origin mismatch on modifying calls should receive HTTP 403.
-
-Verify Owner/Manager/Staff role separation, bookings/court conflicts, payment receipt image/PDF preview and approval, staff walk-ins, blocks, court/rate/hours settings, team accounts, password changes and logout using an isolated disposable database. Backend cookie/Data Protection keys must remain stable on multi-replica production deployment.
-
-See docs/phase-8-owner-staff-dashboard.md. All prior phases' .NET runtime and PostgreSQL checks are still pending; Phase 8 is source-only until npm and browser testing succeeds. Do not reset the existing Docker volume.
+GitHub Actions defines disposable-DB .NET tests, frontend checks/build/audit and real HTTP/browser jobs. Remote CI outcome is separate from local execution evidence; see phase-9-final-verification.md. Production launch/backup/rollback procedures are in deployment.md.

@@ -5,8 +5,8 @@ using Xunit;
 namespace Pickleball.Api.Tests.Integration;
 
 /// <summary>Authorization/CSRF tests do not need configured PostgreSQL.</summary>
-public sealed class Phase6SecurityTests(WebApplicationFactory<Program> app)
-    : IClassFixture<WebApplicationFactory<Program>>
+public sealed class Phase6SecurityTests(IsolatedApiFactory app)
+    : IClassFixture<IsolatedApiFactory>
 {
     [Theory]
     [InlineData("/api/v1/admin/payments/pending")]
@@ -21,21 +21,21 @@ public sealed class Phase6SecurityTests(WebApplicationFactory<Program> app)
     }
 
     [Fact]
-    public async Task PaymentReviewMutation_RequiresCsrf()
+    public async Task PaymentReviewMutation_DeniesAnonymous()
     {
         using var client = app.CreateClient();
         var response = await client.PostAsync("/api/v1/admin/payments/1/approve",
             new StringContent("{}", System.Text.Encoding.UTF8, "application/json"));
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
     [Fact]
-    public async Task ManualBookingMutation_RequiresCsrf()
+    public async Task ManualBookingMutation_DeniesAnonymous()
     {
         using var client = app.CreateClient();
         var response = await client.PostAsync("/api/v1/admin/operations/manual-bookings",
             new StringContent("{}", System.Text.Encoding.UTF8, "application/json"));
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
     [Fact]

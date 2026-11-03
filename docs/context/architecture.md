@@ -1,6 +1,6 @@
 # Architecture and data model
 
-One reusable deployment/codebase, separately configured PostgreSQL database per pickleball venue. The original SQL-first nine-table schema remains the source of truth. No schema changes in Phases 4–5.
+One reusable deployment/codebase, separately configured PostgreSQL database per pickleball venue. The original SQL-first nine-table schema remains the source of truth. No schema changes in Phases 4–9.
 
 ## API layering
 - `Controllers/Public/`: public venue/court APIs plus `AvailabilityController` and `PricingController` (read-only).
@@ -70,4 +70,13 @@ The frontend is not a venue marketplace. Each deployment uses its own branding, 
 - components/admin/sections: Overview, Bookings, Payments, PaymentLedger, Manual, Blocks, Courts, Pricing, Hours, Venue, Staff, Account. Styling in app/admin/admin.css, inheriting Phase 7 brand tokens.
 - All data remains per-venue. No database migration or backend controllers changed in Phase 8.
 
-See [Phase 8 operations guide](../phase-8-owner-staff-dashboard.md). Runtime authentication, UI behavior and verification remain pending.
+See [Phase 8 operations guide](../phase-8-owner-staff-dashboard.md). See Phase 9 for actual runtime authentication, UI and verification results.
+
+## Phase 9 runtime and deployment
+
+- `Extensions/DeploymentConfiguration.cs` validates production secrets/private paths/hosts and persists Data Protection keys. Explicit trusted BFF proxy addresses preserve HTTPS antiforgery and per-client throttling across the internal HTTP hop.
+- `frontend/lib/backend-headers.ts` derives scheme from configured public origin and only forwards one validated IP when a trusted ingress is explicitly configured. The Compose frontend is loopback-published with a reserved internal address; API and DB have no public ports.
+- Frontend streams are byte-limited before JSON/multipart buffering; cookies/token transport and route allowlists remain unchanged. `next.config.ts` supplies standalone output and response security headers.
+- Backend/frontend Dockerfiles run as unprivileged application users. `deployment/compose.yaml` supplies per-project database/proof/key volumes; runtime DB role has no DDL or DELETE. No automatic schema migration/initialization on deployment.
+- Payment reference uniqueness includes REFUNDED history and legacy surrounding whitespace. Review/refund notes append rather than overwrite original verification metadata; no new audit table was introduced.
+- `.github/workflows/verify.yml`, unit/integration tests and guarded HTTP/browser scripts exercise disposable databases. Local execution evidence is in [Phase 9 verification](../phase-9-final-verification.md); [deployment](../deployment.md) documents operational acceptance.

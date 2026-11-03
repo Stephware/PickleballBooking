@@ -19,7 +19,8 @@ public sealed class PostgresOverlapTests
         var connection = Environment.GetEnvironmentVariable("PICKLEBALL_TEST_CONNECTION_STRING");
         if (string.IsNullOrWhiteSpace(connection) ||
             Environment.GetEnvironmentVariable("PICKLEBALL_TEST_MUTATIONS_ENABLED") != "1")
-            return;
+            Assert.Skip("Requires explicitly enabled disposable PostgreSQL mutations.");
+        Assert.EndsWith("_test", new NpgsqlConnectionStringBuilder(connection).Database);
 
         await using var db = new PickleballDbContext(
             new DbContextOptionsBuilder<PickleballDbContext>()
@@ -69,7 +70,8 @@ public sealed class PostgresOverlapTests
         var connection = Environment.GetEnvironmentVariable("PICKLEBALL_TEST_CONNECTION_STRING");
         if (string.IsNullOrWhiteSpace(connection) ||
             Environment.GetEnvironmentVariable("PICKLEBALL_TEST_MUTATIONS_ENABLED") != "1")
-            return;
+            Assert.Skip("Requires explicitly enabled disposable PostgreSQL mutations.");
+        Assert.EndsWith("_test", new NpgsqlConnectionStringBuilder(connection).Database);
 
         await using var db = new PickleballDbContext(
             new DbContextOptionsBuilder<PickleballDbContext>()

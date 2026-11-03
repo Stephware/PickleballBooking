@@ -22,7 +22,7 @@ OWNER or MANAGER creates/updates/deactivates `pricing_rules`; STAFF can read. Ad
 5. Create returns booking code and an HMAC guest bearer token once; guest status lookup and cancellation require `X-Booking-Token` header. Guest may cancel HELD/AWAITING_REVIEW before start; staff OWNER/MANAGER may confirm live HELD or cancel eligible unstarted bookings.
 6. Worker runs `expire_pending_schedule_entries()` roughly every 30 seconds; mutations call it too. **Never make stale-but-active holds free solely by comparing expires_at**.
 
-Guest tokens and deterministic codes require a durable per-venue signing secret; they don't need new DB columns. Payment review and source tagging are **Phase 6**, not implemented here.
+Guest tokens and deterministic codes require a durable per-venue signing secret; they don't need new DB columns. Payment review and source tagging are implemented in Phase 6; see below.
 
 ## Payment handling and staff operations (Phase 6 source)
 
@@ -41,7 +41,7 @@ See [Phase 6 guide](../phase-6-payments-operations.md) for authentication, proof
 
 Staff enters Messenger, phone, and walk-in reservations in the same schedule. Staff may block/unblock courts and review payments. Maintain booking/payment history using status transitions rather than deleting records.
 
-**Phase 5 has booking API source but no payment processing or public/admin booking UI; actual .NET build, real DB transactions and concurrency behavior still need verification.**
+**Phase 9 executed the backend/player/admin integration against disposable PostgreSQL. See the verification report for coverage and limits.**
 
 ## Phase 7 player web flow (implemented in Next.js source)
 
@@ -67,3 +67,11 @@ The frontend is a UI over the backend rules. It cannot make an expired, blocked,
 7. Account password change clears frontend cookies and requires reauthentication; logout clears staff session.
 
 All sensitive actions go through the allowlisted Next.js server-side admin gateway; .NET remains the authority for role/CSRF and PostgreSQL transaction safety. See [Phase 8 details](../phase-8-owner-staff-dashboard.md).
+
+## Phase 9 verified safeguards
+
+Real API/browser checks executed guest selection → HELD → receipt SUBMITTED/AWAITING_REVIEW → staff private preview/approval → CONFIRMED. Other executed API scenarios cover idempotency replay/changed intent, concurrent exclusion, guest/payment cancellation boundaries, manual booking, maintenance overlap/removal, verified balances, external refund history and staff deactivation.
+
+Production-image checks exercise the anonymous→authenticated CSRF handshake across the trusted internal HTTP hop, per-client rate buckets and persistent staff/guest/proof access after application-container recreation. Refund references cannot be recycled into another verified payment. A refund remains an external action recorded by staff, not a transfer performed by this application.
+
+Actual test counts, skipped tests, browser fixture boundaries and remaining launch gates are recorded in [Phase 9](../phase-9-final-verification.md).

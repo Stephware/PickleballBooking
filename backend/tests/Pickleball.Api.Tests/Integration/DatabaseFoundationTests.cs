@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Pickleball.Api.Data;
 using Pickleball.Api.Models.Entities;
 using Pickleball.Api.Repositories;
@@ -25,7 +26,7 @@ public sealed class DatabaseFoundationTests
     public async Task LiveSchema_CanReadVenueAndCourtCount()
     {
         if (string.IsNullOrWhiteSpace(Connection))
-            return; // Integration testing is intentionally opt-in.
+            Assert.Skip("Requires a disposable PostgreSQL test database.");
 
         await using var db = CreateContext();
         Assert.True(await db.Database.CanConnectAsync());
@@ -44,7 +45,8 @@ public sealed class DatabaseFoundationTests
         // Explicit second guard to prevent writes to a regular venue database.
         if (string.IsNullOrWhiteSpace(Connection) ||
             Environment.GetEnvironmentVariable("PICKLEBALL_TEST_MUTATIONS_ENABLED") != "1")
-            return;
+            Assert.Skip("Requires explicitly enabled disposable PostgreSQL mutations.");
+        Assert.EndsWith("_test", new NpgsqlConnectionStringBuilder(Connection).Database);
 
         await using var db = CreateContext();
         var courtRepo = new CourtRepository(db);

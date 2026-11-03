@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { adminRequest, apiTime, extractError, hasManagerRights, weekdayNames } from "@/lib/admin-client";
 import type { OperatingHourAdmin, StaffProfile } from "@/types/admin";
 import { AccessMessage, Loading, Notice, SectionHeader, useAdminResource } from "@/components/admin/AdminShared";
@@ -11,26 +11,23 @@ const defaults: OperatingHourAdmin[] = weekdayNames.map((_, dayOfWeek) => ({
 
 export function AdminHours({ user }: { user: StaffProfile }) {
   const response = useAdminResource<OperatingHourAdmin[]>("/venue/hours", []);
-  const [hours, setHours] = useState<OperatingHourAdmin[]>(defaults);
+  const [draft, setHours] = useState<OperatingHourAdmin[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const canManage = hasManagerRights(user);
 
-  useEffect(() => {
-    if (response.loading || response.error) return;
-    setHours(defaults.map(d => {
+  const hours = draft ?? defaults.map(d => {
       const existing = response.data.find(h => h.dayOfWeek === d.dayOfWeek);
       return existing ? {
         ...existing,
         opensAt: existing.opensAt?.slice(0, 5) ?? "08:00",
         closesAt: existing.closesAt?.slice(0, 5) ?? "22:00",
       } : { ...d, isClosed: true };
-    }));
-  }, [response.data, response.loading, response.error]);
+    });
 
   function change(day: number, key: keyof OperatingHourAdmin, value: boolean | string) {
-    setHours(old => old.map(h => h.dayOfWeek === day ? { ...h, [key]: value } : h));
+    setHours(hours.map(h => h.dayOfWeek === day ? { ...h, [key]: value } : h));
     setMessage("");
   }
   async function save(event: React.FormEvent<HTMLFormElement>) {
@@ -47,7 +44,7 @@ export function AdminHours({ user }: { user: StaffProfile }) {
           closesAt: h.isClosed ? null : apiTime(h.closesAt ?? "22:00"),
         })),
       });
-      setMessage("Operating hours saved."); await response.reload();
+      setMessage("Operating hours saved."); await response.reload(); setHours(null);
     } catch (cause) { setError(extractError(cause)); }
     finally { setBusy(false); }
   }

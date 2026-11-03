@@ -6,8 +6,8 @@ using Xunit;
 namespace Pickleball.Api.Tests.Integration;
 
 /// <summary>No local database needed for authorization/CSRF boundary tests.</summary>
-public sealed class AdminSecurityTests(WebApplicationFactory<Program> app)
-    : IClassFixture<WebApplicationFactory<Program>>
+public sealed class AdminSecurityTests(IsolatedApiFactory app)
+    : IClassFixture<IsolatedApiFactory>
 {
     [Theory]
     [InlineData("/api/v1/admin/courts")]

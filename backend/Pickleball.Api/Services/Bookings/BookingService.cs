@@ -9,6 +9,7 @@ using Pickleball.Api.Repositories.Bookings;
 using Pickleball.Api.Repositories.Settings;
 using Pickleball.Api.Security;
 using Pickleball.Api.Services.Availability;
+using Pickleball.Api.Services.Pricing;
 
 namespace Pickleball.Api.Services.Bookings;
 
@@ -87,7 +88,7 @@ public sealed class BookingService(
             if (startUtc <= now)
                 throw new BookingException(BookingError.Unavailable, "The selected time has passed.");
 
-            var total = selected.Sum(s => s.TotalPrice);
+            var total = PricingCalculator.RoundTotal(selected.Sum(s => s.UnroundedTotalPrice));
             if (total is < 0m or > 99999999.99m)
                 throw new BookingException(BookingError.InvalidInput, "Price exceeds booking limit.");
 

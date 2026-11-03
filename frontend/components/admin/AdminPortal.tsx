@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { adminRequest, extractError, hasOwnerRights } from "@/lib/admin-client";
 import { brandStyle } from "@/lib/player";
 import type { AdminSectionId, StaffProfile } from "@/types/admin";
@@ -48,6 +48,36 @@ export function AdminPortal({ venue }: { venue: Venue }) {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const sidebar = useRef<HTMLElement>(null);
+  const menuButton = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const panel = sidebar.current;
+    const opener = menuButton.current;
+    const controls = () => Array.from(panel?.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled])') ?? []);
+    controls()[0]?.focus();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") { event.preventDefault(); setMenuOpen(false); }
+      if (event.key !== "Tab") return;
+      const items = controls();
+      const first = items[0], last = items.at(-1);
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault(); last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault(); first?.focus();
+      }
+    };
+    const onResize = () => { if (window.innerWidth > 950) setMenuOpen(false); };
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("resize", onResize);
+      opener?.focus();
+    };
+  }, [menuOpen]);
 
   useEffect(() => {
     const onHash = () => setSection(currentSection());
@@ -67,6 +97,7 @@ export function AdminPortal({ venue }: { venue: Venue }) {
 
   async function login(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (busy) return;
     setBusy(true); setNotice("");
     try {
       const profile = await adminRequest<StaffProfile>("/session", "POST",
@@ -121,7 +152,8 @@ export function AdminPortal({ venue }: { venue: Venue }) {
         </div>
       </main> :
       <div className="admin-layout">
-        <aside className={"admin-sidebar" + (menuOpen ? " sidebar-open" : "")}>
+        <aside ref={sidebar} id="admin-navigation"
+          className={"admin-sidebar" + (menuOpen ? " sidebar-open" : "")}>
           <div className="admin-logo">
             <span className="admin-logo-mark">{venue.venueName.charAt(0).toUpperCase()}</span>
             <div><strong>{venue.venueName}</strong><small>Venue operations</small></div>
@@ -144,12 +176,12 @@ export function AdminPortal({ venue }: { venue: Venue }) {
           </div>
         </aside>
         {menuOpen && <button type="button" className="admin-menu-scrim"
-          aria-label="Close navigation" onClick={() => setMenuOpen(false)} />}
-        <div className="admin-main">
+          tabIndex={-1} aria-label="Close navigation" onClick={() => setMenuOpen(false)} />}
+        <div className="admin-main" inert={menuOpen}>
           <header className="admin-topbar">
             <div className="admin-page-intro">
-              <button type="button" className="admin-menu-button"
-                aria-label="Open navigation" aria-expanded={menuOpen}
+              <button ref={menuButton} type="button" className="admin-menu-button"
+                aria-label="Open navigation" aria-expanded={menuOpen} aria-controls="admin-navigation"
                 onClick={() => setMenuOpen(!menuOpen)}>☰</button>
               <div><span className="micro-label">OPERATIONS / {title.toUpperCase()}</span>
                 <strong>{title}</strong></div>

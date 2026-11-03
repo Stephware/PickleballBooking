@@ -63,3 +63,11 @@ Document approved design-system paths here once frontend exists; do not duplicat
 - Preserve editable numbers as string inputs in new court/rule forms so a blank field does not force users to erase a leading 0.00. Keep submit/save next to fields and provide feedback inline.
 - Status indicators use text and semantic styling; roles affect visibility but never replace backend authorization.
 - **Pending:** browser screenshot and keyboard/a11y audit at 320/375/768/1024px, mobile scrolling, nested form validation and reduced motion. UI UX Pro Max/Impeccable run locally only, not through GitHub plugin.
+
+## Phase 9 executed audit — 2026-11-03
+
+UI UX Pro Max form-error guidance and Impeccable context/audit/craft guidance were used while preserving the existing design. Fixed native/React lint issues, mobile hidden-navigation tab access, keyboard focus trap/Escape/return, booking error-summary focus/links, receipt remove/reselect behavior, and measured small-text/brand contrast.
+
+Chrome headless Playwright executed 76 layout checks at 320/375/768/1024px plus three real booking/payment workflow checks (79 total). No page overflow or browser runtime errors in that run. Axe WCAG 2/2.1/2.2 AA rules at 375px reported zero violations in sampled player/lookup/login/form/booking/admin screens. Real three-court flows used the backend/disposable DB; 1/3/8/12-court and empty/closed/outage cases used intercepted read-only availability fixtures. Screenshots were viewed locally; synthetic data/screenshots and auth cookies are not committed.
+
+This is implemented-and-tested evidence for the stated environment, not physical-device or human screen-reader certification. Keep those acceptance checks open. Reproduce with `frontend/tests/e2e/browser-smoke.mjs` per the Phase 9 report.

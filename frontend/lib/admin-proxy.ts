@@ -1,5 +1,7 @@
 export { adminAllowed } from "@/lib/admin-policy";
 import { NextRequest, NextResponse } from "next/server";
+import { headers as incomingHeaders } from "next/headers";
+import { backendHeaders } from "@/lib/backend-headers";
 import { apiOrigin } from "@/lib/server-api";
 
 const adminCookies = {
@@ -53,6 +55,7 @@ export async function backendAdmin(
 ): Promise<Response> {
   if (!path.startsWith("/api/v1/admin/")) throw new Error("Admin URL must be allowlisted.");
   const headers = new Headers(init.headers);
+  backendHeaders(await incomingHeaders()).forEach((value, name) => headers.set(name, value));
   if (cookie) headers.set("Cookie", cookie);
   if (csrf) headers.set("X-CSRF-TOKEN", csrf);
   const response = await fetch(new URL(path, apiOrigin()), {

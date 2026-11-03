@@ -11,6 +11,14 @@ public static class PricingCalculator
 {
     public static decimal Calculate(
         Court court, DateOnly date, TimeOnly start, TimeOnly end,
+        IEnumerable<PricingRule> rules) =>
+        RoundTotal(CalculateUnrounded(court, date, start, end, rules));
+
+    internal static decimal RoundTotal(decimal total) =>
+        decimal.Round(total, 2, MidpointRounding.AwayFromZero);
+
+    internal static decimal CalculateUnrounded(
+        Court court, DateOnly date, TimeOnly start, TimeOnly end,
         IEnumerable<PricingRule> rules)
     {
         if (start >= end)
@@ -51,6 +59,6 @@ public static class PricingCalculator
             var minutes = (decimal)(to.ToTimeSpan() - from.ToTimeSpan()).TotalMinutes;
             total += rate * minutes / 60m;
         }
-        return decimal.Round(total, 2, MidpointRounding.AwayFromZero);
+        return total;
     }
 }

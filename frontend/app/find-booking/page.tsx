@@ -1,4 +1,4 @@
-import type { Metadata } from "react";
+import type { Metadata } from "next";
 import { FindBookingForm } from "@/components/booking/FindBookingForm";
 import { VenueHeader } from "@/components/ui/VenueHeader";
 import { getServerVenue } from "@/lib/server-api";
