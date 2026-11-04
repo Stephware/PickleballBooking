@@ -67,9 +67,9 @@ in the other four prospect folders.
 Set `VENUE_TEMPLATE` on the **frontend only**, then restart/redeploy:
 
 - `pickleball-reserve` (default) — burgundy / cream, unchanged.
-- `the-pickle-cave` — deep forest green / warm linen / subtle gold.
-- `the-mad-pickle` — aubergine / blush / peach.
-- `trnd-pickleball` — midnight blue / cool slate / mint.
+- `the-pickle-cave` — charcoal / warm stone / muted olive.
+- `the-mad-pickle` — forest green / warm paper / mustard.
+- `trnd-pickleball` — supplied steel-blue / white / pale blue.
 - `angeles-pickleball-center` — navy / warm white / burnt orange.
 
 The **same Reserve-style layout and existing booking/payment features** are
@@ -84,3 +84,14 @@ proof storage, secrets and owner credentials, and confirm each venue's
 legal branding and payment instructions before public launch.
 Run `VENUE_BRAND_MODE=api` to preserve a separately configured API
 identity rather than applying one of these preset names.
+
+## Asset pack from the 2026-11-04 image references
+
+The operator supplied Cave, Mad Pickle and TRND logos, plus one Cave venue
+court photograph. The corresponding assets can be extracted into these
+folders as `logo.webp`, `hero.webp` and `court-1.webp`. Reuse the
+one Cave court photo for the hero and first gallery item until additional
+real shots are available. Do not invent Mad Pickle/TRND venue photos.
+The GitHub brand-config PR does **not** assert that chat attachments have
+been uploaded as repository binary blobs: first ensure the files appear in
+the repository and rebuild the frontend before expecting them in the UI.
