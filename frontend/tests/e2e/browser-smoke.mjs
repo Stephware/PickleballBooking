@@ -277,6 +277,9 @@ try {
               const response = await context.request.get(origin + "/api/admin/courts");
               assert.equal(response.status(), 200);
               const expected = await response.json();
+              await page.locator(".admin-court-card h3").first().waitFor({
+                state: "visible",
+              });
               assert.deepEqual((await page.locator(".admin-court-card h3").allTextContents())
                   .map(s => s.trim()), expected.map(court => court.courtName),
                 "Every court card title must match its actual saved name, in creation order");
