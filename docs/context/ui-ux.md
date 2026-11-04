@@ -124,3 +124,11 @@ games starting within an hour and canceled/other unresolved payment records.
 Do not imply that reminders are email/push notifications. A reason must be
 recorded when management releases a court with submitted proof. No invented
 payment account, automatic refund or guaranteed play access.
+
+
+## Official venue name — 2026-11-04
+
+- The supplied logo and Reserve burgundy/cream theme belong to **Pickleball Reserve**.
+- In Reserve brand mode, the public header, footer, booking details, admin sidebar and page/tab metadata all use the exact venue name "Pickleball Reserve", even when a legacy backend still has a generic starter display name.
+- Alternate per-venue deployments in `VENUE_BRAND_MODE=api` preserve their actual API-supplied name, colors and logo. Never rename internal booking codes or the repository to accomplish a presentation change.
+- A safe, opt-in SQL data update is supplied for the existing Reserve database; no production PostgreSQL changes are made by the frontend patch.

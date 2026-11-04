@@ -67,3 +67,15 @@ The unused `review_timeout_hours` database column is retained for backward
 compatibility, but the API no longer exposes or applies it. Include this
 policy change in the eventual canonical EF baseline; do not create fake
 `__EFMigrationsHistory` entries.
+
+
+## 2026-11-04 — Pickleball Reserve display name correction
+
+The existing Reserve database may still have the original starter name.
+`database/sql/07_set_pickleball_reserve_name.sql` is a guarded, idempotent
+**data-only** name update, not an EF schema migration. Apply on the actual
+Reserve deployment only after a backup and positive verification of the
+current venue identity; it rejects unrelated venues. It does not change
+booking codes, venue slugs, schedule entries, payment proofs or other venue
+settings. The frontend corrects Reserve-mode public display immediately,
+independent of whether the existing DB name patch has been applied.

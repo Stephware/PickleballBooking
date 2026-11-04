@@ -53,3 +53,15 @@ erase any booking, payment, proof or ID, and does not recreate the database.
 Already expired bookings require manual reconciliation; they cannot simply
 be reinstated. The unused legacy `review_timeout_hours` column remains stored
 for compatibility but is not used or shown in the new API.
+
+
+## Official name for Pickleball Reserve (2026-11-04)
+
+The current bundled venue's exact name is **Pickleball Reserve**. New, empty
+databases initialized from `sql/01_schema.sql` use this name and the starter
+slug `pickleball-reserve`. Existing Docker volumes do **not** rerun bootstrap
+SQL automatically. To correct a previously initialized Reserve DB's stored
+name, an authorized administrator may verify the target, back it up and apply
+`sql/07_set_pickleball_reserve_name.sql` with `psql -v ON_ERROR_STOP=1`.
+The patch refuses unrelated venue identities and leaves existing slugs and
+bookings unchanged. It is not an automatic migration or reason to reset the DB.
