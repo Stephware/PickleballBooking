@@ -31,7 +31,6 @@ public sealed class CourtService(ICourtRepository courts, IUnitOfWork unit, Time
             CourtName = request.CourtName.Trim(),
             Description = request.Description?.Trim(),
             BaseHourlyRate = request.BaseHourlyRate,
-            DisplayOrder = request.DisplayOrder,
             IsActive = request.IsActive
         };
         courts.Add(court);
@@ -53,7 +52,6 @@ public sealed class CourtService(ICourtRepository courts, IUnitOfWork unit, Time
         court.CourtName = request.CourtName.Trim();
         court.Description = request.Description?.Trim();
         court.BaseHourlyRate = request.BaseHourlyRate;
-        court.DisplayOrder = request.DisplayOrder;
         court.IsActive = request.IsActive;
         await SaveAsync(ct);
         return Map(court);
@@ -77,5 +75,5 @@ public sealed class CourtService(ICourtRepository courts, IUnitOfWork unit, Time
     }
 
     private static CourtResponse Map(Court c) =>
-        new(c.Id, c.CourtName, c.Description, c.BaseHourlyRate, c.DisplayOrder, c.IsActive);
+        new(c.Id, c.CourtName, c.Description, c.BaseHourlyRate, c.IsActive);
 }

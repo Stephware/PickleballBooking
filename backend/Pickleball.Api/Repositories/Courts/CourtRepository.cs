@@ -9,7 +9,9 @@ public sealed class CourtRepository(PickleballDbContext db) : ICourtRepository
 {
     public async Task<IReadOnlyList<Court>> ListAsync(CancellationToken cancellationToken = default) =>
         await db.Courts.AsNoTracking()
-            .OrderBy(c => c.DisplayOrder).ThenBy(c => c.Id)
+            // Newly created courts append automatically. The legacy display_order
+            // field is ignored; edits never reorder a court.
+            .OrderBy(c => c.Id)
             .ToListAsync(cancellationToken);
 
     // Tracked entity; later CourtService may update its properties.

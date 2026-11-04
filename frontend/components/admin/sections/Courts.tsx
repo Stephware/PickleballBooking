@@ -9,16 +9,16 @@ import { AccessMessage, Empty, Notice, SectionHeader, useAdminResource } from "@
 
 type CourtForm = {
   courtName: string; description: string; baseHourlyRate: string;
-  displayOrder: string; isActive: boolean;
+  isActive: boolean;
 };
 const blank: CourtForm = {
   courtName: "", description: "", baseHourlyRate: "",
-  displayOrder: "0", isActive: true,
+  isActive: true,
 };
 function fromCourt(court: CourtAdmin): CourtForm {
   return { courtName: court.courtName, description: court.description || "",
     baseHourlyRate: String(court.baseHourlyRate),
-    displayOrder: String(court.displayOrder), isActive: court.isActive };
+    isActive: court.isActive };
 }
 
 export function AdminCourts({ user, venue }: { user: StaffProfile; venue: Venue }) {
@@ -42,7 +42,7 @@ export function AdminCourts({ user, venue }: { user: StaffProfile; venue: Venue 
         courtName: form.courtName.trim(),
         description: form.description.trim() || null,
         baseHourlyRate: Number(form.baseHourlyRate),
-        displayOrder: Number(form.displayOrder), isActive: form.isActive,
+        isActive: form.isActive,
       };
       if (!Number.isFinite(payload.baseHourlyRate) || payload.baseHourlyRate < 0)
         throw new Error("Enter a valid non-negative court rate.");
@@ -56,7 +56,7 @@ export function AdminCourts({ user, venue }: { user: StaffProfile; venue: Venue 
   }
   return <>
     <SectionHeader eyebrow="Court configuration" title="Courts"
-      description="Set court names, hourly base prices, display order and availability."
+      description="Set court names, hourly base prices and availability. New courts appear last automatically."
       action={canManage ? <button type="button" className="button-primary" onClick={() => edit()}>
         + Add court</button> : undefined} />
     {(error || courts.error) && <Notice>{error || courts.error}</Notice>}
@@ -73,8 +73,6 @@ export function AdminCourts({ user, venue }: { user: StaffProfile; venue: Venue 
           <label>Base hourly rate (PHP)<input required type="number" min="0" step="0.01"
             value={form.baseHourlyRate} placeholder="Enter rate"
             onChange={e => setForm({ ...form, baseHourlyRate: e.target.value })} /></label>
-          <label>Display order<input type="number" step="1" value={form.displayOrder}
-            onChange={e => setForm({ ...form, displayOrder: e.target.value })} /></label>
           <label className="admin-toggle"><input type="checkbox" checked={form.isActive}
             onChange={e => setForm({ ...form, isActive: e.target.checked })} /> Active court</label>
           <label className="admin-full">Description<textarea maxLength={1000} rows={2}
@@ -89,7 +87,7 @@ export function AdminCourts({ user, venue }: { user: StaffProfile; venue: Venue 
       {courts.loading ? <p role="status">Loading courts…</p>
         : courts.data.length === 0 ? <Empty text="No courts configured yet." />
         : courts.data.map(c => <article key={c.id} className="admin-court-card card-surface">
-          <div className="admin-card-top"><span className="micro-label">COURT {c.displayOrder + 1}</span>
+          <div className="admin-card-top">
             <span className={"admin-status " + (c.isActive ? "status-confirmed" : "status-cancelled")}>
               {c.isActive ? "Active" : "Inactive"}</span></div>
           <h3>{c.courtName}</h3>

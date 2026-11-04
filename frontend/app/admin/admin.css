@@ -173,6 +173,7 @@
 .admin-form-panel { min-width: 0; }
 .admin-cards-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 18px; }
 .admin-court-card { padding: 23px; min-width: 0; }
+.admin-court-card .admin-card-top { justify-content: flex-end; }
 .admin-card-top,.admin-card-footer { display: flex; align-items: center;
   justify-content: space-between; gap: 12px; }
 .admin-court-card h3 { margin: 23px 0 9px; font-size: 1.38rem; }
