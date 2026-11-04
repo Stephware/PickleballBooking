@@ -1,0 +1,163 @@
+/*
+ * Shared Pickleball Reserve layout; alternative venue colorways only.
+ * Reserve's approved original colors, logo, real photos and CSS remain
+ * byte-for-byte unchanged (all rules explicitly exclude its template).
+ */
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) {
+  --background:var(--venue-page);
+  --foreground:var(--venue-ink);
+  --border:var(--venue-border);
+  --muted:var(--venue-muted);
+  --brand-tint:var(--venue-tint);
+  background:var(--venue-page);
+  color:var(--venue-ink);
+}
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .brand-text strong,
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .section-top h2,
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .showcase-header h2 {
+  color:var(--venue-ink);
+}
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .brand-text small,
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .showcase-header p {
+  color:var(--venue-muted);
+}
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .site-desktop-nav a {
+  color:var(--venue-ink);
+}
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .site-desktop-nav a:hover {
+  color:var(--brand);
+  border-bottom-color:var(--venue-action);
+}
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .site-book-cta,
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .button-primary {
+  background:var(--venue-action);
+  border-color:var(--venue-action);
+  color:#fff;
+}
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .button-outline {
+  color:var(--brand);
+  border-color:var(--venue-border);
+}
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .button-outline:hover:not(:disabled) {
+  background:var(--venue-tint);
+  border-color:var(--brand);
+}
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .text-button,
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .inline-link,
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .showcase-link,
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .court-showcase .eyebrow,
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .availability-section .eyebrow,
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .steps-section .eyebrow,
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .contact-section .eyebrow {
+  color:var(--brand);
+}
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .player-hero {
+  background:linear-gradient(118deg,var(--venue-deep),var(--venue-mid) 55%,var(--venue-light));
+  box-shadow:0 18px 44px #1625381f;
+}
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .player-hero::before {
+  background:radial-gradient(ellipse at 25% 15%,#ffffff1c,transparent 60%),
+    repeating-linear-gradient(-31deg,transparent 0 130px,#ffffff08 131px 132px);
+}
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .hero-kicker,
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .player-hero h1 em {
+  color:var(--venue-accent);
+}
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .hero-copy > p:not(.hero-kicker) {
+  color:#fff9f3;
+}
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .hero-action {
+  background:#fffaf5;
+  border-color:#fffaf5;
+  color:var(--venue-deep);
+}
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .hero-action:hover {
+  background:var(--venue-accent);
+  border-color:var(--venue-accent);
+}
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .hero-visual {
+  background-color:var(--venue-mid);
+  background-image:linear-gradient(90deg,var(--venue-mid) 0%,#1727357a 29%,#14203313 90%),
+    var(--venue-hero-image);
+  background-position:center;
+  background-size:cover;
+}
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .court-showcase,
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .card-surface {
+  border-color:var(--venue-border);
+}
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .court-showcase .venue-gallery-slide {
+  border-color:var(--venue-border);
+}
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .court-showcase .venue-gallery-count,
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .section-divider {
+  color:var(--venue-muted);
+}
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .court-showcase .venue-gallery-arrows button {
+  color:var(--brand);
+  border-color:var(--venue-border);
+}
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .section-divider,
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .site-footer {
+  border-top-color:var(--venue-border);
+}
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .date-toolbar,
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .schedule-heading,
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .selection-bar,
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .booking-reference {
+  background:var(--venue-tint);
+  border-color:var(--venue-border);
+}
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .schedule-time,
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .proof-preview,
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .booking-access-details {
+  background:var(--venue-page);
+}
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .field input:focus,
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .field textarea:focus,
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .selected-method {
+  border-color:var(--brand);
+}
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .steps-grid article {
+  border-top-color:var(--brand);
+}
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .steps-grid article > span {
+  color:var(--brand);
+}
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .slot-cell.selected {
+  outline-color:var(--brand);
+}
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .reserve-mobile-picker .reserve-time-choice.selected {
+  background:var(--brand);
+  border-color:var(--brand);
+  color:#fff;
+}
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .reserve-mobile-picker .reserve-time-choice.selected small {
+  color:#fff;
+}
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .site-mobile-nav summary {
+  background:var(--venue-tint); border-color:var(--venue-border); color:var(--venue-ink);
+}
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .site-mobile-nav nav {
+  border-color:var(--venue-border); background:#fff;
+}
+.app-shell[data-venue-template]:not([data-venue-template="pickleball-reserve"]) .site-mobile-nav nav a:hover {
+  background:var(--venue-tint);
+}
+.venue-photos-pending {
+  padding:clamp(30px,5vw,70px) 24px;
+  border:1px dashed var(--venue-border,var(--border));
+  border-radius:14px;
+  background:var(--venue-tint,#fbf5f2);
+  color:var(--venue-muted,var(--muted));
+  text-align:center;
+  font-size:.9rem;
+  font-weight:600;
+}
+/* Angeles identity: restrained orange action buttons with the venue's navy. */
+.app-shell[data-venue-template="angeles-pickleball-center"] .hero-action {
+  background:var(--venue-action); border-color:var(--venue-action); color:#fff;
+}
+.app-shell[data-venue-template="angeles-pickleball-center"] .hero-action:hover {
+  background:#913609; border-color:#913609;
+}
