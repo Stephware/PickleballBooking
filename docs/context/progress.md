@@ -142,3 +142,12 @@ See [Phase 4 release verification](../improvements-phase-4-final-verification.md
 - [x] Update default SQL bootstrap for a brand-new Pickleball Reserve instance; leave all booking references and existing venue slugs unchanged.
 - [x] Add opt-in, guarded existing-database rename script and branding unit tests.
 - [ ] Apply the data-only name patch to the real Reserve venue database only after an operator confirms its target and backup. Source merge does not edit the live database.
+
+
+## Court name/ordering fix — 2026-11-04
+
+- [x] Remove misleading generated court numbering from management cards.
+- [x] Remove court display-order editor and API contract field; use ascending court IDs for all server listings.
+- [x] Show actual saved names in desktop schedule headings without additional prefix.
+- [x] Add API, disposable-database and browser regression coverage for stable ordering and exact names.
+- [ ] Check fresh CI before merging; no real venue data updated.

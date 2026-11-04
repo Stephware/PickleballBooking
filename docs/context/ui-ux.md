@@ -132,3 +132,11 @@ payment account, automatic refund or guaranteed play access.
 - In Reserve brand mode, the public header, footer, booking details, admin sidebar and page/tab metadata all use the exact venue name "Pickleball Reserve", even when a legacy backend still has a generic starter display name.
 - Alternate per-venue deployments in `VENUE_BRAND_MODE=api` preserve their actual API-supplied name, colors and logo. Never rename internal booking codes or the repository to accomplish a presentation change.
 - A safe, opt-in SQL data update is supplied for the existing Reserve database; no production PostgreSQL changes are made by the frontend patch.
+
+
+## 2026-11-04 — Court cards show exact saved name; appended order
+
+- The court cards in Admin → Manage → Courts must show **only** `courtName`. Never generate misleading ordinals (e.g. "COURT 1" over "Court 0") independent of what an owner typed.
+- Remove the Display Order form field and API field. Court lists use ascending database ID (creation order); new courts append to the end, and editing a court cannot move it to a different position.
+- The public desktop availability matrix uses the full actual `courtName` without an extra "Court" prefix. Mobile selection already uses the full name.
+- Keep legacy `display_order` database column/EF mapping for compatibility, but no longer use it for sorting. No migration, deletion or resetting historical court records.

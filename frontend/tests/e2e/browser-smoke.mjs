@@ -163,6 +163,9 @@ try {
       const phonePicker = page.locator(".reserve-mobile-picker");
       await desktopSchedule.waitFor({ state: "attached" });
       assert.equal(await page.locator(".court-heading").count(), count);
+      assert.deepEqual((await page.locator(".court-heading").allTextContents()).map(s => s.trim()),
+        Array.from({ length: count }, (_, i) => `Layout Test Court ${i + 1}`),
+        "Schedule column names must be identical to the stored court names");
       if (width <= 680) {
         assert.equal(await desktopSchedule.isVisible(), false,
           "Phone layout must not show a second table-style schedule");
@@ -270,6 +273,20 @@ try {
           for (const tab of ["Pricing", "Opening Hours", "Courts"]) {
             await tabs.getByRole("button", { name: tab, exact: true }).click();
             await page.waitForLoadState("networkidle");
+            if (tab === "Courts") {
+              const response = await context.request.get(origin + "/api/admin/courts");
+              assert.equal(response.status(), 200);
+              const expected = await response.json();
+              assert.deepEqual((await page.locator(".admin-court-card h3").allTextContents())
+                  .map(s => s.trim()), expected.map(court => court.courtName),
+                "Every court card title must match its actual saved name, in creation order");
+              assert.equal(await page.locator(".admin-court-card .micro-label").count(), 0,
+                "No invented COURT N badges should appear on the cards");
+              await page.getByRole("button", { name: "+ Add court" }).click();
+              assert.equal(await page.getByLabel("Display order").count(), 0,
+                "Display order should not be an editable court field");
+              await page.getByRole("button", { name: "Back to courts" }).click();
+            }
             await checkLayout("Manage " + tab, width);
           }
         }
