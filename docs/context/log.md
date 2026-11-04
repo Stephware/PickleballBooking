@@ -78,3 +78,24 @@ badge and display-order editor. Court API/repository now return ascending
 creation IDs, so newly created courts append and updating existing courts
 does not reorder them. Existing court names, IDs, booking relationships
 and the legacy database column remain intact.
+
+
+## 2026-11-04 — Multiple frontend themes and venue-specific public media
+
+Kept the Reserve website/admin UX but introduced five independent
+developer-managed color presets, selected per frontend deployment.
+Created curated `public/venues/<slug>/(logos|hero|courts)` folders, copied
+Reserve's existing photo/logo media into its own folder while retaining old
+URLs, and added automatic folder discovery for new prospects.
+No production database, proofs, credentials or existing Reserve client assets
+were changed; previewing multiple brands against one API is limited to
+synthetic demo data until true tenancy is reviewed.
+
+## 2026-11-04 — Brand references and five simultaneous development frontends
+
+Aligned The Pickle Cave (charcoal/olive), The Mad Pickle (forest/ivory/gold),
+and TRND (steel-blue/white) palettes with the operator-provided logo photos.
+Pickleball Reserve and Angeles palettes are unchanged. A repo-based dev runner
+now assigns separate ports and Next cache directories to each template, so
+multiple frontends can run concurrently against the one disposable demo API.
+Do not expose a shared production backend across unrelated venues.

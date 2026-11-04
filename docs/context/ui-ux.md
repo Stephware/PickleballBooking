@@ -140,3 +140,19 @@ payment account, automatic refund or guaranteed play access.
 - Remove the Display Order form field and API field. Court lists use ascending database ID (creation order); new courts append to the end, and editing a court cannot move it to a different position.
 - The public desktop availability matrix uses the full actual `courtName` without an extra "Court" prefix. Mobile selection already uses the full name.
 - Keep legacy `display_order` database column/EF mapping for compatibility, but no longer use it for sorting. No migration, deletion or resetting historical court records.
+
+
+## 2026-11-04 — Five-venue colorways, identical layout
+
+Preserve the approved burgundy/cream Pickleball Reserve frontend and
+staff layout. New named `VENUE_TEMPLATE` choices theme the **existing UI**
+with contrast-minded, scoped colors; no full design change. Brand values
+come from `frontend/lib/venue-presets.ts`; non-Reserve runtime style
+overrides are in `frontend/app/venue-themes.css` and
+`frontend/app/admin/venue-admin-themes.css`. Never hardcode Reserve images
+into other venue presets. Use approved media from the dedicated asset
+folders, with initials/neutral empty state if none uploaded.
+
+All status signals keep their meaning across palettes; booking/payment
+policies, admin access, court names, pricing and schedules remain
+backend-authoritative. Brand presets are a presentation selector only.

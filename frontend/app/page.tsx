@@ -4,16 +4,20 @@ import { VenueGallery } from "@/components/ui/VenueGallery";
 import { VenueContactSection } from "@/components/ui/VenueContact";
 import { getServerVenue } from "@/lib/server-api";
 import { getVenuePublicDetails } from "@/lib/venue-public-server";
-import { brandStyle } from "@/lib/player";
+import { venueThemeStyle } from "@/lib/venue-theme-style";
+import { discoverVenueMedia } from "@/lib/venue-media-server";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [{ venue, connected }, publicDetails] = await Promise.all([
+  const [{ venue, connected, template }, publicDetails] = await Promise.all([
     getServerVenue(), Promise.resolve(getVenuePublicDetails()),
   ]);
+  const hero = template !== "api" && template !== "pickleball-reserve"
+    ? discoverVenueMedia(template).hero : null;
   return (
-    <div className="app-shell reserve-site" style={brandStyle(venue)}>
+    <div className="app-shell reserve-site" data-venue-template={template}
+      style={venueThemeStyle(venue, template, hero)}>
       <div className="page-shell">
         <VenueHeader venue={venue}/>
         <main>
@@ -39,11 +43,8 @@ export default async function HomePage() {
             </div>
             {publicDetails.photos.length > 0
               ? <VenueGallery photos={publicDetails.photos}/>
-              : <div className="court-art" aria-label="Illustration of a pickleball court" role="img">
-                  <div className="court-line court-line-a"/>
-                  <div className="court-line court-line-b"/>
-                  <span className="court-art-label">YOUR NEXT MATCH STARTS HERE</span>
-                  <span className="court-ball"/>
+              : <div className="venue-photos-pending" role="status">
+                  Photos of this venue will appear here once approved court images are added.
                 </div>}
           </section>
           <div className="section-divider">

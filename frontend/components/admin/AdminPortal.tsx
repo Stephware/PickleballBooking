@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { adminRequest, extractError } from "@/lib/admin-client";
-import { reserveBrandStyle } from "@/lib/reserve-brand";
+import { venueThemeStyle } from "@/lib/venue-theme-style";
+import type { VenueTemplate } from "@/lib/venue-presets";
 import { ReserveMark } from "@/components/ui/ReserveMark";
 import type { AdminSectionId, StaffProfile } from "@/types/admin";
 import type { Venue } from "@/types/player";
@@ -49,7 +50,7 @@ function currentSection(): AdminSectionId {
   return navigation.find((n) => n.section === id)?.section ?? "overview";
 }
 
-export function AdminPortal({ venue }: { venue: Venue }) {
+export function AdminPortal({ venue, template }: { venue: Venue; template: VenueTemplate }) {
   const [user, setUser] = useState<StaffProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [section, setSection] = useState<AdminSectionId>(() => currentSection());
@@ -145,11 +146,12 @@ export function AdminPortal({ venue }: { venue: Venue }) {
   }
   const title = navigation.find((n) => n.section === section)?.title ?? "Today";
 
-  return <div className="admin-app reserve-admin" style={reserveBrandStyle(venue)}>
+  return <div className="admin-app reserve-admin" data-venue-template={template}
+    style={venueThemeStyle(venue, template)}>
     {loading ? <main className="admin-auth-cover"><p role="status">Checking staff access…</p></main>
       : !user ? <main className="admin-auth-cover">
         <div className="admin-auth-card card-surface">
-          <div className="admin-auth-mark"><ReserveMark/></div>
+          <div className="admin-auth-mark"><ReserveMark venue={venue}/></div>
           <p className="eyebrow">Staff workspace</p>
           <h1>Welcome back.</h1>
           <p className="muted">Sign in with your venue Owner account.</p>
@@ -172,7 +174,7 @@ export function AdminPortal({ venue }: { venue: Venue }) {
         <aside ref={sidebar} id="admin-navigation"
           className={"admin-sidebar" + (menuOpen ? " sidebar-open" : "")}>
           <div className="admin-logo">
-            <ReserveMark className="admin-logo-mark"/>
+            <ReserveMark venue={venue} className="admin-logo-mark"/>
             <div><strong>{venue.venueName}</strong><small>Venue operations</small></div>
           </div>
           <nav aria-label="Staff navigation" className="admin-nav">
@@ -196,7 +198,7 @@ export function AdminPortal({ venue }: { venue: Venue }) {
           tabIndex={-1} aria-label="Close navigation" onClick={() => setMenuOpen(false)} />}
         <div className="admin-main" inert={menuOpen}>
           <header className="admin-topbar">
-            <ReserveMark className="admin-mobile-mark"/>
+            <ReserveMark venue={venue} className="admin-mobile-mark"/>
             <div className="admin-page-intro">
               <button ref={menuButton} type="button" className="admin-menu-button"
                 aria-label="Open navigation" aria-expanded={menuOpen} aria-controls="admin-navigation"

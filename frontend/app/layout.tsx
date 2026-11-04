@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { getServerVenue } from "@/lib/server-api";
 import "./globals.css";
 import "./reserve-brand.css";
+import "./venue-themes.css";
 
 // Use the resolved venue identity for tabs/search previews and all booking pages.
 // For the bundled Reserve deployment, this is "Pickleball Reserve"; alternate

@@ -21,3 +21,13 @@ raster asset in this directory. Verify the QR destination before enabling
 ## Pickleball Reserve supplied assets
 
 Approved real venue media: brand-logo.jpg and court-1.jpg through court-4.jpg. The hero uses the approved real court-2.jpg photo alone, without drawn paddle or ball artwork. With Reserve branding and no VENUE_GALLERY_JSON configured, the real-photo gallery is shown. Use VENUE_HIDE_IMPORTED_PHOTOS=true to hide the supplied images; an existing VENUE_GALLERY_JSON=[] is backward-compatible and still shows them. Other venues use VENUE_BRAND_MODE=api with their own approved assets. All media is publicly served, never store private receipt evidence here.
+
+
+## Dedicated venue media library (2026-11-04)
+
+The folder for all five prospect brands is now
+[`frontend/public/venues/`](../venues/README.md).
+Each venue has `logos/`, `hero/`, and `courts/` directories.
+The Reserve source assets are copied there while legacy URLs still work.
+Only developer-approved images belong in public storage. Uploading source
+files to the new folder requires redeploying the frontend to publish changes.

@@ -12,7 +12,7 @@ export type VenuePublicDetails = {
   payments: VenuePaymentDetails;
 };
 
-const imagePattern = /^\/venue\/(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_-]+\.(?:avif|webp|png|jpe?g)$/i;
+const imagePattern = /^\/(?:venue\/(?:[A-Za-z0-9_-]+\/)*|venues\/[a-z0-9-]+\/(?:logos|hero|courts)\/)[A-Za-z0-9_-]+\.(?:avif|webp|png|jpe?g)$/i;
 /** Only local, developer-deployed raster assets. No remote redirects, SVG, traversal or data URLs. */
 export function safeVenueImage(value: unknown): string | null {
   return typeof value === "string" && value.length <= 200 && imagePattern.test(value)
