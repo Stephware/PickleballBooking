@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // Each local dev frontend needs its own Next cache/lock; production uses .next.
+  distDir: process.env.NEXT_DIST_DIR && /^\.next-[a-z0-9-]+$/.test(process.env.NEXT_DIST_DIR)
+    ? process.env.NEXT_DIST_DIR : ".next",
   output: "standalone",
   poweredByHeader: false,
   async headers() {

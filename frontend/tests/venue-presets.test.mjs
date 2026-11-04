@@ -15,6 +15,11 @@ test("all five isolated template presets exist and have distinct brand palettes"
     "trnd-pickleball","angeles-pickleball-center",
   ]);
   assert.equal(new Set(Object.values(VENUE_PRESETS).map(p=>p.primary)).size, 5);
+  assert.deepEqual(VENUE_PRESETS["pickleball-reserve"].primary, "#80011f");
+  assert.deepEqual(VENUE_PRESETS["angeles-pickleball-center"].primary, "#0b2f73");
+  assert.equal(VENUE_PRESETS["the-pickle-cave"].primary, "#242620");
+  assert.equal(VENUE_PRESETS["the-mad-pickle"].primary, "#176a45");
+  assert.equal(VENUE_PRESETS["trnd-pickleball"].primary, "#244f66");
   for (const [id, preset] of Object.entries(VENUE_PRESETS)) {
     assert.equal(resolveVenueTemplate("reserve", id), id);
     const out = applyVenuePreset(base, id);

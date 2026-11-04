@@ -160,3 +160,5 @@ See [Phase 4 release verification](../improvements-phase-4-final-verification.md
 - [x] Added conventional filenames for automatic image discovery on new themes and neutral fallbacks for missing assets.
 - [x] Kept venue template selection frontend-only; no database, auth, payments or tenant isolation changed.
 - [ ] Verify browser and CI for current branch; never deploy prospect templates against shared real customer data.
+- [x] Aligned Cave, Mad, TRND palettes with their actual uploaded logos; Reserve/Angeles presets unchanged.
+- [x] Added separate Next.js dev build directories and one-command launchers (ports 3000–3004) to run all five frontend previews against one synthetic API.

@@ -10,9 +10,9 @@ configuration differ.
 | Theme ID (`VENUE_TEMPLATE`) | Venue display name | Primary | Action | Background | Secondary accents |
 |---|---|---|---|---|---|
 | `pickleball-reserve` | Pickleball Reserve | `#80011f` | Burgundy | `#fcf8f3` | Cream, blush |
-| `the-pickle-cave` | The Pickle Cave | `#1a4b3c` | Forest green | `#f7f6f1` | Linen, muted gold |
-| `the-mad-pickle` | The Mad Pickle | `#633359` | Plum | `#fcf8f6` | Blush, peach |
-| `trnd-pickleball` | TRND Pickleball | `#18466d` | Deep blue | `#f6f9fb` | Ice, soft mint |
+| `the-pickle-cave` | The Pickle Cave | `#242620` | Olive green `#445c23` | `#faf8f3` | Charcoal, stone, muted lime |
+| `the-mad-pickle` | The Mad Pickle | `#176a45` | Emerald green | `#faf6ed` | Warm paper, mustard |
+| `trnd-pickleball` | TRND Pickleball | `#244f66` | Steel blue | `#f6f9fb` | White, pale cool blue |
 | `angeles-pickleball-center` | Angeles Pickleball Center | `#0b2f73` | Burnt orange `#a94310` | `#fbfaf7` | Navy, cream, warm orange |
 
 Colors are **proposal presets** for venues not yet onboarded, not claimed
@@ -58,3 +58,33 @@ A later true shared-database multi-tenant SaaS design would require
 tenant-scoped ownership and isolation across all nine tables, routes,
 security tokens, proof storage, constraints, jobs and operations, with
 dedicated security review and migration. This work does **not** implement it.
+
+## Run all five frontend previews (macOS, one codebase)
+
+The latest code adds a launcher that automatically applies **both** the correct
+front-end port and a different Next dev cache directory. Using only
+`npm run dev -- --port` five times in the same source directory would share
+`.next` cache/locks and is **not** reliable. First start an isolated demo
+PostgreSQL database and the existing ASP.NET Core API at
+`http://localhost:5090` (or set `API_BASE_URL`). Never reuse a real
+client's payment records for demos.
+
+From the **repository root** in five different Terminal tabs:
+
+```bash
+bash scripts/dev-venue.sh reserve  # http://localhost:3000
+bash scripts/dev-venue.sh cave     # http://localhost:3001
+bash scripts/dev-venue.sh mad      # http://localhost:3002
+bash scripts/dev-venue.sh trnd     # http://localhost:3003
+bash scripts/dev-venue.sh angeles  # http://localhost:3004
+```
+
+Each launcher selects `VENUE_BRAND_MODE=reserve`, the appropriate
+`VENUE_TEMPLATE`, `APP_ORIGIN`, and a separate `NEXT_DIST_DIR`. There is
+no need to create five .env files or five frontend repos. Optionally set
+`API_BASE_URL` before running a command if your API uses a different port.
+Run `npm ci` once in `frontend/` after checkout. Stop each frontend with
+Ctrl+C. Other brand themes and asset folders remain unchanged when you select
+another one. For a real paying venue, **pin its deployment to a released Git
+commit** and create its own backend/database/proofs/secret keys. The shared
+frontend codebase itself is not a guarantee of immutable client versions.
