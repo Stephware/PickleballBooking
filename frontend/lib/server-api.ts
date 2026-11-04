@@ -2,17 +2,27 @@ import "server-only";
 import { FALLBACK_VENUE, safeBrandColor } from "@/lib/player";
 import type { Venue } from "@/types/player";
 import { resolvePresentationBrand } from "@/lib/venue-brand";
+import { resolveVenueTemplate, type VenueTemplate } from "@/lib/venue-presets";
+import { discoverVenueMedia } from "@/lib/venue-media-server";
 
 export function apiOrigin(): string {
   return process.env.API_BASE_URL ?? "http://localhost:5090";
 }
-export async function getServerVenue(): Promise<{ venue: Venue; connected: boolean }> {
-  const decorate = (venue: Venue) => resolvePresentationBrand(venue, {
+export async function getServerVenue(): Promise<{ venue: Venue; connected: boolean; template: VenueTemplate }> {
+  const template = resolveVenueTemplate(process.env.VENUE_BRAND_MODE,
+    process.env.VENUE_TEMPLATE);
+  const decorate = (input: Venue) => {
+    const venue = resolvePresentationBrand(input, {
     mode: process.env.VENUE_BRAND_MODE,
+    template: process.env.VENUE_TEMPLATE,
     primary: process.env.VENUE_BRAND_PRIMARY,
     secondary: process.env.VENUE_BRAND_SECONDARY,
     logoPath: process.env.VENUE_LOGO_PATH,
-  });
+    });
+    if (template === "api" || template === "pickleball-reserve") return venue;
+    const media = discoverVenueMedia(template);
+    return { ...venue, logoUrl: venue.logoUrl ?? media.logo };
+  };
   try {
     const response = await fetch(new URL("/api/v1/venue", apiOrigin()), {
       cache: "no-store", signal: AbortSignal.timeout(4000),
@@ -24,6 +34,7 @@ export async function getServerVenue(): Promise<{ venue: Venue; connected: boole
         typeof v?.currency !== "string") throw new Error("Malformed venue");
     return {
       connected: true,
+      template,
       venue: decorate({
         ...FALLBACK_VENUE, venueName: v.venueName,
         venueSlug: v.venueSlug ?? FALLBACK_VENUE.venueSlug,
@@ -34,5 +45,5 @@ export async function getServerVenue(): Promise<{ venue: Venue; connected: boole
         secondaryColor: safeBrandColor(v.secondaryColor, FALLBACK_VENUE.secondaryColor),
       }),
     };
-  } catch { return { venue: decorate(FALLBACK_VENUE), connected: false }; }
+  } catch { return { venue: decorate(FALLBACK_VENUE), connected: false, template }; }
 }

@@ -1,4 +1,6 @@
 import type { Venue } from "@/types/player";
+import { applyVenuePreset, imageBelongsToVenue, resolveVenueTemplate,
+  VENUE_PRESETS } from "@/lib/venue-presets";
 
 /**
  * Pickleball Reserve is the bundled example venue for this deployment.
@@ -12,6 +14,7 @@ export const RESERVE_LOGO = "/venue/brand-logo.jpg";
 
 export type PublicBrandConfig = {
   mode?: string;
+  template?: string;
   primary?: string;
   secondary?: string;
   logoPath?: string;
@@ -21,16 +24,21 @@ const hex = /^#[0-9a-fA-F]{6}$/;
 const localLogo = /^\/venue\/(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_-]+\.(?:png|jpe?g|webp|avif)$/i;
 
 export function resolvePresentationBrand(venue: Venue, config: PublicBrandConfig): Venue {
-  if (config.mode === "api") return venue;
+  const template = resolveVenueTemplate(config.mode, config.template);
+  if (template === "api") return venue;
+  const preset = VENUE_PRESETS[template];
   const primaryColor = config.primary && hex.test(config.primary)
-    ? config.primary : RESERVE_PRIMARY;
+    ? config.primary : preset.primary;
   const secondaryColor = config.secondary && hex.test(config.secondary)
-    ? config.secondary : RESERVE_SECONDARY;
-  const logoUrl = config.logoPath === "api"
-    ? venue.logoUrl
-    : config.logoPath && localLogo.test(config.logoPath)
-      ? config.logoPath : RESERVE_LOGO;
-  // Reserve mode is this venue's official public identity. Other venues
-  // explicitly use VENUE_BRAND_MODE=api to keep their own names and branding.
-  return { ...venue, venueName: RESERVE_VENUE_NAME, primaryColor, secondaryColor, logoUrl };
+    ? config.secondary : preset.secondary;
+  // A missing logo for a new prospect must show initials, never another venue.
+  // Reserve's original public paths remain fully backward-compatible.
+  const logoUrl = template === "pickleball-reserve"
+    ? config.logoPath === "api" ? venue.logoUrl
+      : config.logoPath && localLogo.test(config.logoPath)
+        ? config.logoPath : RESERVE_LOGO
+    : config.logoPath && imageBelongsToVenue(config.logoPath, template) &&
+      config.logoPath.includes("/logos/") ? config.logoPath : null;
+  return { ...applyVenuePreset(venue, template),
+    primaryColor, secondaryColor, logoUrl };
 }

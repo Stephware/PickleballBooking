@@ -3,6 +3,7 @@ import { AdminPortal } from "@/components/admin/AdminPortal";
 import { getServerVenue } from "@/lib/server-api";
 import "./admin.css";
 import "./reserve-admin.css";
+import "./venue-admin-themes.css";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -10,6 +11,6 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false, nocache: true },
 };
 export default async function AdminPage() {
-  const { venue } = await getServerVenue();
-  return <AdminPortal venue={venue} />;
+  const { venue, template } = await getServerVenue();
+  return <AdminPortal venue={venue} template={template} />;
 }
