@@ -68,3 +68,13 @@ per-venue API branding opt-out remains unchanged. Added new-install SQL
 bootstrap identity and a separate guarded existing-DB data-only update script.
 Did not change booking/payment logic, court schedule, credentials, database
 schema, existing venue slugs or production data. Verification via PR CI.
+
+
+## 2026-11-04 — Fix mismatch between court card badges and actual court names
+
+The old admin card presented a `displayOrder + 1` generated badge and a
+separate stored name (e.g. "COURT 1" / "Court 0"). Removed the numbered
+badge and display-order editor. Court API/repository now return ascending
+creation IDs, so newly created courts append and updating existing courts
+does not reorder them. Existing court names, IDs, booking relationships
+and the legacy database column remain intact.

@@ -4,7 +4,7 @@ export type StaffProfile = {
 };
 export type CourtAdmin = {
   id: number; courtName: string; description: string | null;
-  baseHourlyRate: number; displayOrder: number; isActive: boolean;
+  baseHourlyRate: number; isActive: boolean;
 };
 export type AdminBooking = {
   bookingCode: string; courtId: number; status: string;

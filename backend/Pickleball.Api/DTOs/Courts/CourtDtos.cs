@@ -4,7 +4,7 @@ namespace Pickleball.Api.DTOs.Courts;
 
 public sealed record CourtResponse(
     long Id, string CourtName, string? Description,
-    decimal BaseHourlyRate, int DisplayOrder, bool IsActive);
+    decimal BaseHourlyRate, bool IsActive);
 
 public sealed class SaveCourtRequest
 {
@@ -17,6 +17,5 @@ public sealed class SaveCourtRequest
     [Range(typeof(decimal), "0", "99999999.99")]
     public decimal BaseHourlyRate { get; set; }
 
-    public int DisplayOrder { get; set; }
     public bool IsActive { get; set; } = true;
 }

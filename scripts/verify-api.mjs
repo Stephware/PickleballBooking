@@ -53,8 +53,31 @@ await check('new reservations have a ten-minute proof window',async()=>{
  assert.equal(Object.hasOwn(settings,'reviewTimeoutHours'),false);
 });
 await check('isolated repeatable court fixtures',async()=>{
- court=status(await call('/api/v1/admin/courts',{method:'POST',session:owner,body:{courtName:'API Test A '+randomUUID(),baseHourlyRate:courts[0].baseHourlyRate,displayOrder:90,isActive:true}}),201).id;
- court2=status(await call('/api/v1/admin/courts',{method:'POST',session:owner,body:{courtName:'API Test B '+randomUUID(),baseHourlyRate:courts[1].baseHourlyRate,displayOrder:91,isActive:true}}),201).id;
+ court=status(await call('/api/v1/admin/courts',{method:'POST',session:owner,body:{courtName:'API Test A '+randomUUID(),baseHourlyRate:courts[0].baseHourlyRate,isActive:true}}),201).id;
+ court2=status(await call('/api/v1/admin/courts',{method:'POST',session:owner,body:{courtName:'API Test B '+randomUUID(),baseHourlyRate:courts[1].baseHourlyRate,isActive:true}}),201).id;
+});
+await check('new courts append and editing never changes their order',async()=>{
+ const original=status(await call('/api/v1/admin/courts',{session:owner}),200);
+ assert.deepEqual(original.map(c=>c.id),original.map(c=>c.id).sort((a,b)=>a-b),
+   'Court lists must be ordered by creation ID');
+ assert.deepEqual(original.slice(-2).map(c=>c.id),[court,court2],
+   'Newly added courts must be the last two');
+ assert.ok(original.every(c=>!Object.hasOwn(c,'displayOrder')),
+   'Display order must not appear in the public/admin court contract');
+ const item=original.find(c=>c.id===court);
+ const renamed='Renamed '+item.courtName;
+ const updated=status(await call('/api/v1/admin/courts/'+court,{
+   method:'PUT',session:owner,body:{
+     courtName:renamed,description:item.description,
+     baseHourlyRate:item.baseHourlyRate,isActive:item.isActive,displayOrder:-999,
+   }
+ }),200);
+ assert.equal(updated.courtName,renamed);
+ const after=status(await call('/api/v1/admin/courts',{session:owner}),200);
+ assert.deepEqual(after.map(c=>c.id),original.map(c=>c.id),
+   'Renaming or legacy displayOrder input must not reorder courts');
+ assert.equal(after.find(c=>c.id===court).courtName,renamed,
+   'Actual saved name must be used everywhere');
 });
 await check('authenticated mutation missing CSRF denied',async()=>status(await call('/api/v1/admin/operations/blocks',{method:'POST',session:owner,csrf:false,body:{}}),400));
 const input=request(court,'08:00:00','09:00:00');

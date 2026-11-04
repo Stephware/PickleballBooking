@@ -206,7 +206,6 @@ export function AvailabilityGrid({ venue, connected }: {
             <div className="schedule-heading time-heading">Time</div>
             {courtList.map((court) => (
               <div className="schedule-heading court-heading" key={court.courtId}>
-                <span className="court-number">Court</span>
                 <strong>{court.courtName}</strong>
               </div>
             ))}
