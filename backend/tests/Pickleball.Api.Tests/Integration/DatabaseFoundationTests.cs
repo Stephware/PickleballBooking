@@ -40,6 +40,51 @@ public sealed class DatabaseFoundationTests
     }
 
     [Fact]
+    public async Task NewCourtsAppendDespiteLegacyDisplayOrdersAndRenaming()
+    {
+        if (string.IsNullOrWhiteSpace(Connection) ||
+            Environment.GetEnvironmentVariable("PICKLEBALL_TEST_MUTATIONS_ENABLED") != "1")
+            Assert.Skip("Requires an explicitly enabled disposable PostgreSQL test database.");
+        Assert.EndsWith("_test", new NpgsqlConnectionStringBuilder(Connection).Database);
+
+        await using var db = CreateContext();
+        await using var transaction = await db.Database.BeginTransactionAsync();
+        try
+        {
+            var label = "__court_append_" + Guid.NewGuid().ToString("N");
+            var first = new Court
+            {
+                CourtName = label + "_first", BaseHourlyRate = 200m,
+                DisplayOrder = 1000, IsActive = true
+            };
+            db.Courts.Add(first);
+            await db.SaveChangesAsync();
+            var second = new Court
+            {
+                CourtName = label + "_second", BaseHourlyRate = 250m,
+                DisplayOrder = -1000, IsActive = true
+            };
+            db.Courts.Add(second);
+            await db.SaveChangesAsync();
+
+            var repository = new CourtRepository(db);
+            var firstListing = await repository.ListAsync();
+            Assert.True(Array.FindIndex(firstListing.ToArray(), c => c.Id == first.Id)
+                < Array.FindIndex(firstListing.ToArray(), c => c.Id == second.Id));
+            Assert.Equal(firstListing.Select(c => c.Id).OrderBy(id => id),
+                firstListing.Select(c => c.Id));
+
+            first.CourtName = label + "_renamed";
+            await db.SaveChangesAsync();
+            var afterEdit = await repository.ListAsync();
+            Assert.Equal(firstListing.Select(c => c.Id), afterEdit.Select(c => c.Id));
+            Assert.Equal(label + "_renamed",
+                afterEdit.Single(c => c.Id == first.Id).CourtName);
+        }
+        finally { await transaction.RollbackAsync(); }
+    }
+
+    [Fact]
     public async Task CourtRepository_CanCreateUpdateDeleteInsideRolledBackTransaction()
     {
         // Explicit second guard to prevent writes to a regular venue database.
