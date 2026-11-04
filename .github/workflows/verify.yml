@@ -33,6 +33,16 @@ jobs:
         env:
           PGPASSWORD: ci-disposable-only
         run: psql -h localhost -U phase9 -d pickleball_ci_test -v ON_ERROR_STOP=1 -f database/sql/01_schema.sql
+      - name: Verify Reserve venue name upgrade on disposable database
+        env:
+          PGPASSWORD: ci-disposable-only
+        run: |
+          # Historical starter metadata; do not affect any real venue database.
+          psql -h localhost -U phase9 -d pickleball_ci_test -v ON_ERROR_STOP=1 -c "UPDATE venue_settings SET venue_name = 'Sample Pickleball Venue', venue_slug = 'sample-pickleball-venue' WHERE id = 1"
+          psql -h localhost -U phase9 -d pickleball_ci_test -v ON_ERROR_STOP=1 -f database/sql/07_set_pickleball_reserve_name.sql
+          psql -h localhost -U phase9 -d pickleball_ci_test -v ON_ERROR_STOP=1 -f database/sql/07_set_pickleball_reserve_name.sql
+          psql -h localhost -U phase9 -d pickleball_ci_test -Atqc "SELECT venue_name FROM venue_settings WHERE id = 1" | grep -Fx 'Pickleball Reserve'
+          psql -h localhost -U phase9 -d pickleball_ci_test -Atqc "SELECT venue_slug FROM venue_settings WHERE id = 1" | grep -Fx 'sample-pickleball-venue'
       - name: Verify forward-only policy upgrade in the disposable database
         env:
           PGPASSWORD: ci-disposable-only

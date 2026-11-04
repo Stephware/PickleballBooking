@@ -45,6 +45,10 @@ try {
       await page.goto(origin + route);
       await page.waitForLoadState("networkidle");
       if (route === "/") {
+        assert.equal((await page.locator(".wordmark .brand-text strong").textContent())?.trim(),
+          "Pickleball Reserve", "The official venue name must appear in the player header");
+        assert.equal(await page.title(), "Pickleball Reserve",
+          "The browser tab must use the official venue name");
         assert.equal(await page.locator(".hero-visual img, .trust-strip, .hero-assurance").count(), 0,
           "No oversized paddle/ball illustration or redundant feature strip on the homepage");
         const heroBackground = await page.locator(".hero-visual")
