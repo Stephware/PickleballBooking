@@ -1,6 +1,6 @@
 import type { Venue } from "@/types/player";
 import { applyVenuePreset, imageBelongsToVenue, resolveVenueTemplate,
-  VENUE_PRESETS } from "@/lib/venue-presets";
+  VENUE_PRESETS } from "./venue-presets.ts";
 
 /**
  * Pickleball Reserve is the bundled example venue for this deployment.
@@ -27,10 +27,12 @@ export function resolvePresentationBrand(venue: Venue, config: PublicBrandConfig
   const template = resolveVenueTemplate(config.mode, config.template);
   if (template === "api") return venue;
   const preset = VENUE_PRESETS[template];
-  const primaryColor = config.primary && hex.test(config.primary)
-    ? config.primary : preset.primary;
-  const secondaryColor = config.secondary && hex.test(config.secondary)
-    ? config.secondary : preset.secondary;
+  // Legacy overrides are supported only for Reserve; other presets must
+  // never inherit a stale Reserve .env color when switching templates.
+  const primaryColor = template === "pickleball-reserve" &&
+    config.primary && hex.test(config.primary) ? config.primary : preset.primary;
+  const secondaryColor = template === "pickleball-reserve" &&
+    config.secondary && hex.test(config.secondary) ? config.secondary : preset.secondary;
   // A missing logo for a new prospect must show initials, never another venue.
   // Reserve's original public paths remain fully backward-compatible.
   const logoUrl = template === "pickleball-reserve"

@@ -22,6 +22,9 @@ test("photo gallery permits only local raster images with meaningful description
   assert.equal(safeVenueImage("data:image/png;base64,test"), null);
   assert.equal(safeVenueImage("//another.site/venue/court.png"), null);
   assert.equal(safeVenueImage("/venue/court_3.avif"), "/venue/court_3.avif");
+  assert.equal(safeVenueImage("/venues/trnd-pickleball/courts/court-1.webp"),
+    "/venues/trnd-pickleball/courts/court-1.webp");
+  assert.equal(safeVenueImage("/venues/the-mad-pickle/../private.png"), null);
   assert.deepEqual(parseVenuePhotos("not json"), []);
 });
 test("gallery never exceeds six even when configured with many", () => {

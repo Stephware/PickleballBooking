@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import type { Venue } from "@/types/player";
-import { brandStyle } from "@/lib/player";
-import { VENUE_PRESETS, type VenueTemplate } from "@/lib/venue-presets";
+import { brandStyle } from "./player.ts";
+import { VENUE_PRESETS, type VenueTemplate } from "./venue-presets.ts";
 
 /** The existing Reserve preset uses original CSS untouched. Other venues
  * reuse the same DOM/layout with CSS variables scoped to their deployment. */

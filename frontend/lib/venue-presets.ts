@@ -4,7 +4,7 @@ import type { Venue } from "@/types/player";
 export const VENUE_PRESETS = {
   "pickleball-reserve": {
     name: "Pickleball Reserve",
-    primary: "#80011f", secondary: "#fff9ed",
+    primary: "#80011f", secondary: "#f7e9d7",
     page: "#fcf8f3", ink: "#291a21", muted: "#64515a",
     border: "#e8d8d4", tint: "#fff1ed", action: "#80011f",
     deep: "#5b071c", mid: "#820b27", light: "#a92d41",
