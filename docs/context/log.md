@@ -58,3 +58,13 @@ preserving stored payment evidence and the court-overlap exclusion. Staff
 urgency alerts and explicit cancellation reason implemented. No production
 database, credentials or actual transfers touched; fresh CI and operator
 migration still required.
+
+
+## 2026-11-04 — Correct venue display identity
+
+Corrected the supplied Reserve-branded frontend from legacy generic names to
+**Pickleball Reserve** in public navigation, owner/admin and metadata. The
+per-venue API branding opt-out remains unchanged. Added new-install SQL
+bootstrap identity and a separate guarded existing-DB data-only update script.
+Did not change booking/payment logic, court schedule, credentials, database
+schema, existing venue slugs or production data. Verification via PR CI.

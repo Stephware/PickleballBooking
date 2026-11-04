@@ -239,8 +239,9 @@ BEGIN
 END;
 $$;
 
--- Starter settings: rename/update in the owner's admin UI later.
+-- Bundled first venue: Pickleball Reserve. Alternate deployments should
+-- configure their own venue name, slug, logo, colors and credentials.
 INSERT INTO venue_settings (id, venue_name, venue_slug)
-VALUES (1, 'Sample Pickleball Venue', 'sample-pickleball-venue');
+VALUES (1, 'Pickleball Reserve', 'pickleball-reserve');
 
 COMMIT;

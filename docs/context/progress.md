@@ -133,3 +133,12 @@ See [Phase 4 release verification](../improvements-phase-4-final-verification.md
 - [x] Added forward-only idempotent existing-DB patch and disposable migration verification step.
 - [ ] Fresh branch CI, browser, and live deployment upgrade acceptance must be verified.
 - [ ] Real venue database migration must be applied by an authorized operator after consistent backup; **not performed from GitHub**.
+
+
+## Pickleball Reserve official name — 2026-11-04
+
+- [x] Set the bundled theme's venue display name to **Pickleball Reserve** for all public/staff pages.
+- [x] Derive browser metadata from the resolved venue, respecting independent API-branded deployments.
+- [x] Update default SQL bootstrap for a brand-new Pickleball Reserve instance; leave all booking references and existing venue slugs unchanged.
+- [x] Add opt-in, guarded existing-database rename script and branding unit tests.
+- [ ] Apply the data-only name patch to the real Reserve venue database only after an operator confirms its target and backup. Source merge does not edit the live database.
