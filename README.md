@@ -97,3 +97,21 @@ Open http://localhost:3000 for venue branding, date/court grid and booking, and 
 - [docs/development.md](docs/development.md) — local setup
 
 No database migration or existing database reset was performed. Phase 9 executed local .NET, PostgreSQL, frontend/browser and disposable production-container verification.
+
+
+## Developer-owned venue presets and media library (2026-11-04)
+
+Five frontend brand choices now share the existing tested booking/admin UI:
+Pickleball Reserve, The Pickle Cave, The Mad Pickle, TRND Pickleball, and
+Angeles Pickleball Center. Select one frontend-only `VENUE_TEMPLATE` slug
+in that deployment's environment; **Reserve is the default and is unchanged**.
+Other presets are independent, CSS-scoped colorways, not a switch to a
+multi-tenant backend. The backend still contains a single venue and should
+not be reused for unrelated real clients. Use synthetic data for previews.
+
+Developer-managed logos, hero images and up to six gallery photos live under
+[`frontend/public/venues/`](frontend/public/venues/README.md) in one
+directory per venue. New presets auto-discover approved, conventionally named
+images when they're deployed; no admin upload endpoint is introduced.
+The original Reserve `/venue/` media URLs still work.
+See [venue themes and demos](docs/venue-design-library.md).
